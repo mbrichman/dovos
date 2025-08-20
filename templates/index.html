@@ -172,6 +172,22 @@
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        .copy-button {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            margin-left: 0.5rem;
+            background-color: #6c757d;
+            border: none;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s, background-color 0.2s;
+        }
+        .copy-button:hover {
+            opacity: 1;
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -253,10 +269,15 @@
             {% for result in results %}
                 <div class="result-card" id="result-{{ loop.index }}">
                     <div class="result-header">
-                        <h5 class="mb-0">{{ result.title }}</h5>
-                        {% if result.date %}
-                            <small class="text-muted date-to-format">{{ result.date }}</small>
-                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{{ result.title }}</h5>
+                            <div class="d-flex align-items-center">
+                                {% if result.date %}
+                                    <small class="text-muted date-to-format me-2">{{ result.date }}</small>
+                                {% endif %}
+                                <button class="copy-button" onclick="copyConversationAsMarkdown({{ loop.index0 }})">Copy</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="result-body">
                         {% if result.messages %}
@@ -297,7 +318,7 @@
     </div>
     
     <!-- Copy success notification -->
-    <div class="copy-success" id="copySuccess">URL copied to clipboard!</div>
+    <div class="copy-success" id="copySuccess">Conversation copied to clipboard!</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -440,6 +461,203 @@
                     console.error("Error formatting date:", e);
                     return dateStr;
                 }
+            }
+            
+            // Copy conversation as markdown function
+            window.copyConversationAsMarkdown = function(resultIndex) {
+                try {
+                    // Get the result data from the DOM
+                    const resultCard = document.getElementById(`result-${resultIndex + 1}`);
+                    if (!resultCard) return;
+                    
+                    // Get the title
+                    const titleElement = resultCard.querySelector('h5.mb-0');
+                    const title = titleElement ? titleElement.textContent.trim() : 'Conversation';
+                    
+                    // Get the date
+                    const dateElement = resultCard.querySelector('.date-to-format');
+                    let date = '';
+                    if (dateElement) {
+                        // Extract original date before nice formatting
+                        const dateText = dateElement.textContent.trim();
+                        date = dateText.replace(/[()]/g, '');
+                    }
+                    
+                    // Start building markdown content
+                    let markdown = `# ${title}\n\n`;
+                    if (date) {
+                        markdown += `**Date:** ${date}\n\n`;
+                    }
+                    markdown += '---\n\n';
+                    
+                    // Get all messages in this result
+                    const messages = resultCard.querySelectorAll('.message');
+                    
+                    messages.forEach((message, index) => {
+                        // Get the role
+                        const roleElement = message.querySelector('.role-name');
+                        const role = roleElement ? roleElement.textContent.trim() : 'Unknown';
+                        
+                        // Get the timestamp
+                        const timestampElement = message.querySelector('.message-timestamp');
+                        const timestamp = timestampElement ? timestampElement.textContent.trim() : '';
+                        
+                        // Get the message content and convert it back to markdown
+                        const contentElement = message.querySelector('.message-content');
+                        let content = '';
+                        
+                        if (contentElement) {
+                            // Clone the element to avoid modifying the original
+                            const clonedContent = contentElement.cloneNode(true);
+                            
+                            // Remove any highlighting marks
+                            const marks = clonedContent.querySelectorAll('mark');
+                            marks.forEach(mark => {
+                                mark.replaceWith(mark.textContent);
+                            });
+                            
+                            // Convert HTML back to approximate markdown
+                            content = htmlToMarkdown(clonedContent);
+                        }
+                        
+                        // Add the message to markdown
+                        if (timestamp) {
+                            markdown += `**${role}** *(on ${timestamp})*:\n\n`;
+                        } else {
+                            markdown += `**${role}**:\n\n`;
+                        }
+                        markdown += content + '\n\n';
+                    });
+                    
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(markdown).then(function() {
+                        // Show success message
+                        const successMessage = document.getElementById('copySuccess');
+                        successMessage.textContent = 'Conversation copied to clipboard!';
+                        successMessage.style.display = 'block';
+                        
+                        // Hide after 2 seconds
+                        setTimeout(function() {
+                            successMessage.style.display = 'none';
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Failed to copy: ', err);
+                        // Fallback: show error message
+                        const successMessage = document.getElementById('copySuccess');
+                        successMessage.textContent = 'Failed to copy to clipboard';
+                        successMessage.style.backgroundColor = '#dc3545';
+                        successMessage.style.display = 'block';
+                        
+                        setTimeout(function() {
+                            successMessage.style.display = 'none';
+                            successMessage.style.backgroundColor = '#28a745';
+                        }, 2000);
+                    });
+                } catch (err) {
+                    console.error('Error copying conversation:', err);
+                }
+            };
+            
+            // Helper function to convert HTML back to markdown
+            function htmlToMarkdown(element) {
+                let text = '';
+                
+                for (let node of element.childNodes) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        text += node.textContent;
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        const tagName = node.tagName.toLowerCase();
+                        
+                        switch (tagName) {
+                            case 'h1':
+                                text += '# ' + node.textContent + '\n\n';
+                                break;
+                            case 'h2':
+                                text += '## ' + node.textContent + '\n\n';
+                                break;
+                            case 'h3':
+                                text += '### ' + node.textContent + '\n\n';
+                                break;
+                            case 'h4':
+                                text += '#### ' + node.textContent + '\n\n';
+                                break;
+                            case 'h5':
+                                text += '##### ' + node.textContent + '\n\n';
+                                break;
+                            case 'h6':
+                                text += '###### ' + node.textContent + '\n\n';
+                                break;
+                            case 'p':
+                                text += htmlToMarkdown(node) + '\n\n';
+                                break;
+                            case 'strong':
+                            case 'b':
+                                text += '**' + node.textContent + '**';
+                                break;
+                            case 'em':
+                            case 'i':
+                                text += '*' + node.textContent + '*';
+                                break;
+                            case 'code':
+                                text += '`' + node.textContent + '`';
+                                break;
+                            case 'pre':
+                                const codeContent = node.textContent;
+                                text += '```\n' + codeContent + '\n```\n\n';
+                                break;
+                            case 'blockquote':
+                                const quoteLines = node.textContent.split('\n');
+                                text += quoteLines.map(line => '> ' + line).join('\n') + '\n\n';
+                                break;
+                            case 'ul':
+                                const ulItems = node.querySelectorAll('li');
+                                ulItems.forEach(li => {
+                                    text += '- ' + li.textContent + '\n';
+                                });
+                                text += '\n';
+                                break;
+                            case 'ol':
+                                const olItems = node.querySelectorAll('li');
+                                olItems.forEach((li, index) => {
+                                    text += `${index + 1}. ${li.textContent}\n`;
+                                });
+                                text += '\n';
+                                break;
+                            case 'table':
+                                // Simple table handling
+                                const rows = node.querySelectorAll('tr');
+                                rows.forEach((row, rowIndex) => {
+                                    const cells = row.querySelectorAll('td, th');
+                                    const cellContents = Array.from(cells).map(cell => cell.textContent.trim());
+                                    text += '| ' + cellContents.join(' | ') + ' |\n';
+                                    
+                                    // Add header separator after first row
+                                    if (rowIndex === 0 && node.querySelector('th')) {
+                                        text += '|' + ' --- |'.repeat(cellContents.length) + '\n';
+                                    }
+                                });
+                                text += '\n';
+                                break;
+                            case 'a':
+                                const href = node.getAttribute('href');
+                                if (href) {
+                                    text += `[${node.textContent}](${href})`;
+                                } else {
+                                    text += node.textContent;
+                                }
+                                break;
+                            case 'br':
+                                text += '\n';
+                                break;
+                            default:
+                                // For other elements, just get the text content and recurse
+                                text += htmlToMarkdown(node);
+                                break;
+                        }
+                    }
+                }
+                
+                return text;
             }
         });
     </script>
