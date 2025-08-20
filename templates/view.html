@@ -106,6 +106,34 @@
             border-left: 0.25rem solid #e9ecef;
             color: #6c757d;
         }
+        .copy-button {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            margin-left: 1rem;
+            background-color: #6c757d;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, background-color 0.2s;
+        }
+        .copy-button:hover {
+            opacity: 1;
+            background-color: #5a6268;
+        }
+        .copy-success {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -129,7 +157,12 @@
         </div>
         
         <div class="conversation-header">
-            <h3 class="conversation-title">{{ conversation.meta.title }}</h3>
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <h3 class="conversation-title">{{ conversation.meta.title }}</h3>
+                </div>
+                <button class="copy-button" onclick="copyConversationAsMarkdown()">Copy to Clipboard</button>
+            </div>
             <div class="conversation-metadata">
                 <div><strong>Source:</strong> {{ conversation.meta.source }}</div>
                 {% if conversation.meta.earliest_ts %}
@@ -176,6 +209,9 @@
         </div>
     </div>
     
+    <!-- Copy success notification -->
+    <div class="copy-success" id="copySuccess">Conversation copied to clipboard!</div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -188,9 +224,202 @@
             
             dateElements.forEach(function(element) {
                 const dateStr = element.textContent.trim();
+                // Store original date for copy functionality
+                element.setAttribute('data-original', dateStr);
                 const formattedDate = formatDateNicely(dateStr);
                 element.textContent = formattedDate;
             });
+        }
+        
+        // Copy conversation as markdown function
+        window.copyConversationAsMarkdown = function() {
+            try {
+                // Get the conversation title
+                const titleElement = document.querySelector('.conversation-title');
+                const title = titleElement ? titleElement.textContent.trim() : 'Conversation';
+                
+                // Get the date from metadata
+                const dateElement = document.querySelector('.conversation-metadata .date-to-format');
+                let date = '';
+                if (dateElement) {
+                    // Get the original date text (before formatting)
+                    const originalDate = dateElement.getAttribute('data-original') || dateElement.textContent.trim();
+                    date = originalDate;
+                }
+                
+                // Start building markdown content
+                let markdown = `# ${title}\n\n`;
+                if (date) {
+                    markdown += `**Date:** ${date}\n\n`;
+                }
+                markdown += '---\n\n';
+                
+                // Get all messages
+                const messages = document.querySelectorAll('.message');
+                
+                messages.forEach((message, index) => {
+                    // Get the role
+                    const roleElement = message.querySelector('.role-name');
+                    const role = roleElement ? roleElement.textContent.trim() : 'Unknown';
+                    
+                    // Get the timestamp
+                    const timestampElement = message.querySelector('.timestamp');
+                    let timestamp = '';
+                    if (timestampElement) {
+                        // Get original timestamp if available, otherwise formatted
+                        timestamp = timestampElement.getAttribute('data-original') || timestampElement.textContent.trim();
+                    }
+                    
+                    // Get the message content and convert it back to markdown
+                    const contentElement = message.querySelector('.message-content');
+                    let content = '';
+                    
+                    if (contentElement) {
+                        // Clone the element to avoid modifying the original
+                        const clonedContent = contentElement.cloneNode(true);
+                        
+                        // Convert HTML back to approximate markdown
+                        content = htmlToMarkdown(clonedContent);
+                    }
+                    
+                    // Add the message to markdown
+                    if (timestamp) {
+                        markdown += `**${role}** *(on ${timestamp})*:\n\n`;
+                    } else {
+                        markdown += `**${role}**:\n\n`;
+                    }
+                    markdown += content + '\n\n';
+                });
+                
+                // Copy to clipboard
+                navigator.clipboard.writeText(markdown).then(function() {
+                    // Show success message
+                    const successMessage = document.getElementById('copySuccess');
+                    successMessage.textContent = 'Conversation copied to clipboard!';
+                    successMessage.style.display = 'block';
+                    
+                    // Hide after 2 seconds
+                    setTimeout(function() {
+                        successMessage.style.display = 'none';
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Failed to copy: ', err);
+                    // Fallback: show error message
+                    const successMessage = document.getElementById('copySuccess');
+                    successMessage.textContent = 'Failed to copy to clipboard';
+                    successMessage.style.backgroundColor = '#dc3545';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(function() {
+                        successMessage.style.display = 'none';
+                        successMessage.style.backgroundColor = '#28a745';
+                    }, 2000);
+                });
+            } catch (err) {
+                console.error('Error copying conversation:', err);
+            }
+        };
+        
+        // Helper function to convert HTML back to markdown
+        function htmlToMarkdown(element) {
+            let text = '';
+            
+            for (let node of element.childNodes) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    text += node.textContent;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tagName = node.tagName.toLowerCase();
+                    
+                    switch (tagName) {
+                        case 'h1':
+                            text += '# ' + node.textContent + '\n\n';
+                            break;
+                        case 'h2':
+                            text += '## ' + node.textContent + '\n\n';
+                            break;
+                        case 'h3':
+                            text += '### ' + node.textContent + '\n\n';
+                            break;
+                        case 'h4':
+                            text += '#### ' + node.textContent + '\n\n';
+                            break;
+                        case 'h5':
+                            text += '##### ' + node.textContent + '\n\n';
+                            break;
+                        case 'h6':
+                            text += '###### ' + node.textContent + '\n\n';
+                            break;
+                        case 'p':
+                            text += htmlToMarkdown(node) + '\n\n';
+                            break;
+                        case 'strong':
+                        case 'b':
+                            text += '**' + node.textContent + '**';
+                            break;
+                        case 'em':
+                        case 'i':
+                            text += '*' + node.textContent + '*';
+                            break;
+                        case 'code':
+                            text += '`' + node.textContent + '`';
+                            break;
+                        case 'pre':
+                            const codeContent = node.textContent;
+                            text += '```\n' + codeContent + '\n```\n\n';
+                            break;
+                        case 'blockquote':
+                            const quoteLines = node.textContent.split('\n');
+                            text += quoteLines.map(line => '> ' + line).join('\n') + '\n\n';
+                            break;
+                        case 'ul':
+                            const ulItems = node.querySelectorAll('li');
+                            ulItems.forEach(li => {
+                                text += '- ' + li.textContent + '\n';
+                            });
+                            text += '\n';
+                            break;
+                        case 'ol':
+                            const olItems = node.querySelectorAll('li');
+                            olItems.forEach((li, index) => {
+                                text += `${index + 1}. ${li.textContent}\n`;
+                            });
+                            text += '\n';
+                            break;
+                        case 'table':
+                            // Simple table handling
+                            const rows = node.querySelectorAll('tr');
+                            rows.forEach((row, rowIndex) => {
+                                const cells = row.querySelectorAll('td, th');
+                                const cellContents = Array.from(cells).map(cell => cell.textContent.trim());
+                                text += '| ' + cellContents.join(' | ') + ' |\n';
+                                
+                                // Add header separator after first row
+                                if (rowIndex === 0 && node.querySelector('th')) {
+                                    text += '|' + ' --- |'.repeat(cellContents.length) + '\n';
+                                }
+                            });
+                            text += '\n';
+                            break;
+                        case 'a':
+                            const href = node.getAttribute('href');
+                            if (href) {
+                                text += `[${node.textContent}](${href})`;
+                            } else {
+                                text += node.textContent;
+                            }
+                            break;
+                        case 'br':
+                            text += '\n';
+                            break;
+                        default:
+                            // For other elements, just get the text content and recurse
+                            text += htmlToMarkdown(node);
+                            break;
+                    }
+                }
+            }
+            
+            return text;
         }
         
         // Helper function to format dates nicely
