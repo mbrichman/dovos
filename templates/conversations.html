@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversations - ChatGPT Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1100px;
+        }
+        .header {
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #17a2b8;
+        }
+        .conversation-card {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eaeaea;
+        }
+
+        .conversation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+
+        .conversation-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .conversation-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+            background-color: #f1f1f1;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .conversation-preview {
+            padding: 1rem;
+            background-color: white;
+            color: #555;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .conversation-preview::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+        }
+
+        .conversation-footer {
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .filters {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .date-header {
+            margin: 1.5rem 0 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header d-flex justify-content-between align-items-center">
+            <h2>Conversations</h2>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/conversations">Conversations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/stats">Stats</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="filters">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Source</label>
+                    <select class="form-select" id="sourceFilter">
+                        <option value="all" {% if source_filter == 'all' %}selected{% endif %}>All Sources</option>
+                        <option value="json" {% if source_filter == 'json' %}selected{% endif %}>JSON Export</option>
+                        <option value="docx" {% if source_filter == 'docx' %}selected{% endif %}>Word Documents</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="all" {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
+                        <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                        <option value="week" {% if date_filter == 'week' %}selected{% endif %}>Past Week</option>
+                        <option value="month" {% if date_filter == 'month' %}selected{% endif %}>Past Month</option>
+                        <option value="year" {% if date_filter == 'year' %}selected{% endif %}>Past Year</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Sort Order</label>
+                    <select class="form-select" id="sortOrder">
+                        <option value="newest" {% if sort_order == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="oldest" {% if sort_order == 'oldest' %}selected{% endif %}>Oldest First</option>
+                        <option value="original" {% if sort_order == 'original' %}selected{% endif %}>Original Order</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        {% if conversations %}
+            <div id="conversationList">
+                {% for conversation in conversations %}
+                    <div class="conversation-card" data-source="{{ conversation.meta.source }}" data-date="{{ conversation.meta.earliest_ts }}">
+                        <div class="conversation-header">
+                            <h5 class="conversation-title">{{ conversation.meta.title }}</h5>
+                            <span class="conversation-date date-to-format">{{ conversation.meta.earliest_ts }}</span>
+                        </div>
+                        <div class="conversation-preview">
+                            {{ conversation.preview|safe }}
+                        </div>
+                        <div class="conversation-footer">
+                            <a href="/view/{{ conversation.id }}" class="btn btn-sm btn-outline-primary">View Conversation</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if page_count > 1 %}
+                <div class="page-navigation">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item {% if current_page == 1 %}disabled{% endif %}"><a class="page-link" href="{{ url_for('conversations', page=current_page-1, source=source_filter, date=date_filter, sort=sort_order) }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                            {% if current_page > 3 %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('conversations', page=1, source=source_filter, date=date_filter, sort=sort_order) }}">1</a></li>
+                                {% if current_page > 4 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+                            {% endif %}
+                            {% set start_page = current_page - 2 if current_page - 2 > 0 else 1 %}
+                            {% set end_page = current_page + 2 if current_page + 2 < page_count else page_count %}
+                            {% for p in range(start_page, end_page + 1) %}
+                                <li class="page-item {% if p == current_page %}active{% endif %}"><a class="page-link" href="{{ url_for('conversations', page=p, source=source_filter, date=date_filter, sort=sort_order) }}">{{ p }}</a></li>
+                            {% endfor %}
+                            {% if current_page < page_count - 2 %}
+                                {% if current_page < page_count - 3 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('conversations', page=page_count, source=source_filter, date=date_filter, sort=sort_order) }}">{{ page_count }}</a></li>
+                            {% endif %}
+                            <li class="page-item {% if current_page == page_count %}disabled{% endif %}"><a class="page-link" href="{{ url_for('conversations', page=current_page+1, source=source_filter, date=date_filter, sort=sort_order) }}" aria-label="Next">&raquo;</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <h3>No Conversations Found</h3>
+                <p>Upload some ChatGPT conversations to get started.</p>
+                <a href="/upload" class="btn btn-primary mt-3">Upload Conversations</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sourceFilter = document.getElementById('sourceFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const sortOrder = document.getElementById('sortOrder');
+            setupFilters(); applyUrlParamsToFilters(); formatDates(); applyFilters();
+            function setupFilters() {
+                [sourceFilter,dateFilter,sortOrder].forEach(filter=>filter?.addEventListener('change', ()=>{applyFilters(); updateUrlWithFilters();}));
+            }
+            function applyUrlParamsToFilters() {

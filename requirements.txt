@@ -1,0 +1,7 @@
+flask
+flask-wtf
+wtforms
+sentence-transformers
+chromadb
+markdown
+python-docx

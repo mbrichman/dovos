@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatGPT Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1100px;
+        }
+        .header {
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #17a2b8;
+        }
+        .result-card {
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .result-header {
+            background-color: #f1f1f1;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-body {
+            padding: 1.5rem;
+            background-color: white;
+        }
+        .message {
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .message-header {
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .message-body {
+            padding: 1rem;
+            line-height: 1.6;
+        }
+        .user-message .message-header {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+        }
+        .user-message .message-body {
+            background-color: #f8fbff;
+        }
+        .assistant-message .message-header {
+            background-color: #e3f9f4;
+            color: #20c997;
+        }
+        .assistant-message .message-body {
+            background-color: #f6fdfb;
+        }
+        .system-message .message-header {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        .system-message .message-body {
+            background-color: #ffffff;
+        }
+        .message-timestamp {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .message-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        .message-content table {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+        .message-content th,
+        .message-content td {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+        }
+        .message-content blockquote {
+            padding: 0.5rem 1rem;
+            margin: 0 0 1rem;
+            border-left: 0.25rem solid #e9ecef;
+            color: #6c757d;
+        }
+        .message-content pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .message-content code {
+            padding: 0.2rem 0.4rem;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+        .results-index {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .results-index h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .results-index-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .results-index-list li {
+            margin-bottom: 0.5rem;
+        }
+        .results-index-list a {
+            display: block;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+        .results-index-list a:hover {
+            background-color: #f1f8ff;
+        }
+        .timestamp {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .nice-date {
+            color: #5c6ac4;
+            font-weight: 500;
+        }
+        .jump-back-link {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+        .share-link {
+            margin-left: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        .share-link:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .copy-success {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header d-flex justify-content-between align-items-center">
+            <h2>Search</h2>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/conversations">Conversations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/stats">Stats</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if stats.doc_count == 0 %}
+                    <div class="alert alert-warning">
+                        No documents indexed yet.
+                    </div>
+                {% else %}
+                    <p>{{ stats.doc_count }} documents indexed</p>
+                
+                    <!-- Support both POST form submission and GET URL parameters -->
+                    <form method="POST" id="searchForm">
+                        {{ search_form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Search Query</label>
+                            <div class="input-group">
+                                {{ search_form.query(class="form-control", placeholder="Enter your search query") }}
+                                <button type="submit" class="btn btn-primary">Search</button>
+                                {% if search_form.query.data %}
+                                <button type="button" class="btn btn-outline-secondary" id="shareButton">
+                                    Share
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Shareable link form (hidden, just for generating URLs) -->
+                    <form method="GET" action="/" id="shareForm" style="display:none;">
+                        <input type="hidden" name="q" id="shareQuery">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if search_triggered and results %}
+            <h2 class="mb-3">Search Results</h2>
+            
+            <!-- Results Index -->
+            <div class="results-index" id="results-index">
+                <h3>Quick Navigation</h3>
+                <ul class="results-index-list">
+                    {% for result in results %}
+                        <li>
+                            <a href="#result-{{ loop.index }}">
+                                {{ result.title }}
+                                {% if result.date %}
+                                <span class="timestamp ms-2 date-to-format">({{ result.date }})</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Detailed Results -->
+            {% for result in results %}
+                <div class="result-card" id="result-{{ loop.index }}">
+                    <div class="result-header">
+                        <h5 class="mb-0">{{ result.title }}</h5>
+                        {% if result.date %}
+                            <small class="text-muted date-to-format">{{ result.date }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="result-body">
+                        {% if result.messages %}
+                            {% for message in result.messages %}
+                                <div class="message {{ message.role }}-message">
+                                    <div class="message-header">
+                                        <div class="role-name">
+                                            {% if message.role == 'user' %}
+                                                You
+                                            {% elif message.role == 'assistant' %}
+                                                ChatGPT
+                                            {% else %}
+                                                {{ message.role|capitalize }}
+                                            {% endif %}
+                                        </div>
+                                        {% if message.timestamp %}
+                                            <div class="message-timestamp date-to-format">{{ message.timestamp }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-body">
+                                        <div class="message-content">{{ message.content|safe }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No messages found in this conversation.</p>
+                        {% endif %}
+                        <a href="#results-index" class="jump-back-link">↑ Back to index</a>
+                    </div>
+                </div>
+            {% endfor %}
+            
+        {% elif search_triggered %}
+            <div class="alert alert-info">
+                No results found.
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Copy success notification -->
+    <div class="copy-success" id="copySuccess">URL copied to clipboard!</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle share button
+            const shareButton = document.getElementById('shareButton');
+            if (shareButton) {
+                shareButton.addEventListener('click', function() {
+                    // Get the current search query
+                    const searchInput = document.querySelector('input[name="query"]');
+                    const shareQuery = document.getElementById('shareQuery');
+                    
+                    if (searchInput && searchInput.value && shareQuery) {
+                        // Set the query in the shareable form
+                        shareQuery.value = searchInput.value;
+                        
+                        // Create the shareable URL
+                        const shareForm = document.getElementById('shareForm');
+                        const formData = new FormData(shareForm);
+                        const queryString = new URLSearchParams(formData).toString();
+                        const shareableUrl = window.location.origin + window.location.pathname + '?' + queryString;
+                        
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(shareableUrl).then(function() {
+                            // Show success message
+                            const successMessage = document.getElementById('copySuccess');
+                            successMessage.style.display = 'block';
+                            
+                            // Hide after 2 seconds
+                            setTimeout(function() {
+                                successMessage.style.display = 'none';
+                            }, 2000);
+                        });
+                    }
+                });
+            }
+            
+            // Format dates
+            const dateElements = document.querySelectorAll('.date-to-format');
+            
+            dateElements.forEach(function(element) {
+                const originalText = element.textContent.trim();
+                
+                // Extract the date part
+                let dateText;
+                if (originalText.startsWith('(') && originalText.endsWith(')')) {
+                    // Format: (2025-03-03 10:01)
+                    dateText = originalText.substring(1, originalText.length - 1);
+                } else {
+                    // Direct format: 2025-03-03 10:01
+                    dateText = originalText;
+                }
+                
+                // Format the date
+                const formattedDate = formatDateNicely(dateText);
+                
+                // Update the element
+                if (originalText.startsWith('(') && originalText.endsWith(')')) {
+                    element.innerHTML = `(<span class="nice-date">${formattedDate}</span>)`;
+                } else {
+                    element.innerHTML = `<span class="nice-date">${formattedDate}</span>`;
+                }
+            });
+            
+            // Highlight search terms
+            const searchInput = document.querySelector('input[name="query"]');
+            if (searchInput && searchInput.value) {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    const messageContents = document.querySelectorAll('.message-content');
+                    
+                    messageContents.forEach(content => {
+                        // Skip highlighting within tags
+                        const html = content.innerHTML;
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        
+                        // This is a simple approach - for production, you'd want a more robust HTML-aware solution
+                        content.innerHTML = html.replace(regex, '<mark>$1</mark>');
+                    });
+                }
+            }
+            
+            // Helper function to format dates nicely
+            function formatDateNicely(dateStr) {
+                try {
+                    // Handle different formats
+                    let date;
+                    
+                    // Try parsing different date formats
+                    if (dateStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/)) {
+                        // Format: 2025-03-03 10:01:18 or 2025-03-03 10:01
+                        date = new Date(dateStr.replace(' ', 'T'));
+                    } 
+                    else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        // Format: 2025-03-03
+                        date = new Date(dateStr);
+                    }
+                    else if (dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?/)) {
+                        // ISO format: 2025-03-03T10:01:18
+                        date = new Date(dateStr);
+                    } 
+                    else {
+                        // Unknown format, return as is
+                        return dateStr;
+                    }
+                    
+                    // If date parsing failed, return original
+                    if (isNaN(date.getTime())) {
+                        return dateStr;
+                    }
+                    
+                    // Format the date based on how recent it is
+                    const now = new Date();
+                    const isToday = date.toDateString() === now.toDateString();
+                    const isYesterday = new Date(now - 86400000).toDateString() === date.toDateString();
+                    const isThisYear = date.getFullYear() === now.getFullYear();
+                    
+                    // Format time part
+                    const time = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    if (isToday) {
+                        return `Today at ${time}`;
+                    } else if (isYesterday) {
+                        return `Yesterday at ${time}`;
+                    } else if (isThisYear) {
+                        // For dates this year, use Month Day format
+                        const monthDay = date.toLocaleDateString([], {month: 'short', day: 'numeric'});
+                        return `${monthDay}, ${time}`;
+                    } else {
+                        // For older dates, include the year
+                        const monthDayYear = date.toLocaleDateString([], {
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        return `${monthDayYear}, ${time}`;
+                    }
+                    
+                } catch (e) {
+                    console.error("Error formatting date:", e);
+                    return dateStr;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
