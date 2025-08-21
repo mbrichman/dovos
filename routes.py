@@ -224,9 +224,6 @@ def init_routes(app, archive):
                 for doc, meta in zip(
                     raw_results["documents"][0], raw_results["metadatas"][0]
                 ):
-                    # Parse document into individual messages
-                    messages = parse_messages_from_document(doc)
-
                     # Get dates from metadata
                     date_str = meta.get("earliest_ts", "Unknown date")
                     if date_str != "Unknown date":
@@ -236,16 +233,20 @@ def init_routes(app, archive):
                         except:
                             pass
 
-                    # Determine assistant name based on source
-                    assistant_name = "Claude" if meta.get("source") == "claude" else "ChatGPT"
+                    # Get conversation ID for the view link
+                    # Try different ID sources in order of preference
+                    conv_id = (
+                        meta.get("id") or 
+                        meta.get("conversation_id") or
+                        f"unknown-{len(results)}"
+                    )
                     
                     results.append(
                         {
                             "title": meta.get("title", "Untitled"),
                             "date": date_str,
-                            "messages": messages,
-                            "meta": meta,
-                            "assistant_name": assistant_name,
+                            "id": conv_id,
+                            "source": meta.get("source", "unknown"),
                         }
                     )
 
