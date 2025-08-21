@@ -9,6 +9,60 @@ from forms import SearchForm
 from utils import highlight_concepts
 
 
+# Clean, focused filter functions
+def filter_by_source(items, source_filter):
+    """Filter conversations by source type"""
+    if source_filter == "all":
+        return items
+    
+    filtered = [item for item in items if item["meta"].get("source") == source_filter]
+    return filtered
+
+
+def filter_by_date(items, date_filter):
+    """Filter conversations by date range"""
+    if date_filter == "all":
+        return items
+    
+    now = datetime.now()
+    today = now.date()
+    
+    if date_filter == "today":
+        filtered = [item for item in items if item["date_obj"].date() == today]
+        return filtered
+        
+    elif date_filter == "week":
+        week_ago = now - timedelta(days=7)
+        filtered = [item for item in items if item["date_obj"] >= week_ago]
+        return filtered
+        
+    elif date_filter == "month":
+        month_ago = now - timedelta(days=30)
+        filtered = [item for item in items if item["date_obj"] >= month_ago]
+        return filtered
+        
+    elif date_filter == "year":
+        year_ago = now - timedelta(days=365)
+        filtered = [item for item in items if item["date_obj"] >= year_ago]
+        return filtered
+    
+    # Unknown date filter, return all items
+    return items
+
+
+def apply_sorting(items, sort_order):
+    """Apply sorting to conversation items"""
+    if sort_order == "newest":
+        return sorted(items, key=lambda x: x["date_obj"], reverse=True)
+    elif sort_order == "oldest":
+        return sorted(items, key=lambda x: x["date_obj"])
+    elif sort_order == "original":
+        return sorted(items, key=lambda x: x["meta"].get("original_index", 0))
+    else:
+        # Default to newest first
+        return sorted(items, key=lambda x: x["date_obj"], reverse=True)
+
+
 def clean_message_content(content):
     """Clean artifacts and special tokens from message content while preserving markdown"""
     if not content or not isinstance(content, str):
@@ -509,8 +563,8 @@ def init_routes(app, archive):
 
             # Last resort: use creation time of metadata if available
             if not date_obj:
-                # Use current time as absolute last resort
-                date_obj = datetime.now()
+                # Use a very old date as fallback so undated conversations don't interfere with date filters
+                date_obj = datetime(1970, 1, 1)
 
             # Store original index in metadata for ordering
             meta["original_index"] = idx
@@ -533,35 +587,12 @@ def init_routes(app, archive):
 
         print(f"DEBUG: Processed {len(items)} valid items for display")
 
-        # Apply source filter
-        if source_filter != "all":
-            items = [item for item in items if item["meta"].get("source") == source_filter]
+        # Apply filters using clean, focused functions
+        items = filter_by_source(items, source_filter)
+        items = filter_by_date(items, date_filter)
 
-        # Apply date filter
-        if date_filter != "all":
-            now = datetime.now()
-            if date_filter == "today":
-                items = [item for item in items if item["date_obj"].date() == now.date()]
-            elif date_filter == "week":
-                week_ago = now - timedelta(days=7)
-                items = [item for item in items if item["date_obj"] >= week_ago]
-            elif date_filter == "month":
-                month_ago = now - timedelta(days=30)
-                items = [item for item in items if item["date_obj"] >= month_ago]
-            elif date_filter == "year":
-                year_ago = now - timedelta(days=365)
-                items = [item for item in items if item["date_obj"] >= year_ago]
-
-        # Apply sort order
-        if sort_order == "newest":
-            # Sort by date (newest first)
-            items.sort(key=lambda x: x["date_obj"], reverse=True)
-        elif sort_order == "oldest":
-            # Sort by date (oldest first)
-            items.sort(key=lambda x: x["date_obj"])
-        elif sort_order == "original":
-            # Sort by original order
-            items.sort(key=lambda x: x["meta"].get("original_index", float("inf")))
+        # Apply sorting
+        items = apply_sorting(items, sort_order)
 
         # Calculate pagination
         total_items = len(items)
