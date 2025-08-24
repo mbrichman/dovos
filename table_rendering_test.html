@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Rendering Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .test-section {
+            border: 2px solid #ccc;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .raw-content {
+            background: #f8f8f8;
+            padding: 15px;
+            border-left: 4px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .current {
+            background: #fff5f5;
+            border-color: #ff6b6b;
+        }
+        .improved {
+            background: #f0fff4;
+            border-color: #51cf66;
+        }
+        .stats {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .rendered {
+            border: 1px solid #ccc;
+            padding: 20px;
+            background: white;
+            border-radius: 4px;
+        }
+        .rendered table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .rendered th, .rendered td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .rendered th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .rendered h2, .rendered h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .rendered blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            background: #f8f9fa;
+            padding: 15px 20px;
+        }
+        .analysis {
+            background: #fffbf0;
+            border: 2px solid #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <h1>Table Rendering Test: Toronto Budget Breakdown</h1>
+    
+    <div class="test-section">
+        <h2>Original Raw Content</h2>
+        <div class="stats">
+            Length: 2161 characters | Lines: 64 | Pipe chars: 64
+        </div>
+        <div class="raw-content">Excellent instinct — you're correct, and you're starting to see one of the real truths of *your* specific numbers.
+
+Let’s pull this apart carefully for a minute.
+
+---
+
+### Your PV budget (simplified baseline)
+
+| Category | Estimate (USD) | In CAD (~1.37) |
+| -------- | -------------- | --------------- |
+| Rent | ~$2,200 USD | ~$3,000 CAD |
+| Utilities/Internet | Included or ~$100 USD | ~$137 CAD |
+| Health (private) | ~$200 USD | ~$275 CAD |
+| Groceries | ~$600 USD | ~$825 CAD |
+| Dining out | ~$300 USD | ~$410 CAD |
+| Uber / transport | ~$100 USD | ~$137 CAD |
+| Misc (subscriptions, gym, etc) | ~$300 USD | ~$410 CAD |
+| Travel / extra | ~$300 USD | ~$410 CAD |
+| **Total** | ~$4,100 USD | ~$5,600 CAD |
+
+---
+
+### Comparison to Toronto
+
+| Category | PV (CAD) | Toronto (CAD) |
+| -------- | -------- | -------------- |
+| Rent | $3,000 | $3,425 |
+| Core cost of living | ~$2,600 | ~$2,800 |
+| **Total** | ~$5,600 | ~$6,250 |
+
+---
+
+### Key takeaway
+
+- **Toronto is only about ~$600–700 CAD/month more** for a similar quality of life, based on your numbers.
+- That’s mostly driven by:  
+   - Rent being a bit higher  
+   - Higher cell/data plan  
+   - Higher insurance / health costs (at least for the first few months pre-OHIP)
+- Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.
+- You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.
+
+---
+
+### The *real* price difference kicks in if:
+- You bought property (Toronto becomes much more expensive)
+- You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)
+- You scale up lifestyle (Toronto can burn $10K/month if you want it to)
+
+---
+
+👉 **The hidden variable is the emotional one: what city feeds you better.**
+
+In pure budget terms, for you, *Toronto vs PV is remarkably close.*
+
+---
+
+If you want, we can now model:
+
+- **Annual cash burn** for both.
+- **Sustainability against your current NW and work plans.**
+- **"Runway" in each case.**
+
+Shall I run those numbers? That’s where it gets really clarifying.</div>
+    </div>
+    
+    <div class="test-section current">
+        <h2>Current Cleaning Function Result</h2>
+        <div class="stats">
+            Length: 2147 chars | Tables: 2 | Cleaned: 14 chars removed
+        </div>
+        <h3>Cleaned Text:</h3>
+        <div class="raw-content">Excellent instinct — you're correct, and you're starting to see one of the real truths of *your* specific numbers.
+
+Let’s pull this apart carefully for a minute.
+
+---
+
+### Your PV budget (simplified baseline)
+
+| Category | Estimate (USD) | In CAD (~1.37) |
+| -------- | -------------- | --------------- |
+| Rent | ~$2,200 USD | ~$3,000 CAD |
+| Utilities/Internet | Included or ~$100 USD | ~$137 CAD |
+| Health (private) | ~$200 USD | ~$275 CAD |
+| Groceries | ~$600 USD | ~$825 CAD |
+| Dining out | ~$300 USD | ~$410 CAD |
+| Uber / transport | ~$100 USD | ~$137 CAD |
+| Misc (subscriptions, gym, etc) | ~$300 USD | ~$410 CAD |
+| Travel / extra | ~$300 USD | ~$410 CAD |
+| **Total** | ~$4,100 USD | ~$5,600 CAD |
+
+---
+
+### Comparison to Toronto
+
+| Category | PV (CAD) | Toronto (CAD) |
+| -------- | -------- | -------------- |
+| Rent | $3,000 | $3,425 |
+| Core cost of living | ~$2,600 | ~$2,800 |
+| **Total** | ~$5,600 | ~$6,250 |
+
+---
+
+### Key takeaway
+
+- **Toronto is only about ~$600–700 CAD/month more** for a similar quality of life, based on your numbers.
+- That’s mostly driven by:
+- Rent being a bit higher
+- Higher cell/data plan
+- Higher insurance / health costs (at least for the first few months pre-OHIP)
+- Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.
+- You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.
+
+---
+
+### The *real* price difference kicks in if:
+- You bought property (Toronto becomes much more expensive)
+- You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)
+- You scale up lifestyle (Toronto can burn $10 K/month if you want it to)
+
+---
+
+👉 **The hidden variable is the emotional one: what city feeds you better.**
+
+In pure budget terms, for you, *Toronto vs PV is remarkably close.*
+
+---
+
+If you want, we can now model:
+
+- **Annual cash burn** for both.
+- **Sustainability against your current NW and work plans.**
+- **"Runway" in each case.**
+
+Shall I run those numbers? That’s where it gets really clarifying.</div>
+        <h3>Rendered HTML:</h3>
+        <div class="rendered">
+            <p>Excellent instinct — you're correct, and you're starting to see one of the real truths of <em>your</em> specific numbers.</p>
+<p>Let’s pull this apart carefully for a minute.</p>
+<hr />
+<h3>Your PV budget (simplified baseline)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Estimate (USD)</th>
+<th>In CAD (~1.37)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rent</td>
+<td>~$2,200 USD</td>
+<td>~$3,000 CAD</td>
+</tr>
+<tr>
+<td>Utilities/Internet</td>
+<td>Included or ~$100 USD</td>
+<td>~$137 CAD</td>
+</tr>
+<tr>
+<td>Health (private)</td>
+<td>~$200 USD</td>
+<td>~$275 CAD</td>
+</tr>
+<tr>
+<td>Groceries</td>
+<td>~$600 USD</td>
+<td>~$825 CAD</td>
+</tr>
+<tr>
+<td>Dining out</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td>Uber / transport</td>
+<td>~$100 USD</td>
+<td>~$137 CAD</td>
+</tr>
+<tr>
+<td>Misc (subscriptions, gym, etc)</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td>Travel / extra</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>~$4,100 USD</td>
+<td>~$5,600 CAD</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Comparison to Toronto</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>PV (CAD)</th>
+<th>Toronto (CAD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rent</td>
+<td>$3,000</td>
+<td>$3,425</td>
+</tr>
+<tr>
+<td>Core cost of living</td>
+<td>~$2,600</td>
+<td>~$2,800</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>~$5,600</td>
+<td>~$6,250</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Key takeaway</h3>
+<ul>
+<li><strong>Toronto is only about ~$600–700 CAD/month more</strong> for a similar quality of life, based on your numbers.</li>
+<li>That’s mostly driven by:</li>
+<li>Rent being a bit higher</li>
+<li>Higher cell/data plan</li>
+<li>Higher insurance / health costs (at least for the first few months pre-OHIP)</li>
+<li>Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.</li>
+<li>You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.</li>
+</ul>
+<hr />
+<h3>The <em>real</em> price difference kicks in if:</h3>
+<ul>
+<li>You bought property (Toronto becomes much more expensive)</li>
+<li>You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)</li>
+<li>You scale up lifestyle (Toronto can burn $10 K/month if you want it to)</li>
+</ul>
+<hr />
+<p>👉 <strong>The hidden variable is the emotional one: what city feeds you better.</strong></p>
+<p>In pure budget terms, for you, <em>Toronto vs PV is remarkably close.</em></p>
+<hr />
+<p>If you want, we can now model:</p>
+<ul>
+<li><strong>Annual cash burn</strong> for both.</li>
+<li><strong>Sustainability against your current NW and work plans.</strong></li>
+<li><strong>"Runway" in each case.</strong></li>
+</ul>
+<p>Shall I run those numbers? That’s where it gets really clarifying.</p>
+        </div>
+    </div>
+    
+    <div class="test-section improved">
+        <h2>Improved Cleaning Function Result</h2>
+        <div class="stats">
+            Length: 2146 chars | Tables: 2 | Cleaned: 15 chars removed
+        </div>
+        <h3>Cleaned Text:</h3>
+        <div class="raw-content">Excellent instinct — you're correct, and you're starting to see one of the real truths of *your* specific numbers.
+
+Let’s pull this apart carefully for a minute.
+
+---
+
+### Your PV budget (simplified baseline)
+
+| Category | Estimate (USD) | In CAD (~1.37) |
+| -------- | -------------- | --------------- |
+| Rent | ~$2,200 USD | ~$3,000 CAD |
+| Utilities/Internet | Included or ~$100 USD | ~$137 CAD |
+| Health (private) | ~$200 USD | ~$275 CAD |
+| Groceries | ~$600 USD | ~$825 CAD |
+| Dining out | ~$300 USD | ~$410 CAD |
+| Uber / transport | ~$100 USD | ~$137 CAD |
+| Misc (subscriptions, gym, etc) | ~$300 USD | ~$410 CAD |
+| Travel / extra | ~$300 USD | ~$410 CAD |
+| **Total** | ~$4,100 USD | ~$5,600 CAD |
+
+---
+
+### Comparison to Toronto
+
+| Category | PV (CAD) | Toronto (CAD) |
+| -------- | -------- | -------------- |
+| Rent | $3,000 | $3,425 |
+| Core cost of living | ~$2,600 | ~$2,800 |
+| **Total** | ~$5,600 | ~$6,250 |
+
+---
+
+### Key takeaway
+
+- **Toronto is only about ~$600–700 CAD/month more** for a similar quality of life, based on your numbers.
+- That’s mostly driven by:
+- Rent being a bit higher
+- Higher cell/data plan
+- Higher insurance / health costs (at least for the first few months pre-OHIP)
+- Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.
+- You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.
+
+---
+
+### The *real* price difference kicks in if:
+- You bought property (Toronto becomes much more expensive)
+- You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)
+- You scale up lifestyle (Toronto can burn $10K/month if you want it to)
+
+---
+
+👉 **The hidden variable is the emotional one: what city feeds you better.**
+
+In pure budget terms, for you, *Toronto vs PV is remarkably close.*
+
+---
+
+If you want, we can now model:
+
+- **Annual cash burn** for both.
+- **Sustainability against your current NW and work plans.**
+- **"Runway" in each case.**
+
+Shall I run those numbers? That’s where it gets really clarifying.</div>
+        <h3>Rendered HTML:</h3>
+        <div class="rendered">
+            <p>Excellent instinct — you're correct, and you're starting to see one of the real truths of <em>your</em> specific numbers.</p>
+<p>Let’s pull this apart carefully for a minute.</p>
+<hr />
+<h3>Your PV budget (simplified baseline)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Estimate (USD)</th>
+<th>In CAD (~1.37)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rent</td>
+<td>~$2,200 USD</td>
+<td>~$3,000 CAD</td>
+</tr>
+<tr>
+<td>Utilities/Internet</td>
+<td>Included or ~$100 USD</td>
+<td>~$137 CAD</td>
+</tr>
+<tr>
+<td>Health (private)</td>
+<td>~$200 USD</td>
+<td>~$275 CAD</td>
+</tr>
+<tr>
+<td>Groceries</td>
+<td>~$600 USD</td>
+<td>~$825 CAD</td>
+</tr>
+<tr>
+<td>Dining out</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td>Uber / transport</td>
+<td>~$100 USD</td>
+<td>~$137 CAD</td>
+</tr>
+<tr>
+<td>Misc (subscriptions, gym, etc)</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td>Travel / extra</td>
+<td>~$300 USD</td>
+<td>~$410 CAD</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>~$4,100 USD</td>
+<td>~$5,600 CAD</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Comparison to Toronto</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>PV (CAD)</th>
+<th>Toronto (CAD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rent</td>
+<td>$3,000</td>
+<td>$3,425</td>
+</tr>
+<tr>
+<td>Core cost of living</td>
+<td>~$2,600</td>
+<td>~$2,800</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>~$5,600</td>
+<td>~$6,250</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Key takeaway</h3>
+<ul>
+<li><strong>Toronto is only about ~$600–700 CAD/month more</strong> for a similar quality of life, based on your numbers.</li>
+<li>That’s mostly driven by:</li>
+<li>Rent being a bit higher</li>
+<li>Higher cell/data plan</li>
+<li>Higher insurance / health costs (at least for the first few months pre-OHIP)</li>
+<li>Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.</li>
+<li>You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.</li>
+</ul>
+<hr />
+<h3>The <em>real</em> price difference kicks in if:</h3>
+<ul>
+<li>You bought property (Toronto becomes much more expensive)</li>
+<li>You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)</li>
+<li>You scale up lifestyle (Toronto can burn $10K/month if you want it to)</li>
+</ul>
+<hr />
+<p>👉 <strong>The hidden variable is the emotional one: what city feeds you better.</strong></p>
+<p>In pure budget terms, for you, <em>Toronto vs PV is remarkably close.</em></p>
+<hr />
+<p>If you want, we can now model:</p>
+<ul>
+<li><strong>Annual cash burn</strong> for both.</li>
+<li><strong>Sustainability against your current NW and work plans.</strong></li>
+<li><strong>"Runway" in each case.</strong></li>
+</ul>
+<p>Shall I run those numbers? That’s where it gets really clarifying.</p>
+        </div>
+    </div>
+    
+    <div class="test-section analysis">
+        <h2>Analysis</h2>
+        <h3>Table Rendering:</h3>
+        <ul>
+            <li>Current version tables: 2 
+                ✅ Preserved</li>
+            <li>Improved version tables: 2 
+                ✅ Preserved</li>
+            <li>Header formatting: ✅ Present</li>
+            <li>Bold text: ✅ Present</li>
+            <li>Blockquotes: ❌ Missing</li>
+        </ul>
+        
+        <h3>Key Tests:</h3>
+        <ul>
+            <li>Pipe characters preserved: Original 64 → Cleaned 64</li>
+            <li>Table separators (---): ✅ Preserved</li>
+            <li>Proper line breaks in tables: ❌ Issues</li>
+        </ul>
+        
+        <h3>Expected Features:</h3>
+        <p>Should render proper HTML tables with headers, multiple comparison tables, 
+           formatted text (bold, headers), and blockquotes - all with clean spacing.</p>
+    </div>
+</body>
+</html>

@@ -133,15 +133,25 @@
         <div class="search-section mb-4">
             <form method="POST" action="/conversations" class="mb-3">
                 {{ search_form.hidden_tag() }}
-                <div class="input-group">
-                    {{ search_form.query(class="form-control", placeholder="Search conversations...") }}
-                    <button type="submit" class="btn btn-primary">Search</button>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            {{ search_form.query(class="form-control", placeholder="Search conversations...") }}
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ search_form.search_type(class="form-select") }}
+                            <label for="{{ search_form.search_type.id }}">Search Method</label>
+                        </div>
+                    </div>
                 </div>
             </form>
             
             {% if search_triggered %}
                 <div class="alert alert-info">
-                    <strong>Search Results for:</strong> "{{ query }}"
+                    <strong>{{ search_form.search_type.data|title }} Search Results for:</strong> "{{ query }}"
                     <a href="/conversations" class="btn btn-sm btn-outline-secondary ms-2">Clear Search</a>
                 </div>
             {% endif %}

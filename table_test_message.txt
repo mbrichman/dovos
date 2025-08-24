@@ -1,0 +1,64 @@
+Excellent instinct — you're correct, and you're starting to see one of the real truths of *your* specific numbers.
+
+Let’s pull this apart carefully for a minute.
+
+---
+
+### Your PV budget (simplified baseline)
+
+| Category | Estimate (USD) | In CAD (~1.37) |
+| -------- | -------------- | --------------- |
+| Rent | ~$2,200 USD | ~$3,000 CAD |
+| Utilities/Internet | Included or ~$100 USD | ~$137 CAD |
+| Health (private) | ~$200 USD | ~$275 CAD |
+| Groceries | ~$600 USD | ~$825 CAD |
+| Dining out | ~$300 USD | ~$410 CAD |
+| Uber / transport | ~$100 USD | ~$137 CAD |
+| Misc (subscriptions, gym, etc) | ~$300 USD | ~$410 CAD |
+| Travel / extra | ~$300 USD | ~$410 CAD |
+| **Total** | ~$4,100 USD | ~$5,600 CAD |
+
+---
+
+### Comparison to Toronto
+
+| Category | PV (CAD) | Toronto (CAD) |
+| -------- | -------- | -------------- |
+| Rent | $3,000 | $3,425 |
+| Core cost of living | ~$2,600 | ~$2,800 |
+| **Total** | ~$5,600 | ~$6,250 |
+
+---
+
+### Key takeaway
+
+- **Toronto is only about ~$600–700 CAD/month more** for a similar quality of life, based on your numbers.
+- That’s mostly driven by:  
+   - Rent being a bit higher  
+   - Higher cell/data plan  
+   - Higher insurance / health costs (at least for the first few months pre-OHIP)
+- Many other items (groceries, dining out, transport if you don't drive) aren't that different between PV and Toronto at your personal consumption level.
+- You’re not spending wildly in either location. You're basically buying “comfortable urban expat life” in both.
+
+---
+
+### The *real* price difference kicks in if:
+- You bought property (Toronto becomes much more expensive)
+- You live very lean (PV gives you more flexibility to drop to $3,500 USD or lower if you wanted)
+- You scale up lifestyle (Toronto can burn $10K/month if you want it to)
+
+---
+
+👉 **The hidden variable is the emotional one: what city feeds you better.**
+
+In pure budget terms, for you, *Toronto vs PV is remarkably close.*
+
+---
+
+If you want, we can now model:
+
+- **Annual cash burn** for both.
+- **Sustainability against your current NW and work plans.**
+- **"Runway" in each case.**
+
+Shall I run those numbers? That’s where it gets really clarifying.

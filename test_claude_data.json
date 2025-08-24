@@ -1,0 +1,62 @@
+[
+  {
+    "uuid": "test_claude_today",
+    "name": "Test Claude Today",
+    "created_at": "2025-08-21T12:30:00.123456Z",
+    "updated_at": "2025-08-21T12:30:00.123456Z",
+    "chat_messages": [
+      {
+        "uuid": "claude_msg_001",
+        "text": "This is a test message from today",
+        "sender": "human",
+        "created_at": "2025-08-21T12:30:00.123456Z"
+      },
+      {
+        "uuid": "claude_msg_002", 
+        "text": "This is Claude's response from today",
+        "sender": "assistant",
+        "created_at": "2025-08-21T12:30:05.654321Z"
+      }
+    ]
+  },
+  {
+    "uuid": "test_claude_yesterday",
+    "name": "Test Claude Yesterday",
+    "created_at": "2025-08-20T09:15:00.789012Z",
+    "updated_at": "2025-08-20T09:15:00.789012Z", 
+    "chat_messages": [
+      {
+        "uuid": "claude_msg_003",
+        "text": "This is a test message from yesterday",
+        "sender": "human",
+        "created_at": "2025-08-20T09:15:00.789012Z"
+      },
+      {
+        "uuid": "claude_msg_004",
+        "text": "This is Claude's response from yesterday", 
+        "sender": "assistant",
+        "created_at": "2025-08-20T09:15:05.345678Z"
+      }
+    ]
+  },
+  {
+    "uuid": "test_claude_aug2",
+    "name": "Test Claude August 2nd",
+    "created_at": "2025-08-02T14:45:00.456789Z",
+    "updated_at": "2025-08-02T14:45:00.456789Z",
+    "chat_messages": [
+      {
+        "uuid": "claude_msg_005",
+        "text": "This is a test message from August 2nd",
+        "sender": "human",
+        "created_at": "2025-08-02T14:45:00.456789Z"
+      },
+      {
+        "uuid": "claude_msg_006",
+        "text": "This is Claude's response from August 2nd",
+        "sender": "assistant", 
+        "created_at": "2025-08-02T14:45:05.987654Z"
+      }
+    ]
+  }
+]

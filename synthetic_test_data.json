@@ -1,0 +1,207 @@
+{
+  "chatgpt_conversations": [
+    {
+      "title": "Test ChatGPT Today",
+      "create_time": 1724285400.123456,
+      "update_time": 1724285400.123456,
+      "mapping": {
+        "msg_001": {
+          "id": "msg_001",
+          "message": {
+            "id": "msg_001",
+            "author": {
+              "role": "user"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["This is a test message from today"]
+            },
+            "create_time": 1724285400.123456
+          },
+          "parent": null,
+          "children": ["msg_002"]
+        },
+        "msg_002": {
+          "id": "msg_002", 
+          "message": {
+            "id": "msg_002",
+            "author": {
+              "role": "assistant"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["This is ChatGPT's response from today"]
+            },
+            "create_time": 1724285410.654321
+          },
+          "parent": "msg_001",
+          "children": []
+        }
+      },
+      "moderation_results": [],
+      "current_node": "msg_002",
+      "plugin_ids": null,
+      "conversation_id": "test_chatgpt_today",
+      "conversation_template_id": null,
+      "gizmo_id": null,
+      "is_archived": false,
+      "safe_urls": []
+    },
+    {
+      "title": "Test ChatGPT Yesterday", 
+      "create_time": 1724199000.789012,
+      "update_time": 1724199000.789012,
+      "mapping": {
+        "msg_003": {
+          "id": "msg_003",
+          "message": {
+            "id": "msg_003",
+            "author": {
+              "role": "user"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["This is a test message from yesterday"]
+            },
+            "create_time": 1724199000.789012
+          },
+          "parent": null,
+          "children": ["msg_004"]
+        },
+        "msg_004": {
+          "id": "msg_004",
+          "message": {
+            "id": "msg_004", 
+            "author": {
+              "role": "assistant"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["This is ChatGPT's response from yesterday"]
+            },
+            "create_time": 1724199010.345678
+          },
+          "parent": "msg_003",
+          "children": []
+        }
+      },
+      "moderation_results": [],
+      "current_node": "msg_004",
+      "plugin_ids": null,
+      "conversation_id": "test_chatgpt_yesterday",
+      "conversation_template_id": null,
+      "gizmo_id": null,
+      "is_archived": false,
+      "safe_urls": []
+    },
+    {
+      "title": "Test ChatGPT August 2nd",
+      "create_time": 1722643200.456789,
+      "update_time": 1722643200.456789,
+      "mapping": {
+        "msg_005": {
+          "id": "msg_005",
+          "message": {
+            "id": "msg_005",
+            "author": {
+              "role": "user"
+            },
+            "content": {
+              "content_type": "text", 
+              "parts": ["This is a test message from August 2nd"]
+            },
+            "create_time": 1722643200.456789
+          },
+          "parent": null,
+          "children": ["msg_006"]
+        },
+        "msg_006": {
+          "id": "msg_006",
+          "message": {
+            "id": "msg_006",
+            "author": {
+              "role": "assistant"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["This is ChatGPT's response from August 2nd"]
+            },
+            "create_time": 1722643210.987654
+          },
+          "parent": "msg_005",
+          "children": []
+        }
+      },
+      "moderation_results": [],
+      "current_node": "msg_006",
+      "plugin_ids": null,
+      "conversation_id": "test_chatgpt_aug2",
+      "conversation_template_id": null,
+      "gizmo_id": null,
+      "is_archived": false,
+      "safe_urls": []
+    }
+  ],
+  "claude_conversations": [
+    {
+      "uuid": "test_claude_today",
+      "name": "Test Claude Today",
+      "created_at": "2025-08-21T12:30:00.123456Z",
+      "updated_at": "2025-08-21T12:30:00.123456Z",
+      "chat_messages": [
+        {
+          "uuid": "claude_msg_001",
+          "text": "This is a test message from today",
+          "sender": "human",
+          "created_at": "2025-08-21T12:30:00.123456Z"
+        },
+        {
+          "uuid": "claude_msg_002", 
+          "text": "This is Claude's response from today",
+          "sender": "assistant",
+          "created_at": "2025-08-21T12:30:05.654321Z"
+        }
+      ]
+    },
+    {
+      "uuid": "test_claude_yesterday",
+      "name": "Test Claude Yesterday",
+      "created_at": "2025-08-20T09:15:00.789012Z",
+      "updated_at": "2025-08-20T09:15:00.789012Z", 
+      "chat_messages": [
+        {
+          "uuid": "claude_msg_003",
+          "text": "This is a test message from yesterday",
+          "sender": "human",
+          "created_at": "2025-08-20T09:15:00.789012Z"
+        },
+        {
+          "uuid": "claude_msg_004",
+          "text": "This is Claude's response from yesterday", 
+          "sender": "assistant",
+          "created_at": "2025-08-20T09:15:05.345678Z"
+        }
+      ]
+    },
+    {
+      "uuid": "test_claude_aug2",
+      "name": "Test Claude August 2nd",
+      "created_at": "2025-08-02T14:45:00.456789Z",
+      "updated_at": "2025-08-02T14:45:00.456789Z",
+      "chat_messages": [
+        {
+          "uuid": "claude_msg_005",
+          "text": "This is a test message from August 2nd",
+          "sender": "human",
+          "created_at": "2025-08-02T14:45:00.456789Z"
+        },
+        {
+          "uuid": "claude_msg_006",
+          "text": "This is Claude's response from August 2nd",
+          "sender": "assistant", 
+          "created_at": "2025-08-02T14:45:05.987654Z"
+        }
+      ]
+    }
+  ]
+}

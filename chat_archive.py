@@ -9,6 +9,7 @@ import chromadb
 from docx import Document
 
 from config import COLLECTION_NAME, PERSIST_DIR, DEFAULT_EMBEDDING_MODEL
+from utils import expand_query_with_stems
 
 
 def clean_text_content(text):
@@ -126,48 +127,8 @@ class ChatArchive:
                 }
 
         if keyword_search:
-            # Get all docs matching date filter if specified
-            where_filter = date_filter if date_filter else None
-            all_docs = self.get_documents(
-                where=where_filter, include=["documents", "metadatas"], limit=9999
-            )
-            terms = (
-                query_text.replace("AND", "&&")
-                .replace("OR", "||")
-                .replace("NOT", "!!")
-                .split()
-            )
-            matches = []
-
-            def match(doc):
-                text = doc.lower()
-                expr = ""
-                for term in terms:
-                    if term == "&&":
-                        expr += " and "
-                    elif term == "||":
-                        expr += " or "
-                    elif term == "!!":
-                        expr += " not "
-                    else:
-                        expr += f"'{term.lower()}' in text"
-                try:
-                    return eval(expr)
-                except Exception:
-                    return False
-
-            for idx, doc in enumerate(all_docs["documents"]):
-                if match(doc):
-                    matches.append((doc, all_docs["metadatas"][idx]))
-
-            # Format results like a query response
-            if not matches:
-                return {"documents": [[]], "metadatas": [[]]}
-
-            documents = [m[0] for m in matches[:n_results]]
-            metadatas = [m[1] for m in matches[:n_results]]
-
-            return {"documents": [documents], "metadatas": [metadatas]}
+            # Use improved keyword search with stemming
+            return self._keyword_search_with_stemming(query_text, n_results, date_filter)
         else:
             # Vector search
             embedding = embedder.encode([query_text])[0]
@@ -179,6 +140,82 @@ class ChatArchive:
                 where=date_filter,
                 include_distances=True,
             )
+
+    def _keyword_search_with_stemming(self, query_text, n_results, date_filter):
+        """
+        Improved keyword search using stemming and query expansion
+        """
+        # Get expanded query terms with stemming
+        expanded_terms = expand_query_with_stems(query_text)
+        
+        # Get all documents for filtering
+        all_docs = self.get_documents(
+            where=date_filter, include=["documents", "metadatas"], limit=9999
+        )
+        
+        if not all_docs or not all_docs.get("documents"):
+            return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+        
+        # Score documents based on term matches
+        matches = []
+        
+        for idx, doc in enumerate(all_docs["documents"]):
+            doc_lower = doc.lower()
+            score = 0
+            term_matches = 0
+            
+            # Score based on term frequency and importance
+            for term in expanded_terms:
+                term_lower = term.lower()
+                if term_lower in doc_lower:
+                    # Count occurrences
+                    occurrences = doc_lower.count(term_lower)
+                    
+                    # Weight different types of matches
+                    if term in query_text.lower():
+                        # Original query terms get higher weight
+                        score += occurrences * 2
+                    else:
+                        # Expanded terms get lower weight
+                        score += occurrences * 1
+                    
+                    term_matches += 1
+            
+            # Only include documents that have at least one term match
+            if term_matches > 0:
+                # Bonus for matching more distinct terms
+                score += term_matches * 5
+                
+                # Add title matching bonus
+                title = all_docs["metadatas"][idx].get("title", "").lower()
+                for term in expanded_terms:
+                    if term.lower() in title:
+                        score += 10  # Title matches are important
+                
+                matches.append({
+                    "doc": doc,
+                    "metadata": all_docs["metadatas"][idx],
+                    "score": score,
+                    "term_matches": term_matches
+                })
+        
+        # Sort by score (higher = better for keyword search)
+        matches.sort(key=lambda x: x["score"], reverse=True)
+        
+        # Take top n_results
+        top_matches = matches[:n_results]
+        
+        if not top_matches:
+            return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+        
+        # Format results similar to vector search
+        documents = [m["doc"] for m in top_matches]
+        metadatas = [m["metadata"] for m in top_matches]
+        # Convert keyword scores to distance-like scores (invert so lower is better)
+        max_score = max(m["score"] for m in top_matches) if top_matches else 1
+        distances = [1.0 - (m["score"] / max_score) for m in top_matches]
+        
+        return {"documents": [documents], "metadatas": [metadatas], "distances": [distances]}
 
     def index_json(self, json_path, chunk_size=0):
         """Index conversations from a JSON export (supports ChatGPT and Claude formats)"""

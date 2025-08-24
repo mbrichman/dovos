@@ -1,11 +1,11 @@
 from flask import Flask
 
 from config import SECRET_KEY
-from chat_archive import ChatArchive
+from models.conversation_model import ConversationModel
 from routes import init_routes
 
 # Create global archive instance
-archive = ChatArchive()
+archive = ConversationModel()
 
 # === Flask App ===
 app = Flask(__name__)
