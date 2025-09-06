@@ -72,13 +72,22 @@ class ConversationModel(BaseModel):
         return self.collection.count()
 
     def delete_collection(self):
-        """Delete the collection"""
+        """Delete the collection and clear FTS5 index"""
         self.chroma_client.delete_collection(COLLECTION_NAME)
         # Reinitialize
         self.collection = self.chroma_client.create_collection(COLLECTION_NAME)
+        
+        # Also clear FTS5 index
+        try:
+            from models.fts_model import FTSModel
+            fts_model = FTSModel()
+            fts_model.clear_index()
+            print("Cleared FTS5 index along with ChromaDB collection")
+        except Exception as e:
+            print(f"Warning: Failed to clear FTS5 index: {e}")
 
     def add_documents(self, documents, embeddings, metadatas, ids):
-        """Add documents to the collection"""
+        """Add documents to the collection and FTS5 index"""
         try:
             self.collection.add(
                 documents=documents, embeddings=embeddings, metadatas=metadatas, ids=ids
@@ -90,6 +99,47 @@ class ConversationModel(BaseModel):
             self.collection.add(
                 documents=documents, embeddings=embeddings, metadatas=metadatas, ids=ids
             )
+        
+        # Also add documents to FTS5 index
+        try:
+            from models.fts_model import FTSModel
+            fts_model = FTSModel()
+            
+            # Prepare FTS documents
+            fts_documents = []
+            for i, doc in enumerate(documents):
+                meta = metadatas[i] if i < len(metadatas) else {}
+                doc_id = ids[i] if i < len(ids) else f"doc_{i}"
+                
+                title = meta.get('title', 'Untitled')
+                source = meta.get('source', 'unknown')
+                conversation_id = meta.get('conversation_id') or meta.get('id', '')
+                
+                # Get date string
+                date_str = "Unknown"
+                for date_field in ['latest_ts', 'earliest_ts', 'created', 'modified']:
+                    if meta.get(date_field):
+                        date_str = str(meta[date_field])
+                        break
+                
+                fts_doc = {
+                    'doc_id': doc_id,
+                    'title': title,
+                    'content': doc.strip() if doc else "",
+                    'source': source,
+                    'date_str': date_str,
+                    'conversation_id': conversation_id
+                }
+                
+                fts_documents.append(fts_doc)
+            
+            # Add to FTS5 in batch
+            if fts_documents:
+                fts_model.add_documents(fts_documents)
+                print(f"Added {len(fts_documents)} documents to FTS5 index")
+                
+        except Exception as e:
+            print(f"Warning: Failed to add documents to FTS5 index: {e}")
 
     def query(self, query_embeddings, n_results=5, where=None, include_distances=False):
         """Query the collection"""
