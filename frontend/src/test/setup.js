@@ -8,7 +8,11 @@ export const server = setupServer(...handlers)
 
 // Start server before all tests
 beforeAll(() => {
-  server.listen()
+  console.log('🔧 MSW: Starting server with handlers for:', handlers.length, 'routes')
+  server.listen({
+    onUnhandledRequest: 'warn'
+  })
+  console.log('🔧 MSW: Server started')
 })
 
 // Reset handlers after each test

@@ -47,207 +47,142 @@
     }
   }
   
-  function getSourceBadgeColor(source) {
+  function getSourceBadgeClass(source) {
     switch (source?.toLowerCase()) {
       case 'chatgpt':
-        return 'bg-green-100 text-green-800'
+        return 'badge--indigo'
       case 'claude':
-        return 'bg-blue-100 text-blue-800'
+        return 'badge--amber'
       case 'docx':
-        return 'bg-purple-100 text-purple-800'
+        return 'badge'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'badge'
     }
   }
 </script>
 
 <button 
-  class="conversation-card"
+  class="thread"
   on:click={handleClick}
-  role="button"
-  tabindex="0"
 >
-  <div class="flex items-center justify-between gap-2 mb-1">
-    <h3 class="font-medium text-gray-900 truncate flex-1">
-      {conversation.title || 'Untitled Conversation'}
-    </h3>
-    <div class="flex items-center gap-2 flex-shrink-0">
-      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {getSourceBadgeColor(conversation.source)}">
-        {getSourceDisplayName(conversation.source)}
-      </span>
+  <div class="thread__main">
+    <div class="thread__title">
+      <h3 class="thread__name">{conversation.title || 'Untitled Conversation'}</h3>
       {#if conversation.date}
-        <span class="text-xs text-gray-500 whitespace-nowrap">
+        <span class="thread__date" title={conversation.date}>
           {formatDate(conversation.date)}
         </span>
       {/if}
     </div>
+    {#if conversation.preview}
+      <p class="thread__summary">
+        {conversation.preview}
+      </p>
+    {/if}
+    <div class="thread__meta">
+      <span class="badge {getSourceBadgeClass(conversation.source)}">
+        {getSourceDisplayName(conversation.source)}
+      </span>
+    </div>
   </div>
-  
-  {#if conversation.preview}
-    <p class="text-sm text-gray-600 truncate mt-1">
-      {conversation.preview}
-    </p>
-  {/if}
 </button>
 
 <style>
-  .conversation-card {
+  /* CSS variables matching the mockup */
+  :root {
+    --bg: #fafafa;
+    --panel: #ffffff;
+    --ink: #0b0b0c;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --line-strong: #d1d5db;
+    --indigo: #4f46e5;
+    --indigo-weak: #eef2ff;
+    --amber: #f59e0b;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 10px 30px rgba(0,0,0,.06);
+  }
+
+  /* Thread styles from mockup */
+  .thread {
     width: 100%;
     text-align: left;
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    border: 1px solid #e4e4e7;
-    background: white;
-    transition: all 0.2s ease;
+    background: color-mix(in lab, var(--panel) 96%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: none;
+    display: block;
     cursor: pointer;
+    color: var(--ink);
   }
   
-  .conversation-card:hover {
-    background: rgba(244, 244, 245, 0.4);
-    border-color: #d4d4d8;
+  .thread:hover {
+    box-shadow: var(--shadow);
   }
   
-  .conversation-card:focus {
-    outline: 2px solid #6366f1;
+  .thread:focus {
+    outline: 2px solid var(--indigo);
     outline-offset: 2px;
   }
   
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .flex {
+  .thread__title {
     display: flex;
-  }
-  
-  .items-start {
     align-items: flex-start;
-  }
-  
-  .items-center {
-    align-items: center;
-  }
-  
-  .justify-between {
     justify-content: space-between;
+    gap: 8px;
   }
   
-  .gap-2 {
-    gap: 0.5rem;
-  }
-  
-  .gap-3 {
-    gap: 0.75rem;
-  }
-  
-  .mb-1 {
-    margin-bottom: 0.25rem;
-  }
-
-  .mb-2 {
-    margin-bottom: 0.5rem;
-  }
-
-  .mt-1 {
-    margin-top: 0.25rem;
-  }
-
-  .truncate {
+  .thread__name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   
-  .flex-1 {
-    flex: 1;
-  }
-  
-  .flex-shrink-0 {
-    flex-shrink: 0;
-  }
-  
-  .font-medium {
-    font-weight: 500;
-  }
-  
-  .text-gray-900 {
-    color: #18181b;
-  }
-  
-  .text-sm {
-    font-size: 0.875rem;
-  }
-  
-  .text-xs {
-    font-size: 0.75rem;
-  }
-  
-  .text-gray-600 {
-    color: #71717a;
-  }
-  
-  .text-gray-500 {
-    color: #71717a;
-  }
-  
-  .whitespace-nowrap {
+  .thread__date {
+    font-size: 12px;
+    color: var(--muted);
     white-space: nowrap;
   }
   
-  .leading-relaxed {
-    line-height: 1.625;
+  .thread__summary {
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0.4rem 0 0;
   }
   
-  .inline-flex {
+  .thread__meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    align-items: center;
+  }
+  
+  .badge {
     display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #eef2f7;
+    color: #334155;
   }
   
-  .px-2 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  .badge--indigo {
+    background: var(--indigo-weak);
+    color: var(--indigo);
   }
   
-  .py-1 {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-  }
-  
-  .rounded-full {
-    border-radius: 9999px;
-  }
-  
-  .bg-green-100 {
-    background-color: #dcfce7;
-  }
-  
-  .text-green-800 {
-    color: #166534;
-  }
-  
-  .bg-blue-100 {
-    background-color: #dbeafe;
-  }
-  
-  .text-blue-800 {
-    color: #1e40af;
-  }
-  
-  .bg-purple-100 {
-    background-color: #f3e8ff;
-  }
-  
-  .text-purple-800 {
-    color: #6b21a8;
-  }
-  
-  .bg-gray-100 {
-    background-color: #f4f4f5;
-  }
-  
-  .text-gray-800 {
-    color: #27272a;
+  .badge--amber {
+    background: color-mix(in oklab, var(--amber) 20%, transparent);
+    color: var(--amber);
   }
 </style>

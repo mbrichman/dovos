@@ -320,21 +320,6 @@
     font-weight: 600;
   }
   
-  .clear-button {
-    padding: 0.5rem 1rem;
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    color: #374151;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-  }
-  
-  .clear-button:hover {
-    background: #e5e7eb;
-    border-color: #9ca3af;
-  }
   
   .content-section {
     flex: 1;
@@ -342,15 +327,6 @@
     overflow-y: auto;
   }
   
-  .error-message {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 2rem;
-    color: #dc2626;
-    text-align: center;
-  }
   
   .conversation-details {
     background: white;
@@ -455,55 +431,6 @@
     font-size: 1.1rem;
   }
   
-  .search-tips {
-    background: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    text-align: left;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .search-tips h3 {
-    color: #374151;
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-  }
-  
-  .search-tips ul {
-    margin: 0;
-    padding-left: 1.5rem;
-  }
-  
-  .search-tips li {
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
-  }
-  
-  .selection-info {
-    margin-top: 2rem;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .selection-info p {
-    margin: 0;
-    color: #1e40af;
-  }
-  
-  .text-sm {
-    font-size: 0.875rem;
-  }
-  
-  .text-gray-600 {
-    color: #4b5563;
-  }
   
   /* Responsive Design */
   @media (max-width: 768px) {
@@ -517,16 +444,8 @@
       gap: 1rem;
     }
     
-    .main-content {
-      padding: 1rem;
-    }
-    
     .welcome-state {
       padding: 2rem 1rem;
-    }
-    
-    .search-tips {
-      max-width: none;
     }
   }
 </style>
