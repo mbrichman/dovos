@@ -1,4 +1,4 @@
-from flask import render_template, request, Response, redirect, url_for
+from flask import render_template, request, Response, redirect, url_for, jsonify
 import os
 from datetime import datetime
 
@@ -281,6 +281,72 @@ class ConversationController:
             return {"status": "success", "message": "Database cleared successfully"}, 200
         except Exception as e:
             return {"status": "error", "message": str(e)}, 500
+    
+    def api_conversations(self):
+        """API endpoint for paginated conversations list"""
+        try:
+            # Get pagination parameters
+            try:
+                page = int(request.args.get('page', 1))
+                if page <= 0:
+                    page = 1
+            except (ValueError, TypeError):
+                page = 1
+                
+            try:
+                limit = int(request.args.get('limit', 50))
+                if limit <= 0:
+                    limit = 50
+                limit = min(100, limit)  # Cap at 100
+            except (ValueError, TypeError):
+                limit = 50
+            
+            # Get all conversations
+            all_docs = self.search_model.get_all_conversations(include=["documents", "metadatas"], limit=9999)
+            
+            if not all_docs or not all_docs.get("documents"):
+                return jsonify({
+                    "conversations": [],
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": 0,
+                        "has_next": False,
+                        "has_prev": False
+                    }
+                })
+            
+            # Transform conversations data for API response
+            conversations = []
+            for i, (doc, meta) in enumerate(zip(all_docs["documents"], all_docs.get("metadatas", []))):
+                conversation = {
+                    "id": meta.get("id", f"conv-{i}"),
+                    "title": meta.get("title", "Untitled Conversation"),
+                    "preview": doc[:200] + ("..." if len(doc) > 200 else "") if doc else "",
+                    "date": meta.get("earliest_ts", ""),
+                    "source": meta.get("source", "unknown")
+                }
+                conversations.append(conversation)
+            
+            # Calculate pagination
+            total = len(conversations)
+            start_idx = (page - 1) * limit
+            end_idx = start_idx + limit
+            page_conversations = conversations[start_idx:end_idx]
+            
+            return jsonify({
+                "conversations": page_conversations,
+                "pagination": {
+                    "page": page,
+                    "limit": limit,
+                    "total": total,
+                    "has_next": end_idx < total,
+                    "has_prev": page > 1
+                }
+            })
+            
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
 
 class UploadController:

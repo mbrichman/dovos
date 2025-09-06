@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import SearchBox from './components/SearchBox.svelte'
   import ConversationList from './components/ConversationList.svelte'
+  import ScrollableConversationList from './components/ScrollableConversationList.svelte'
   import { searchConversations, getConversation } from './services/api.js'
   
   // App state
@@ -73,7 +74,7 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-content">
-        <h1 class="app-title">DovOS - Conversation Search</h1>
+        <h1 class="app-title">DovOS - Conversation Browser</h1>
         <div class="header-actions">
           {#if searchQuery}
             <button class="clear-button" on:click={clearSearch}>
@@ -84,54 +85,82 @@
       </div>
     </header>
     
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Search Section -->
-      <section class="search-section">
-        <SearchBox on:search={handleSearch} />
-      </section>
-      
-      <!-- Error Message -->
-      {#if errorMessage}
-        <div class="error-message">
-          <p>{errorMessage}</p>
+    <!-- Two-pane Layout -->
+    <div class="main-layout">
+      <!-- Left Pane: All Conversations -->
+      <aside class="left-pane">
+        <div class="pane-header">
+          <h2>All Conversations</h2>
         </div>
-      {/if}
+        <ScrollableConversationList on:select={handleConversationSelect} />
+      </aside>
       
-      <!-- Results Section -->
-      <section class="results-section">
-        {#if searchQuery}
-          <ConversationList 
-            {conversations}
-            {isLoading}
-            {searchQuery}
-            on:conversationSelect={handleConversationSelect}
-          />
-        {:else}
-          <!-- Welcome State -->
-          <div class="welcome-state">
-            <div class="welcome-icon">🔍</div>
-            <h2>Search Your Conversations</h2>
-            <p>Enter a search term above to find relevant conversations from your ChatGPT and Claude exports.</p>
-            <div class="search-tips">
-              <h3>Search Tips:</h3>
-              <ul>
-                <li>Try keywords like "python", "react", or "api"</li>
-                <li>Use quotes for exact phrases: "machine learning"</li>
-                <li>Search works across titles and conversation content</li>
-              </ul>
-            </div>
+      <!-- Right Pane: Search & Details -->
+      <main class="right-pane">
+        <!-- Search Section -->
+        <section class="search-section">
+          <SearchBox on:search={handleSearch} />
+        </section>
+        
+        <!-- Error Message -->
+        {#if errorMessage}
+          <div class="error-message">
+            <p>{errorMessage}</p>
           </div>
         {/if}
-      </section>
-      
-      <!-- Selected Conversation (Optional) -->
-      {#if selectedConversation}
-        <aside class="selection-info">
-          <p><strong>Selected:</strong> {selectedConversation.title}</p>
-          <p class="text-sm text-gray-600">Click to view full conversation (feature coming soon)</p>
-        </aside>
-      {/if}
+        
+        <!-- Content Area -->
+        <section class="content-section">
+          {#if searchQuery}
+            <!-- Search Results -->
+            <div class="search-results">
+              <h3>Search Results for "{searchQuery}"</h3>
+              <ConversationList 
+                {conversations}
+                {isLoading}
+                {searchQuery}
+                on:conversationSelect={handleConversationSelect}
+              />
+            </div>
+          {:else if selectedConversation}
+            <!-- Selected Conversation Details -->
+            <div class="conversation-details">
+              <h3>{selectedConversation.title}</h3>
+              <p class="conversation-meta">
+                <span class="source">{selectedConversation.source}</span>
+                <span class="date">{selectedConversation.date}</span>
+              </p>
+              <div class="conversation-preview">
+                <p>{selectedConversation.preview}</p>
+                <p class="coming-soon">Full conversation view coming soon...</p>
+              </div>
+            </div>
+          {:else}
+            <!-- Welcome State -->
+            <div class="welcome-state">
+              <div class="welcome-icon">💬</div>
+              <h2>Welcome to DovOS</h2>
+              <p>Browse all your conversations in the left panel, or use search to find specific topics.</p>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <span class="feature-icon">📋</span>
+                  <div>
+                    <h4>Browse All Conversations</h4>
+                    <p>Scroll through all your ChatGPT and Claude conversations in chronological order.</p>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">🔍</span>
+                  <div>
+                    <h4>Powerful Search</h4>
+                    <p>Find conversations by keywords, topics, or exact phrases.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {/if}
+        </section>
+      </main>
     </div>
   </div>
 </main>
@@ -146,17 +175,50 @@
   
   .app-container {
     min-height: 100vh;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
   }
   
   .app-header {
     background: white;
     border-bottom: 1px solid #e5e7eb;
     padding: 1rem 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    flex-shrink: 0;
+  }
+  
+  .main-layout {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 80px); /* Adjust based on header height */
+  }
+  
+  .left-pane {
+    width: 350px;
+    background: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  
+  .pane-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  
+  .pane-header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .right-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   .header-content {
@@ -188,15 +250,16 @@
     border-color: #9ca3af;
   }
   
-  .main-content {
-    padding: 2rem;
+  .search-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
   }
   
-  .search-section {
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+  .content-section {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
   }
   
   .error-message {
@@ -209,9 +272,81 @@
     text-align: center;
   }
   
-  .results-section {
-    max-width: 800px;
-    margin: 0 auto;
+  .conversation-details {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .conversation-details h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: #111827;
+  }
+  
+  .conversation-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .source {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+  }
+  
+  .date {
+    color: #6b7280;
+  }
+  
+  .conversation-preview {
+    line-height: 1.6;
+    color: #374151;
+  }
+  
+  .coming-soon {
+    color: #9ca3af;
+    font-style: italic;
+    margin-top: 1rem;
+  }
+  
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .feature-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .feature-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #111827;
+    font-size: 1rem;
+  }
+  
+  .feature-item p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
   }
   
   .welcome-state {

@@ -28,6 +28,10 @@ def init_routes(app, archive):
     def api_search():
         return upload_controller.api_search()
 
+    @app.route("/api/conversations", methods=["GET"])
+    def api_conversations():
+        return conversation_controller.api_conversations()
+
     @app.route("/stats")
     def stats():
         return conversation_controller.stats()

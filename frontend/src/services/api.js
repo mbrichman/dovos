@@ -85,6 +85,17 @@ export async function getConversation(id) {
 }
 
 /**
+ * Get paginated conversations
+ * @param {number} page - Page number (1-based)
+ * @param {number} limit - Number of conversations per page
+ * @returns {Promise<Object>} Paginated conversations response
+ */
+export async function getConversations(page = 1, limit = 50) {
+  const url = `${API_BASE_URL}/conversations?page=${page}&limit=${limit}`
+  return await makeRequest(url)
+}
+
+/**
  * Get conversation statistics
  * @returns {Promise<Object>} Statistics data
  */
