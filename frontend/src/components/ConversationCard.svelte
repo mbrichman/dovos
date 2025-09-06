@@ -62,13 +62,13 @@
 </script>
 
 <button 
-  class="conversation-card w-full text-left p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 bg-white"
+  class="conversation-card"
   on:click={handleClick}
   role="button"
   tabindex="0"
 >
-  <div class="flex items-start justify-between gap-3 mb-2">
-    <h3 class="font-medium text-gray-900 line-clamp-2 flex-1">
+  <div class="flex items-center justify-between gap-2 mb-1">
+    <h3 class="font-medium text-gray-900 truncate flex-1">
       {conversation.title || 'Untitled Conversation'}
     </h3>
     <div class="flex items-center gap-2 flex-shrink-0">
@@ -84,15 +84,32 @@
   </div>
   
   {#if conversation.preview}
-    <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+    <p class="text-sm text-gray-600 truncate mt-1">
       {conversation.preview}
     </p>
   {/if}
 </button>
 
 <style>
+  .conversation-card {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e4e4e7;
+    background: white;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
   .conversation-card:hover {
-    transform: translateY(-1px);
+    background: rgba(244, 244, 245, 0.4);
+    border-color: #d4d4d8;
+  }
+  
+  .conversation-card:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
   }
   
   .line-clamp-2 {
@@ -102,8 +119,135 @@
     overflow: hidden;
   }
   
-  .conversation-card:focus {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
+  .flex {
+    display: flex;
+  }
+  
+  .items-start {
+    align-items: flex-start;
+  }
+  
+  .items-center {
+    align-items: center;
+  }
+  
+  .justify-between {
+    justify-content: space-between;
+  }
+  
+  .gap-2 {
+    gap: 0.5rem;
+  }
+  
+  .gap-3 {
+    gap: 0.75rem;
+  }
+  
+  .mb-1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .mt-1 {
+    margin-top: 0.25rem;
+  }
+
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .flex-1 {
+    flex: 1;
+  }
+  
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
+  .text-gray-900 {
+    color: #18181b;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .text-xs {
+    font-size: 0.75rem;
+  }
+  
+  .text-gray-600 {
+    color: #71717a;
+  }
+  
+  .text-gray-500 {
+    color: #71717a;
+  }
+  
+  .whitespace-nowrap {
+    white-space: nowrap;
+  }
+  
+  .leading-relaxed {
+    line-height: 1.625;
+  }
+  
+  .inline-flex {
+    display: inline-flex;
+  }
+  
+  .px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .rounded-full {
+    border-radius: 9999px;
+  }
+  
+  .bg-green-100 {
+    background-color: #dcfce7;
+  }
+  
+  .text-green-800 {
+    color: #166534;
+  }
+  
+  .bg-blue-100 {
+    background-color: #dbeafe;
+  }
+  
+  .text-blue-800 {
+    color: #1e40af;
+  }
+  
+  .bg-purple-100 {
+    background-color: #f3e8ff;
+  }
+  
+  .text-purple-800 {
+    color: #6b21a8;
+  }
+  
+  .bg-gray-100 {
+    background-color: #f4f4f5;
+  }
+  
+  .text-gray-800 {
+    color: #27272a;
   }
 </style>

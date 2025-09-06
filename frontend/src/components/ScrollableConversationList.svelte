@@ -127,7 +127,7 @@
   {:else}
     <div class="conversation-list">
       {#each conversations as conversation (conversation.id)}
-        <div class="mb-2">
+        <div class="conversation-item">
           <ConversationCard 
             {conversation} 
             on:select={handleConversationSelect}
@@ -168,7 +168,7 @@
   .scrollable-conversation-list {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.5rem;
     min-height: 0;
   }
 
@@ -180,10 +180,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 2rem 1rem;
   }
 
   .conversation-list {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .conversation-item {
+    padding: 0 0.25rem;
   }
 
   .sentinel {

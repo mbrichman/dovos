@@ -85,6 +85,7 @@
         <!-- Search Section -->
         <div class="search-header">
           <SearchBox on:search={handleSearch} />
+          <button class="new-button">New</button>
         </div>
         
         <!-- Error Message -->
@@ -170,7 +171,8 @@
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background-color: #f9fafb;
+    background-color: #fafafa;
+    color: #18181b;
   }
   
   .app-container {
@@ -181,8 +183,8 @@
   }
   
   .app-header {
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
+    background: #fafafa;
+    border-bottom: 1px solid #e4e4e7;
     padding: 1rem 2rem;
     flex-shrink: 0;
   }
@@ -195,9 +197,9 @@
   }
   
   .left-pane {
-    width: 350px;
+    width: 320px;
     background: white;
-    border-right: 1px solid #e5e7eb;
+    border-right: 1px solid #e4e4e7;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -205,10 +207,16 @@
   }
   
   .search-header {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e4e4e7;
+    background: rgba(250, 250, 250, 0.8);
+    backdrop-filter: blur(8px);
     flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 0.5rem;
   }
   
   .conversations-container {
@@ -218,10 +226,27 @@
     flex-direction: column;
   }
   
+  .new-button {
+    padding: 0.5rem 0.75rem;
+    background: #6366f1;
+    border: none;
+    border-radius: 0.75rem;
+    color: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  
+  .new-button:hover {
+    background: #5856eb;
+  }
+  
   .pane-header {
     padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    border-bottom: 1px solid #e4e4e7;
+    background: #fafafa;
     flex-shrink: 0;
   }
   
@@ -229,13 +254,13 @@
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #374151;
+    color: #18181b;
   }
   
   .search-results-header {
     padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    border-bottom: 1px solid #e4e4e7;
+    background: #fafafa;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -246,7 +271,7 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: #374151;
+    color: #18181b;
   }
   
   .clear-search-btn {

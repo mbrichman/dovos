@@ -36,7 +36,7 @@
   <div class="search-input-container">
     <input
       type="text"
-      placeholder="Search conversations..."
+      placeholder="Search conversations"
       bind:value={query}
       on:input={handleInput}
       class="search-input"
@@ -75,17 +75,18 @@
   
   .search-input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d4d4d8;
+    border-radius: 0.75rem;
     font-size: 0.875rem;
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    background: white;
   }
   
   .search-input:focus {
     border-color: #6366f1;
-    box-shadow: 0 0 0 1px #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
   }
   
   .clear-button {
