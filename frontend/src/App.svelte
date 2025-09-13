@@ -94,7 +94,6 @@
         <!-- Search Section -->
         <div class="search-header">
           <SearchBox on:search={handleSearch} />
-          <button class="new-button">New</button>
         </div>
         
         <!-- Error Message -->
@@ -232,8 +231,6 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    display: flex;
-    gap: 0.5rem;
   }
   
   .conversations-container {
@@ -243,22 +240,6 @@
     flex-direction: column;
   }
   
-  .new-button {
-    padding: 0.5rem 0.75rem;
-    background: #6366f1;
-    border: none;
-    border-radius: 0.75rem;
-    color: white;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  
-  .new-button:hover {
-    background: #5856eb;
-  }
   
   .pane-header {
     padding: 1rem;
