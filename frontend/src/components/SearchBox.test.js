@@ -6,7 +6,7 @@ describe('SearchBox', () => {
   test('renders search input with placeholder', () => {
     render(SearchBox)
     
-    const input = screen.getByPlaceholderText('Search conversations...')
+    const input = screen.getByPlaceholderText('Search conversations')
     expect(input).toBeInTheDocument()
   })
   
@@ -14,7 +14,7 @@ describe('SearchBox', () => {
     const user = userEvent.setup()
     render(SearchBox)
     
-    const input = screen.getByPlaceholderText('Search conversations...')
+    const input = screen.getByPlaceholderText('Search conversations')
     
     // Start typing
     await user.type(input, 'test query')
@@ -30,7 +30,7 @@ describe('SearchBox', () => {
     const { component } = render(SearchBox)
     component.$on('search', mockSearchHandler)
     
-    const input = screen.getByPlaceholderText('Search conversations...')
+    const input = screen.getByPlaceholderText('Search conversations')
     
     await user.type(input, 'test query')
     
@@ -48,7 +48,7 @@ describe('SearchBox', () => {
     const user = userEvent.setup()
     render(SearchBox)
     
-    const input = screen.getByPlaceholderText('Search conversations...')
+    const input = screen.getByPlaceholderText('Search conversations')
     
     // Type something first
     await user.type(input, 'test')
@@ -68,7 +68,7 @@ describe('SearchBox', () => {
     const { component } = render(SearchBox)
     component.$on('search', mockSearchHandler)
     
-    const input = screen.getByPlaceholderText('Search conversations...')
+    const input = screen.getByPlaceholderText('Search conversations')
     
     // Type and then clear
     await user.type(input, 'test')

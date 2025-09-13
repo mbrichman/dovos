@@ -65,7 +65,7 @@ describe('ConversationCard', () => {
     render(ConversationCard, { conversation: mockConversation })
     
     const card = screen.getByRole('button')
-    expect(card).toHaveClass('conversation-card')
+    expect(card).toHaveClass('thread')
   })
 
   test('truncates long titles appropriately', () => {
