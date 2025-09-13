@@ -494,3 +494,74 @@ Hello! How can I help you today?"""
         result = extract_preview_content(document, max_length=100)
         expected = "Hello there Hello! How can I help you today?"
         assert result == expected
+
+
+class TestSearchAPI:
+    """Test cases for the search API endpoint."""
+    
+    @patch('models.search_model.SearchModel.search_conversations')
+    def test_api_search_returns_cleaned_previews(self, mock_search, client):
+        """Test that search API returns cleaned preview content instead of raw documents."""
+        # Mock search results with raw document content
+        mock_search.return_value = {
+            'documents': [['**You said** *(on 2025-09-05 00:16:52)*:\n\nhow do I enable ssh and vnc on pi5\n\n**Claude said** *(on 2025-09-05 00:17:03)*:\n\nTo enable SSH and VNC on your Raspberry Pi 5, you have several options...']],
+            'metadatas': [[{
+                'id': 'conv-123',
+                'title': 'SSH and VNC on Raspberry Pi 5',
+                'source': 'claude',
+                'earliest_ts': '2025-09-05T00:17:03Z'
+            }]],
+            'distances': [[0.5]]
+        }
+        
+        response = client.get('/api/search?q=ssh')
+        
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        
+        # Check response structure
+        assert 'query' in data
+        assert 'results' in data
+        assert data['query'] == 'ssh'
+        assert len(data['results']) == 1
+        
+        result = data['results'][0]
+        
+        # Check that content is cleaned (no formatting markers)
+        assert 'You said' not in result['content']
+        assert 'Claude said' not in result['content']
+        assert '*(on 2025-09-05' not in result['content']
+        
+        # Check that actual content is preserved
+        assert 'how do I enable ssh and vnc on pi5' in result['content']
+        assert 'To enable SSH and VNC on your Raspberry Pi 5' in result['content']
+        
+        # Check other fields
+        assert result['title'] == 'SSH and VNC on Raspberry Pi 5'
+        assert result['date'] == '2025-09-05T00:17:03Z'
+        assert result['metadata']['source'] == 'claude'
+    
+    @patch('models.search_model.SearchModel.search_conversations')
+    def test_api_search_empty_results(self, mock_search, client):
+        """Test search API with no results."""
+        mock_search.return_value = {
+            'documents': [[]],
+            'metadatas': [[]],
+            'distances': [[]]
+        }
+        
+        response = client.get('/api/search?q=nonexistent')
+        
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        
+        assert data['query'] == 'nonexistent'
+        assert data['results'] == []
+    
+    def test_api_search_missing_query(self, client):
+        """Test search API with missing query parameter."""
+        response = client.get('/api/search')
+        
+        assert response.status_code == 400
+        data = json.loads(response.data)
+        assert 'error' in data

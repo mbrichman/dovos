@@ -595,11 +595,14 @@ class UploadController:
         results = []
         if raw_results["documents"][0]:
             for doc, meta in zip(raw_results["documents"][0], raw_results["metadatas"][0]):
+                # Use cleaned preview content instead of raw document
+                cleaned_preview = extract_preview_content(doc, max_length=300)
+                
                 results.append(
                     {
                         "title": meta.get("title", "Untitled"),
                         "date": meta.get("earliest_ts", "Unknown"),
-                        "content": doc,
+                        "content": cleaned_preview,
                         "metadata": meta,
                     }
                 )
