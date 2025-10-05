@@ -199,7 +199,7 @@ class ConversationController:
         # Format the conversation for detailed view
         conversation, messages, assistant_name = self.view_model.format_conversation_view(document, metadata)
 
-        return render_template("view.html", conversation=conversation, messages=messages, assistant_name=assistant_name)
+        return render_template("view.html", conversation=conversation, messages=messages, assistant_name=assistant_name, doc_id=doc_id)
     
     def export_conversation(self, doc_id):
         """Export a conversation as markdown"""
@@ -266,6 +266,113 @@ class ConversationController:
         response.headers["Content-Disposition"] = f"attachment; filename={filename}"
 
         return response
+    
+    def export_to_openwebui(self, doc_id):
+        """Export a conversation to OpenWebUI format and send it to the server"""
+        import requests
+        import json
+        import config
+        
+        # Import the converter functions
+        from claude_to_openwebui_converter import convert_conversation, parse_timestamp
+        
+        # Get document by ID
+        doc_result = self.search_model.get_conversation_by_id(doc_id)
+        
+        # Handle fallback for old-style IDs
+        if not doc_result or not doc_result.get("documents"):
+            if doc_id.startswith(("chat-", "docx-")):
+                try:
+                    idx = int(doc_id.split("-")[1])
+                    all_docs = self.search_model.get_all_conversations(
+                        include=["documents", "metadatas"], limit=9999
+                    )
+                    
+                    if (
+                        all_docs
+                        and all_docs.get("documents")
+                        and idx < len(all_docs["documents"])
+                    ):
+                        doc_result = {
+                            "documents": [all_docs["documents"][idx]],
+                            "metadatas": [
+                                all_docs["metadatas"][idx]
+                                if idx < len(all_docs.get("metadatas", []))
+                                else {}
+                            ],
+                        }
+                    else:
+                        return jsonify({"error": "Conversation not found"}), 404
+                except (ValueError, IndexError):
+                    return jsonify({"error": "Invalid conversation ID"}), 404
+            else:
+                return jsonify({"error": "Conversation not found"}), 404
+        
+        document = doc_result["documents"][0]
+        metadata = doc_result["metadatas"][0] if doc_result.get("metadatas") else {}
+        
+        # Parse the conversation into messages
+        messages = self._parse_conversation_messages(document, metadata)
+        
+        # Build a conversation structure compatible with the converter
+        source = metadata.get("source", "").lower()
+        
+        # Create chat_messages in the format expected by the converter
+        chat_messages = []
+        for msg in messages:
+            chat_msg = {
+                "sender": msg["role"],
+                "text": msg["content"],
+                "created_at": msg.get("timestamp") or metadata.get("earliest_ts", "")
+            }
+            chat_messages.append(chat_msg)
+        
+        # Build conversation object
+        claude_conv = {
+            "name": metadata.get("title", "Untitled Conversation"),
+            "created_at": metadata.get("earliest_ts", ""),
+            "updated_at": metadata.get("latest_ts") or metadata.get("earliest_ts", ""),
+            "chat_messages": chat_messages
+        }
+        
+        # Convert to OpenWebUI format
+        try:
+            openwebui_conv = convert_conversation(claude_conv)
+        except Exception as e:
+            return jsonify({"error": f"Conversion failed: {str(e)}"}), 500
+        
+        # Send to OpenWebUI server using config values
+        headers = {
+            "Authorization": f"Bearer {config.OPENWEBUI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            # OpenWebUI's chat creation endpoint
+            response = requests.post(
+                f"{config.OPENWEBUI_URL}/api/v1/chats/new",
+                headers=headers,
+                json=openwebui_conv,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                return jsonify({
+                    "success": True,
+                    "message": "Conversation exported to OpenWebUI successfully"
+                }), 200
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": f"OpenWebUI API error: {response.status_code}",
+                    "detail": response.text
+                }), response.status_code
+                
+        except requests.exceptions.RequestException as e:
+            return jsonify({
+                "success": False,
+                "error": f"Failed to connect to OpenWebUI: {str(e)}"
+            }), 500
     
     def stats(self):
         """Display statistics about conversations"""

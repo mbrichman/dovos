@@ -40,6 +40,10 @@ def init_routes(app, archive):
     def stats():
         return conversation_controller.stats()
 
+    @app.route("/api/stats")
+    def api_stats():
+        return conversation_controller.api_stats()
+
     @app.route("/conversations", methods=["GET", "POST"])
     @app.route("/conversations/<int:page>", methods=["GET", "POST"])
     def conversations(page=1):
@@ -55,6 +59,11 @@ def init_routes(app, archive):
     def export_conversation(doc_id):
         """Export a conversation as markdown"""
         return conversation_controller.export_conversation(doc_id)
+    
+    @app.route("/export_to_openwebui/<doc_id>", methods=["POST"])
+    def export_to_openwebui(doc_id):
+        """Export a conversation to OpenWebUI"""
+        return conversation_controller.export_to_openwebui(doc_id)
 
     @app.route("/clear_db", methods=["POST"])
     def clear_database():

@@ -6,3 +6,4 @@ chromadb
 markdown
 python-docx
 nltk
+requests
