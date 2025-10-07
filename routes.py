@@ -1,11 +1,12 @@
 import re
 from datetime import datetime, timedelta
 
-from flask import render_template, request, Response
+from flask import render_template, request, Response, jsonify
 import markdown
 
 from forms import SearchForm
 from controllers.conversation_controller import ConversationController, UploadController
+from config import COLLECTION_NAME, DEFAULT_EMBEDDING_MODEL, SECRET_KEY
 
 
 def init_routes(app, archive):
@@ -65,7 +66,73 @@ def init_routes(app, archive):
         """Export a conversation to OpenWebUI"""
         return conversation_controller.export_to_openwebui(doc_id)
 
+    @app.route("/api/rag/query", methods=["POST"])
+    def api_rag_query():
+        """RAG query endpoint for OpenWebUI integration"""
+        try:
+            data = request.get_json()
+            query_text = data.get('query', '')
+            n_results = data.get('n_results', 5)
+            search_type = data.get('search_type', 'semantic')
+            
+            if not query_text:
+                return jsonify({"error": "Query text is required"}), 400
+                
+            # Query the RAG service
+            search_results = conversation_controller.search_model.conversation_model.search(
+                query_text=query_text,
+                n_results=n_results,
+                keyword_search=(search_type == "keyword")
+            )
+            
+            # Format results for OpenWebUI
+            formatted_results = []
+            if search_results.get("documents") and search_results["documents"][0]:
+                for i, (doc, meta, dist) in enumerate(zip(
+                    search_results["documents"][0], 
+                    search_results["metadatas"][0], 
+                    search_results["distances"][0]
+                )):
+                    # Extract a preview of the content
+                    preview = doc[:500] + "..." if len(doc) > 500 else doc
+                    
+                    formatted_results.append({
+                        "id": meta.get("id", f"result-{i}"),
+                        "title": meta.get("title", "Untitled"),
+                        "content": doc,
+                        "preview": preview,
+                        "source": meta.get("source", "unknown"),
+                        "distance": dist,
+                        "relevance": 1.0 - dist,  # Convert distance to relevance score
+                        "metadata": meta
+                    })
+            
+            return jsonify({
+                "query": query_text,
+                "search_type": search_type,
+                "results": formatted_results
+            })
+            
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/clear_db", methods=["POST"])
     def clear_database():
         """Clear the entire database"""
         return conversation_controller.clear_database()
+    
+    @app.route("/api/rag/health", methods=["GET"])
+    def api_rag_health():
+        """Health check endpoint for RAG service"""
+        try:
+            # Get basic stats from the conversation model
+            doc_count = conversation_controller.search_model.conversation_model.get_count()
+            
+            return jsonify({
+                "status": "healthy",
+                "collection_name": COLLECTION_NAME,
+                "document_count": doc_count,
+                "embedding_model": DEFAULT_EMBEDDING_MODEL
+            })
+        except Exception as e:
+            return jsonify({"status": "unhealthy", "error": str(e)}), 500

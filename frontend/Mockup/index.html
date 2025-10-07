@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DovOS — Conversation Browser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header__inner">
+        <h1 class="app-title">DovOS — Conversation Browser</h1>
+        <span class="badge badge--indigo">Sovereign</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar__controls">
+          <div class="search">
+            <input class="search__input" placeholder="Search conversations" />
+            <button class="btn btn--primary">New</button>
+          </div>
+          <div class="chips">
+            <button class="chip chip--active">All</button>
+            <button class="chip">Unread</button>
+            <button class="chip">Starred</button>
+          </div>
+        </div>
+
+        <ul class="threadlist">
+          <li>
+            <button class="thread thread--active">
+              <div class="thread__title">
+                <h3 class="thread__name">SSH and VNC on Raspberry Pi 5</h3>
+                <span class="thread__date">Sep 4</span>
+              </div>
+              <p class="thread__summary">**You said**: how do I enable SSH headless. **AI said**: create ssh + wpa_supplicant files.</p>
+              <div class="thread__meta">
+                <span class="badge badge--amber">Claude</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="thread">
+              <div class="thread__title">
+                <h3 class="thread__name">DovOS Sovereign AI System Plan</h3>
+                <span class="thread__date">Sep 3</span>
+              </div>
+              <p class="thread__summary">Blueprint of corpus ingest, eval harness, retrieval QA…</p>
+              <div class="thread__meta">
+                <span class="badge badge--indigo">ChatGPT</span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main panel -->
+      <section class="main">
+        <!-- Conversation header -->
+        <div class="main__header">
+          <div class="main__titles">
+            <h2 class="main__name">SSH and VNC on Raspberry Pi 5</h2>
+            <p class="main__sub">Last updated Sep 4</p>
+          </div>
+          <div class="main__actions">
+            <span class="badge badge--amber">Claude</span>
+            <button class="btn">Copy</button>
+            <button class="btn">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Messages -->
+<div class="messages">
+  <!-- User message first -->
+  <article class="msg msg--me">
+    <div class="bubble">
+      <header class="bubble__hdr">
+        <div class="bubble__meta">
+          <strong>You</strong>
+          <span class="bubble__time">3h ago</span>
+        </div>
+        <button class="btn btn--xs">Copy</button>
+      </header>
+      <p class="bubble__text">How do I enable SSH without monitor/keyboard?</p>
+    </div>
+    <div class="avatar">Y</div>
+  </article>
+
+  <!-- AI response second -->
+  <article class="msg msg--ai">
+    <div class="avatar">A</div>
+    <div class="ai">
+      <div class="ai__meta">
+        <strong>AI</strong>
+        <span class="ai__time">2h ago</span>
+      </div>
+      <div class="ai__content">
+        <h3>Enable SSH + Wi-Fi headless</h3>
+        <p>On the boot volume of your microSD card:</p>
+        <ol>
+          <li>Add an empty file named <code>ssh</code></li>
+          <li>Add <code>wpa_supplicant.conf</code> with your Wi-Fi credentials:</li>
+        </ol>
+        <pre><code>country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+  ssid="YourSSID"
+  psk="YourPassword"
+}</code></pre>
+        <blockquote>Tip: stick to 2.4 GHz networks for first boot.</blockquote>
+      </div>
+      <div class="ai__actions">
+        <button class="btn btn--xs">Copy</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+        <!-- Composer -->
+        <div class="composer">
+          <textarea class="composer__input" placeholder="Type a message (mock)"></textarea>
+          <button class="btn btn--primary">Send</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

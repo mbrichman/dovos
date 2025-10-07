@@ -97,6 +97,24 @@
         color: #495057;
     }
     
+    /* Export button styles */
+    .export-btn {
+        min-width: 80px;
+    }
+    
+    /* Notification styles */
+    #exportNotification {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        color: white;
+        border-radius: 4px;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
     /* Responsive improvements */
     @media (max-width: 768px) {
         .conversation-header {
@@ -250,7 +268,13 @@
                                 <span class="badge bg-info ms-2">Score: {{ conversation.meta.relevance_display }}</span>
                             {% endif %}
                         </div>
-                        <a href="/view/{{ conversation.id }}" class="btn btn-sm btn-outline-primary">View Conversation</a>
+                        <div>
+                            <a href="/view/{{ conversation.id }}" class="btn btn-sm btn-outline-primary">View</a>
+                            <button type="button" class="btn btn-sm btn-outline-success export-btn ms-1" data-conversation-id="{{ conversation.id }}" onclick="exportToOpenWebUI('{{ conversation.id }}', this); return false;">
+                                <span class="button-text">Export</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -410,5 +434,98 @@
     document.addEventListener('DOMContentLoaded', function() {
         new ConversationFilters();
     });
+    
+    // Export to OpenWebUI function
+    async function exportToOpenWebUI(conversationId, button) {
+        const buttonText = button.querySelector('.button-text');
+        const spinner = button.querySelector('.spinner-border');
+        
+        // Store original button text to restore later
+        const originalText = buttonText.textContent;
+        
+        // Disable button and show spinner
+        button.disabled = true;
+        buttonText.textContent = 'Exporting...';
+        spinner.classList.remove('d-none');
+        
+        try {
+            const response = await fetch(`/export_to_openwebui/${conversationId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                // Show success message
+                showNotification('Successfully exported to OpenWebUI!', 'success');
+                buttonText.textContent = 'Exported!';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    buttonText.textContent = originalText;
+                    spinner.classList.add('d-none');
+                }, 2000);
+            } else {
+                // Show error message
+                const errorMsg = data.error || 'Failed to export to OpenWebUI';
+                showNotification(errorMsg, 'error');
+                buttonText.textContent = 'Export Failed';
+                
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    buttonText.textContent = originalText;
+                    spinner.classList.add('d-none');
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Export error:', error);
+            showNotification('Network error: Could not connect to server', 'error');
+            buttonText.textContent = 'Export Failed';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.disabled = false;
+                buttonText.textContent = originalText;
+                spinner.classList.add('d-none');
+            }, 3000);
+        }
+    }
+    
+    // Helper function to show notifications
+    function showNotification(message, type = 'success') {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById('exportNotification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'exportNotification';
+            notification.style.cssText = `
+                display: none;
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                color: white;
+                border-radius: 4px;
+                z-index: 1000;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(notification);
+        }
+        
+        // Set message and type
+        notification.textContent = message;
+        notification.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+        notification.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
 </script>
 {% endblock %}

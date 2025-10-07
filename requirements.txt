@@ -1,4 +1,5 @@
 flask
+flask-cors
 flask-wtf
 wtforms
 sentence-transformers
@@ -7,3 +8,4 @@ markdown
 python-docx
 nltk
 requests
+uuid

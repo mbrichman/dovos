@@ -382,14 +382,19 @@ class ChatArchive:
 
             embeddings = embedder.encode(batch_docs, show_progress_bar=False)
 
-            self.add_documents(
-                documents=batch_docs,
-                embeddings=embeddings.tolist(),
-                metadatas=batch_metas,
-                ids=batch_ids,
-            )
-
-            total_indexed += len(batch_docs)
+            try:
+                self.add_documents(
+                    documents=batch_docs,
+                    embeddings=embeddings.tolist(),
+                    metadatas=batch_metas,
+                    ids=batch_ids,
+                )
+                total_indexed += len(batch_docs)
+                print(f"Indexed batch {i//batch_size + 1}: {len(batch_docs)} documents")
+            except Exception as e:
+                print(f"Error indexing batch {i//batch_size + 1}: {e}")
+                # Continue with remaining batches rather than failing completely
+                continue
 
         message = f"Successfully indexed {total_indexed} documents"
         if skipped_duplicates > 0:

@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import SearchBox from './components/SearchBox.svelte'
+  import FilterTokens from './components/FilterTokens.svelte'
   import ConversationList from './components/ConversationList.svelte'
   import ScrollableConversationList from './components/ScrollableConversationList.svelte'
   import MessageView from './components/MessageView.svelte'
@@ -14,6 +15,13 @@
   let fullConversation = null
   let loadingConversation = false
   let errorMessage = ''
+  
+  // Filter state
+  let filters = {
+    source: 'all',
+    date: 'all', 
+    sort: 'newest'
+  }
   
   // Handle search from SearchBox component
   async function handleSearch(event) {
@@ -76,6 +84,13 @@
     fullConversation = null
     errorMessage = ''
   }
+  
+  // Handle filter changes
+  function handleFiltersChanged(event) {
+    filters = event.detail
+    console.log('🔧 Filters changed:', filters)
+    // TODO: Apply filters to conversations list
+  }
 </script>
 
 <main>
@@ -94,6 +109,7 @@
         <!-- Search Section -->
         <div class="search-header">
           <SearchBox on:search={handleSearch} />
+          <FilterTokens on:filtersChanged={handleFiltersChanged} />
         </div>
         
         <!-- Error Message -->
@@ -213,7 +229,7 @@
   }
   
   .left-pane {
-    width: 320px;
+    width: 400px;
     background: white;
     border-right: 1px solid #e4e4e7;
     display: flex;
@@ -231,6 +247,9 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
   
   .conversations-container {

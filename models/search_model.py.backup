@@ -1,0 +1,240 @@
+from models import BaseModel
+from models.conversation_model import ConversationModel
+from models.fts_model import FTSModel
+from models.search_utils import expand_query_with_stems
+
+
+class SearchModel(BaseModel):
+    """Model for handling search operations"""
+    
+    def __init__(self):
+        self.conversation_model = ConversationModel()
+        self.fts_model = FTSModel()
+        self.initialize()
+    
+    def initialize(self):
+        """Initialize the search model"""
+        pass
+    
+    def search_conversations(self, query_text, n_results=5, date_range=None, keyword_search=False, search_type="auto"):
+        """Search conversations using the appropriate search method"""
+        if search_type == "fts" or search_type == "keyword":
+            return self.fts_search_conversations(query_text, n_results)
+        elif search_type == "semantic":
+            return self.conversation_model.search(
+                query_text=query_text,
+                n_results=n_results,
+                date_range=date_range,
+                keyword_search=False
+            )
+        else:  # auto - choose best method
+            # For short queries or exact phrases, use FTS
+            if len(query_text.split()) <= 3 or '"' in query_text:
+                return self.fts_search_conversations(query_text, n_results)
+            else:
+                # For longer queries, use semantic search
+                return self.conversation_model.search(
+                    query_text=query_text,
+                    n_results=n_results,
+                    date_range=date_range,
+                    keyword_search=keyword_search
+                )
+    
+    def fts_search_conversations(self, query_text, n_results=5, source_filter=None):
+        """Search conversations using FTS5 for fast keyword search"""
+        # Get FTS results
+        fts_results = self.fts_model.search(query_text, limit=n_results, source_filter=source_filter)
+        
+        if not fts_results:
+            return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+        
+        # Convert FTS results to ChromaDB format for consistency
+        documents = []
+        metadatas = []
+        distances = []
+        
+        for result in fts_results:
+            documents.append(result['content'])
+            
+            # Build metadata similar to ChromaDB format
+            meta = {
+                'title': result['title'],
+                'source': result['source'],
+                'id': result['doc_id'],
+                'conversation_id': result.get('conversation_id', ''),
+                'search_type': 'fts',
+                'fts_rank': result['rank'],
+                'title_snippet': result.get('title_snippet', ''),
+                'content_snippet': result.get('content_snippet', ''),
+                'relevance_score': abs(result['rank']),  # Convert BM25 score to positive
+                'relevance_display': f"{abs(result['rank']):.2f}"
+            }
+            
+            # Add date info if available
+            if result['date_str'] and result['date_str'] != 'Unknown':
+                meta['earliest_ts'] = result['date_str']
+                meta['latest_ts'] = result['date_str']
+            
+            metadatas.append(meta)
+            
+            # Convert BM25 score to distance-like metric (lower = better)
+            # BM25 scores are typically negative, so we use abs and invert
+            distance = 1.0 / (abs(result['rank']) + 1) if result['rank'] != 0 else 0.0
+            distances.append(distance)
+        
+        return {
+            "documents": [documents], 
+            "metadatas": [metadatas], 
+            "distances": [distances]
+        }
+    
+    def hybrid_search_conversations(self, query_text, n_results=5, fts_weight=0.6):
+        """Combine FTS and semantic search results"""
+        # Get results from both methods
+        fts_results = self.fts_search_conversations(query_text, n_results)
+        semantic_results = self.conversation_model.search(query_text, n_results, keyword_search=False)
+        
+        # Combine and rank results (this is a simple implementation)
+        # In a production system, you'd want more sophisticated result fusion
+        combined_docs = []
+        combined_metas = []
+        combined_distances = []
+        
+        # Add FTS results with weight
+        if fts_results.get("documents") and fts_results["documents"][0]:
+            for i, doc in enumerate(fts_results["documents"][0]):
+                meta = fts_results["metadatas"][0][i].copy()
+                meta['search_type'] = 'hybrid_fts'
+                combined_docs.append(doc)
+                combined_metas.append(meta)
+                combined_distances.append(fts_results["distances"][0][i] * fts_weight)
+        
+        # Add semantic results with weight  
+        if semantic_results.get("documents") and semantic_results["documents"][0]:
+            for i, doc in enumerate(semantic_results["documents"][0]):
+                meta = semantic_results["metadatas"][0][i].copy()
+                meta['search_type'] = 'hybrid_semantic'
+                combined_docs.append(doc)
+                combined_metas.append(meta)
+                combined_distances.append(semantic_results["distances"][0][i] * (1 - fts_weight))
+        
+        # Sort by combined distance and take top results
+        combined = list(zip(combined_docs, combined_metas, combined_distances))
+        combined.sort(key=lambda x: x[2])  # Sort by distance (lower = better)
+        combined = combined[:n_results]
+        
+        if not combined:
+            return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+        
+        docs, metas, dists = zip(*combined)
+        return {
+            "documents": [list(docs)],
+            "metadatas": [list(metas)], 
+            "distances": [list(dists)]
+        }
+    
+    def get_all_conversations(self, include=None, limit=None):
+        """Get all conversations"""
+        return self.conversation_model.get_documents(include=include, limit=limit)
+    
+    def get_conversation_by_id(self, doc_id):
+        """Get a specific conversation by ID"""
+        # Try multiple lookup methods in order of preference
+        
+        # 1. Try to find the document by its actual ChromaDB ID
+        try:
+            doc_result = self.conversation_model.get_documents(
+                where={"id": doc_id}, include=["documents", "metadatas"]
+            )
+            
+            if doc_result and doc_result.get("documents") and doc_result["documents"]:
+                return doc_result
+                
+        except Exception as e:
+            print(f"Error finding document by metadata id {doc_id}: {e}")
+        
+        # 2. Try to find the document by conversation_id field
+        try:
+            doc_result = self.conversation_model.get_documents(
+                where={"conversation_id": doc_id}, include=["documents", "metadatas"]
+            )
+            
+            if doc_result and doc_result.get("documents") and doc_result["documents"]:
+                return doc_result
+                
+        except Exception as e:
+            print(f"Error finding document by conversation_id {doc_id}: {e}")
+        
+        # 3. Try to find the document by its ChromaDB ID (exact match)
+        try:
+            # Get all documents with their IDs
+            all_docs = self.conversation_model.collection.get(include=["documents", "metadatas", "ids"])
+            
+            if all_docs.get("ids") and doc_id in all_docs["ids"]:
+                # Found the document by ID
+                idx = all_docs["ids"].index(doc_id)
+                return {
+                    "documents": [all_docs["documents"][idx]],
+                    "metadatas": [all_docs["metadatas"][idx]],
+                    "ids": [doc_id]
+                }
+        except Exception as e:
+            print(f"Error finding document by ChromaDB id {doc_id}: {e}")
+            
+        # 4. Try fallback positional lookup for legacy IDs
+        if doc_id.startswith(("chat-", "docx-")):
+            try:
+                # Extract index from ID like "chat-123" or "docx-456"
+                idx_str = doc_id.split("-")[-1]
+                if idx_str.isdigit():
+                    idx = int(idx_str)
+                    # Get all documents and find the one with the matching index
+                    all_docs = self.conversation_model.get_documents(
+                        include=["documents", "metadatas", "ids"], limit=9999
+                    )
+                    
+                    # Check if we have enough documents
+                    if all_docs and all_docs.get("documents") and idx < len(all_docs["documents"]):
+                        return {
+                            "documents": [all_docs["documents"][idx]],
+                            "metadatas": [all_docs["metadatas"][idx]] if idx < len(all_docs.get("metadatas", [])) else [{}],
+                            "ids": [all_docs["ids"][idx]] if idx < len(all_docs.get("ids", [])) else [f"fallback-{idx}"]
+                        }
+            except (ValueError, IndexError) as e:
+                print(f"Error in fallback lookup for {doc_id}: {e}")
+        
+        return None
+    
+    def get_statistics(self):
+        """Get statistics about the conversations"""
+        # Get basic stats
+        doc_count = self.conversation_model.get_count()
+
+        # Get all metadata to analyze
+        all_meta = self.conversation_model.get_documents(include=["metadatas"], limit=9999)["metadatas"]
+
+        # Count by source
+        sources = {}
+        for meta in all_meta:
+            source = meta.get("source", "unknown")
+            sources[source] = sources.get(source, 0) + 1
+
+        # Get date range
+        dates = [meta.get("earliest_ts") for meta in all_meta if meta.get("earliest_ts")]
+        date_range = None
+        if dates:
+            dates.sort()
+            date_range = {"earliest": dates[0], "latest": dates[-1]}
+
+        # Count by chunks
+        chunked = sum(1 for meta in all_meta if meta.get("is_chunk", False))
+
+        stats_data = {
+            "total": doc_count,
+            "sources": sources,
+            "date_range": date_range,
+            "chunked": chunked,
+            "full": doc_count - chunked,
+        }
+        
+        return stats_data

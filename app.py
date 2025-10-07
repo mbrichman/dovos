@@ -1,22 +1,35 @@
 from flask import Flask
 from flask_cors import CORS
 
-from config import SECRET_KEY
-from models.conversation_model import ConversationModel
+from config import SECRET_KEY, USE_PG_SINGLE_STORE
 from routes import init_routes
 
-# Create global archive instance
-archive = ConversationModel()
+def create_app():
+    """Application factory pattern for better testing and configuration"""
+    app = Flask(__name__)
+    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["USE_PG_SINGLE_STORE"] = USE_PG_SINGLE_STORE
+    
+    # Enable CORS for all routes
+    CORS(app)
+    
+    # Initialize data layer based on feature flag
+    if app.config["USE_PG_SINGLE_STORE"]:
+        print("🚀 Using PostgreSQL single-store architecture")
+        # TODO: Initialize Postgres repositories and SearchService
+        archive = None  # Placeholder - will implement in next steps
+    else:
+        print("📚 Using legacy ChromaDB + SQLite architecture")
+        from models.conversation_model import ConversationModel
+        archive = ConversationModel()
+    
+    # Initialize routes
+    init_routes(app, archive)
+    
+    return app
 
-# === Flask App ===
-app = Flask(__name__)
-app.config["SECRET_KEY"] = SECRET_KEY
-
-# Enable CORS for all routes
-CORS(app)
-
-# Initialize routes
-init_routes(app, archive)
+# Create the app instance
+app = create_app()
 
 # === Main ===
 if __name__ == "__main__":
