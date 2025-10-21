@@ -1,5 +1,9 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # === CONFIG ===
 COLLECTION_NAME = "chat_history"
@@ -8,7 +12,7 @@ DEFAULT_EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 SECRET_KEY = "your-secret-key-change-this-in-production"
 
 # Feature Flags
-USE_PG_SINGLE_STORE = os.getenv("USE_PG_SINGLE_STORE", "false").lower() in ("true", "1", "yes")
+USE_PG_SINGLE_STORE = os.getenv("USE_POSTGRES", "false").lower() in ("true", "1", "yes")
 
 # PostgreSQL Configuration (for new single-store architecture)
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://user:pass@localhost:5432/dovos_dev")
