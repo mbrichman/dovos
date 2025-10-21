@@ -186,6 +186,9 @@ def validate_all_golden_responses():
     Validate all golden responses against the API contract.
     This should be run as part of CI to ensure contract compliance.
     """
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from api.contracts.api_contract import APIContract
     
     results = {}
