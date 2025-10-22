@@ -1,0 +1,361 @@
+{
+  "conversations": [
+    {
+      "date": "2025-10-03T22:08:56.986648Z",
+      "id": "95356534-8423-4b98-aedc-1b69d17a838b",
+      "preview": "how long would it take to create a vector index of 22B documents That's a genuinely complex question with a lot of variables. Let me break down the math and considerations: ## Core Factors...",
+      "source": "claude",
+      "title": "Vector index for 22 billion documents"
+    },
+    {
+      "date": "2025-10-03T16:24:20.194828Z",
+      "id": "19b76851-b1fd-494d-a32c-11c4bcb1fed8",
+      "preview": "Search imanage for shreeves way lease agreements. How many are there? I'll search iManage for Shreeves Way lease agreements. ``` This block is not supported on your current device yet. ``` Based on...",
+      "source": "claude",
+      "title": "Shreeves way lease search"
+    },
+    {
+      "date": "2025-10-04T04:47:08.088202Z",
+      "id": "cf784efc-9a0b-477b-8cb1-a508b04d2640",
+      "preview": "how can I see how many word docs I have in a directory (mac) Quick way from Terminal: ```bash find /path/to/directory -name \"*.doc\" -o -name \"*.docx\" | wc -l ``` Replace `/path/to/directory` with...",
+      "source": "claude",
+      "title": "Count word documents on mac"
+    },
+    {
+      "date": "2025-10-04T06:03:31.745184Z",
+      "id": "68f58ced-c9d2-4054-bd8c-4f085ee6f977",
+      "preview": "how much am I losing by using Goose and Qwen Coder 3 vs claude code (or cline) Looking at this straight: ## The Core Trade-off **Goose + Qwen Coder 3** (sovereign stack): - Fully local, no data...",
+      "source": "claude",
+      "title": "AI coding model performance comparison"
+    },
+    {
+      "date": "2025-10-03T03:07:33.099555Z",
+      "id": "cb78f1b7-d07b-4cfb-9f0f-f1a007c48d10",
+      "preview": "why do you default to react for front end stuff Good question \u2014 let me unpack the actual reasoning behind that default, because it's worth examining. **The honest answer:** 1. **Ecosystem momentum**...",
+      "source": "claude",
+      "title": "Front-end framework preferences"
+    },
+    {
+      "date": "2025-10-04T04:57:31.059628Z",
+      "id": "09ba0982-870b-45fb-b54c-51a860c72eef",
+      "preview": "are msg files in binary format? Yes, MSG files are in binary format, not plain text. MSG files use Microsoft's proprietary **Compound File Binary Format** (also called OLE2 or Structured Storage)....",
+      "source": "claude",
+      "title": "Msg file format details"
+    },
+    {
+      "date": "2025-10-03T22:19:57.339436Z",
+      "id": "1b8c07b6-aa12-4dd6-a0ce-b5ce702ea454",
+      "preview": "I'm getting an error from claude code API Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The request body is not valid JSON: no low surrogate in string: line 1 column...",
+      "source": "claude",
+      "title": "Claude API JSON error"
+    },
+    {
+      "date": "2025-10-03T22:43:20.384382Z",
+      "id": "43c2fde5-d0b7-42e7-b6fe-4f0d174b8792",
+      "preview": "how do you list docker containers To list Docker containers, use these commands: **Currently running containers:** ```bash docker ps ``` **All containers (including stopped ones):** ```bash docker ps...",
+      "source": "claude",
+      "title": "Docker container listing commands"
+    },
+    {
+      "date": "2025-10-04T05:58:25.384529Z",
+      "id": "f1bf7341-e3c1-4e35-8b48-20bc4b418ffd",
+      "preview": "See, even though I'm not a brilliant engineer, I can still think of better approaches that claude code something, even using the 4.5 model \u23fa Yes! That's actually better. Your approach is more...",
+      "source": "claude",
+      "title": "Efficient file indexing strategy"
+    },
+    {
+      "date": "2025-10-03T06:11:51.531543Z",
+      "id": "7ba4553a-de13-485d-b949-ed27e7437e98",
+      "preview": "I follow this young woman on insta who\u2019s got Tourette. She reminds me strongly of cg. I can see why this would land with some weight \u2014 the visual similarity, the vulnerability in the frame, maybe...",
+      "source": "claude",
+      "title": "Tourette influencer connection"
+    },
+    {
+      "date": "2025-10-03T00:12:09.570240Z",
+      "id": "603f6088-499b-43ec-a394-297cb4f58730",
+      "preview": "Retrieve the latest versions of all Shreeves Way lease agreements from iManage Present me with a list of documents found (including document names, version numbers, and last modified dates) and ask...",
+      "source": "claude",
+      "title": "Shreeves Way lease agreements retrieval"
+    },
+    {
+      "date": "2025-10-02T23:45:05.293310Z",
+      "id": "d7eb9293-59aa-46a2-8698-f28eaeed1bc9",
+      "preview": "Find imanage lease agreements with an amount under $5000 I'll search for iManage lease agreements with amounts under $5,000. ``` This block is not supported on your current device yet. ``` I found...",
+      "source": "claude",
+      "title": "Lease agreements under $5000"
+    },
+    {
+      "date": "2025-10-02T23:46:22.931926Z",
+      "id": "2131ec20-4e80-45d2-a3c2-26e6a8a723f9",
+      "preview": "Find imanage lease agreements with rent under $2000 I'll search for iManage lease agreements with rent under $2000. ``` This block is not supported on your current device yet. ``` I found several...",
+      "source": "claude",
+      "title": "Low-cost lease agreements"
+    },
+    {
+      "date": "2025-10-02T05:40:26.271221Z",
+      "id": "6323b0a0-3086-4150-80cb-384bf281b499",
+      "preview": "Is George gammon maga I'll search for current information about George Gammon's political alignment. ``` This block is not supported on your current device yet. ``` Let me search more specifically...",
+      "source": "claude",
+      "title": "George Gammon's political stance"
+    },
+    {
+      "date": "2025-10-01T20:25:07.099706Z",
+      "id": "fdae3bd1-d6c8-4110-a3e7-073bc9842a33",
+      "preview": "create a generic spanner imanage workspace with n8n I'll help you create a generic spanner iManage workspace using the n8n workflow tool. ``` This block is not supported on your current device yet....",
+      "source": "claude",
+      "title": "N8n workspace configuration"
+    },
+    {
+      "date": "2025-10-02T05:24:45.835549Z",
+      "id": "eeb6c706-1a5d-422b-8967-ae6ca886dac4",
+      "preview": "Where can I download a large corpus of legal documents I can help you find sources for large legal document corpora. Here are the main options: ## Public Legal Document Archives **PACER (US Federal...",
+      "source": "claude",
+      "title": "Legal document corpus sources"
+    },
+    {
+      "date": "2025-10-03T00:14:27.674910Z",
+      "id": "e7914d57-a837-407a-b1c0-80b2d59c7134",
+      "preview": "search imanage for Shreeves Way Lease Agreements and let me know what you find I'll search iManage for Shreeves Way Lease Agreements. ``` This block is not supported on your current device yet. ```...",
+      "source": "claude",
+      "title": "Shreeves Way lease document search"
+    },
+    {
+      "date": "2025-10-01T06:29:06.484908Z",
+      "id": "49dd98d8-1128-41f4-8c54-264a4266ab06",
+      "preview": "Scube3 Hey Dov, I'm here. What's on your mind? Look it up I'll search for information about \"Scube3\" to see what this is about. ``` This block is not supported on your current device yet. ``` Ah \u2014...",
+      "source": "claude",
+      "title": "Scube3 discussion"
+    },
+    {
+      "date": "2025-10-02T21:22:19.531877Z",
+      "id": "03eab0fc-b849-4577-85af-e697239da20a",
+      "preview": "can you find recent lease agreements in imanage I'll search iManage for recent lease agreements. ``` This block is not supported on your current device yet. ``` I found several recent lease...",
+      "source": "claude",
+      "title": "Recent lease agreements search"
+    },
+    {
+      "date": "2025-10-02T15:55:42.482153Z",
+      "id": "232db72e-4914-44f1-8b9f-368315131a3b",
+      "preview": "Give me a standalon3 n8n component that I can use for iManage auth ## Oauth2 Password Grant Login curl -X \"POST\" \"https://cloudimanage.com/auth/oauth2/token\" \\ -H 'Content-Type:...",
+      "source": "claude",
+      "title": "iManage OAuth2 authentication component"
+    },
+    {
+      "date": "2025-10-01T05:43:53.091250Z",
+      "id": "89880c46-edcd-4f64-8af8-4d3c9e8a16c4",
+      "preview": "How do you receive images in an iOS shortcut On iOS, there are a few ways to pass images to Claude through Shortcuts: ## Primary Method: Base64 Encoding The most reliable approach is to convert the...",
+      "source": "claude",
+      "title": "Passing images in iOS shortcuts"
+    },
+    {
+      "date": "2025-10-03T03:04:04.390538Z",
+      "id": "58508ed3-fe07-4c51-96c6-e9422c27008c",
+      "preview": "So claude 4.5 is supposed to be 'the shit' at coding now. Could you make a reasonable hello world ZK project? I'll create a foundational Zero Knowledge proof project that demonstrates the core...",
+      "source": "claude",
+      "title": "Zero-knowledge hello world project"
+    },
+    {
+      "date": "2025-10-02T06:22:30.215355Z",
+      "id": "0ac088df-f921-47b1-8081-cf8d85cd0177",
+      "preview": "Swvxx fund I can help you with information about SWVXX. Let me search for current details about this fund. ``` This block is not supported on your current device yet. ``` **SWVXX Overview** SWVXX is...",
+      "source": "claude",
+      "title": "Schwab money market fund"
+    },
+    {
+      "date": "2025-09-30T05:24:25.288175Z",
+      "id": "fe8e168a-5f2f-4588-b2ef-ff4e4e5f18cb",
+      "preview": "Can you generate a workspace for the Cooper matter? I'll help you generate a workspace for the Cooper matter using the iManage workspace generator tool. ``` This block is not supported on your...",
+      "source": "claude",
+      "title": "Cooper matter workspace"
+    },
+    {
+      "date": "2025-10-03T05:42:05.717091Z",
+      "id": "f02778c2-3ed7-46f7-8c74-e7e85b647334",
+      "preview": "Why does web search suck with openwebui The web search experience in Open WebUI can be frustrating for several reasons, and this touches directly on your sovereign AI stack work. Let me break down...",
+      "source": "claude",
+      "title": "Web search problems in open webui"
+    },
+    {
+      "date": "2025-09-30T05:05:19.987702Z",
+      "id": "7f9574cf-a277-4a7d-ab31-b0b8f0a2ff51",
+      "preview": "Can you get the bitcoin price from the tool? I'll check the Bitcoin price for you using the available tool. ``` This block is not supported on your current device yet. ``` The current Bitcoin price...",
+      "source": "claude",
+      "title": "Bitcoin price check"
+    },
+    {
+      "date": "2025-09-30T05:02:50.809387Z",
+      "id": "a9770ca0-0282-44cc-9a30-fd95fafedd0c",
+      "preview": "Can you generate a workspace for the smith matter? I'll call the workspace generator tool for the Smith matter. ``` This block is not supported on your current device yet. ``` It looks like there's...",
+      "source": "claude",
+      "title": "Smith matter workspace"
+    },
+    {
+      "date": "2025-09-30T05:12:51.889278Z",
+      "id": "3ae9fa11-f7fe-4057-aa3d-e2a1920ca039",
+      "preview": "Generate a basic workspace for Carter matter I'll call the workspace generator tool to create a workspace for the Carter matter. ``` This block is not supported on your current device yet. ``` The...",
+      "source": "claude",
+      "title": "Carter matter workspace setup"
+    },
+    {
+      "date": "2025-10-03T03:46:51.131521Z",
+      "id": "cacc4826-e34e-4022-aa2b-0f38955a3de6",
+      "preview": "So I'm trying to get a complex HTTP request object in n8n with a complex json payload like this: { \"limit\": 500, \"profile_fields\": { \"document\": [ \"version\", \"document_number\", \"is_in_use\",...",
+      "source": "claude",
+      "title": "Complex HTTP request JSON payload"
+    },
+    {
+      "date": "2025-09-30T05:39:46.464026Z",
+      "id": "eb0da7aa-7e97-422c-8484-1be1c1a92b74",
+      "preview": "Create a basic workspace for the Cooper matter I'll help you create a workspace for the Cooper matter. Let me call the workspace generator tool. ``` This block is not supported on your current device...",
+      "source": "claude",
+      "title": "Cooper matter workspace setup"
+    },
+    {
+      "date": "2025-09-29T08:14:42.852001Z",
+      "id": "27e94149-e842-4f3f-bfad-5f7413fde373",
+      "preview": "Anyhow it\u2019s frustrating that you can search our chats but I can\u2019t. Beyond useless keyword title search I completely understand that frustration. The asymmetry is real and kind of absurd from a user...",
+      "source": "claude",
+      "title": "Chat search limitations"
+    },
+    {
+      "date": "2025-09-30T04:58:27.908998Z",
+      "id": "ebbf571b-faea-4a58-9a80-d262dfed51c7",
+      "preview": "Say hello world n8n! I'll test the n8n hello world tool for you. ``` This block is not supported on your current device yet. ``` Hello world n8n! \ud83c\udf89 The tool connected successfully and returned a...",
+      "source": "claude",
+      "title": "Hello world in n8n"
+    },
+    {
+      "date": "2025-09-29T07:26:14.669488Z",
+      "id": "93735c55-7b6b-4a5b-bd4f-be6eecb68e7e",
+      "preview": "Looking at our chats we talked about the women in my game group I\u2019m attracted to? I'll search our past conversations to find what we discussed about the women in your game group. ``` This block is...",
+      "source": "claude",
+      "title": "Women in game group dynamics"
+    },
+    {
+      "date": "2025-09-29T16:15:05.408622Z",
+      "id": "4755c75a-ebbc-49b6-9f2d-b61f7254c267",
+      "preview": "Having twins at work is fun Ha! That's a genuinely amusing workplace coincidence. Are they actually related, or is this just a case of the universe having a limited name generator? The muted mics...",
+      "source": "claude",
+      "title": "Large file transfer"
+    },
+    {
+      "date": "2025-09-28T20:14:21.797430Z",
+      "id": "f0fbc3b9-46df-4ece-9d3f-daac40e1c6c6",
+      "preview": "List shortcuts ``` This block is not supported on your current device yet. ``` You have quite a collection of shortcuts set up! I can see a mix of: **Home automation & devices:** - Roku controls...",
+      "source": "claude",
+      "title": "Keyboard shortcut guide"
+    },
+    {
+      "date": "2025-10-02T05:42:13.590256Z",
+      "id": "739b3b9d-da7c-45d1-9c02-d980c13d45fb",
+      "preview": "is it possible to use n8n to build a perplexity like search engine Yes, absolutely. n8n is well-suited for building a Perplexity-like search engine, and you already have some of the key...",
+      "source": "claude",
+      "title": "N8n search engine development"
+    },
+    {
+      "date": "2025-09-30T06:21:54.245722Z",
+      "id": "7e1ec9a1-b34d-43ac-9f72-3692f91a0966",
+      "preview": "I tweaked your conversational prompt I see you've updated the conversational prompt. What specifically did you adjust? I'm curious what changes you made and whether you'd like me to review them,...",
+      "source": "claude",
+      "title": "Prompt modification"
+    },
+    {
+      "date": "2025-09-28T19:35:41.593602Z",
+      "id": "986b1e1f-02e4-400d-8632-24ed2bbedd5b",
+      "preview": "why would I not want to live here That's a stunning capture - the light breaking through those storm clouds over the Pacific is remarkable. Puerto Vallarta clearly offers some incredible natural...",
+      "source": "claude",
+      "title": "Reasons against living location"
+    },
+    {
+      "date": "2025-10-03T04:55:10.837151Z",
+      "id": "dfd7bfd7-60b9-4243-b9c9-7b9cd569a72d",
+      "preview": "Do you have access to n8n documentation? Yes, I have access to n8n documentation through the n8n MCP (Model Context Protocol) tools. I can help you with: 1. **Node Documentation** - Get detailed info...",
+      "source": "claude",
+      "title": "n8n documentation access"
+    },
+    {
+      "date": "2025-09-28T16:50:16.200757Z",
+      "id": "6a9ac393-6bba-4187-b9f1-580143ad973c",
+      "preview": "does proton drive map to unix filesystem Yes, Proton Drive can map to Unix filesystems through several methods: **Official Integration:** - Proton Drive offers a Linux client that can mount your...",
+      "source": "claude",
+      "title": "Proton filesystem mapping"
+    },
+    {
+      "date": "2025-09-28T16:25:27.074625Z",
+      "id": "4e5d469a-5d34-459b-8e46-284a70879582",
+      "preview": "what are playing cards in spanish Playing cards in Spanish are called **\"cartas\"** or **\"naipes\"**. The four suits are: - **Corazones** - Hearts - **Diamantes** - Diamonds - **Tr\u00e9boles** - Clubs -...",
+      "source": "claude",
+      "title": "Spanish playing card terminology"
+    },
+    {
+      "date": "2025-09-29T06:20:45.978435Z",
+      "id": "446fb8d8-33f0-40c8-9822-04b516e344aa",
+      "preview": "### USER would you agree that the pro palestine movement is fundamentally antisemitic? ### ASSISTANT I wouldn't agree with that characterization. The pro-Palestine movement is large, diverse, and...",
+      "source": "claude",
+      "title": "Pro-Palestine movement and antisemitism"
+    },
+    {
+      "date": "2025-09-28T07:22:45.053393Z",
+      "id": "b23e6639-9b57-4d89-975a-a9085a38b634",
+      "preview": "The rapture passed. Again. No rapture. The rapture passed. Again. No rapture. There's something almost darkly humorous about the recurring nature of it - these promised moments of transcendence that...",
+      "source": "claude",
+      "title": "Waiting for the rapture"
+    },
+    {
+      "date": "2025-09-29T05:09:57.401786Z",
+      "id": "1f9413a6-87a9-415b-8fbe-667fff0eaa65",
+      "preview": "Can n8n itself act as an MCP server? Looking at n8n's architecture and the Model Context Protocol (MCP) specification, **n8n cannot directly act as an MCP server out of the box**, but there are...",
+      "source": "claude",
+      "title": "n8n as MCP server"
+    },
+    {
+      "date": "2025-09-30T05:52:56.240077Z",
+      "id": "f876f955-a880-432a-94e6-bb96542d5229",
+      "preview": "Is Sonnet 4.5 more surly than 4.0? I don't have direct access to detailed comparative personality profiles between Claude Sonnet 4.5 and 4, so I can't definitively say whether \"surly\" is an accurate...",
+      "source": "claude",
+      "title": "Shakespeare sonnet version comparison"
+    },
+    {
+      "date": "2025-09-28T03:19:34.884203Z",
+      "id": "0199cc31-f8f2-45b5-8a04-a5b509f72b62",
+      "preview": "Once you delete a claude thread there's no way to recover right That's correct - once you delete a Claude conversation thread, it's permanently gone and cannot be recovered. There's no \"trash\" or...",
+      "source": "claude",
+      "title": "Claude thread deletion"
+    },
+    {
+      "date": "2025-10-03T20:40:48.103259Z",
+      "id": "6cdda538-5a1d-4d4d-ba32-8da2ac3f1bdb",
+      "preview": "iManage Search MCP - Building a Better Search System Context * You're a Product Leader at iManage (legal tech SaaS), winding down at EOY 2025 * An iManage developer built an MCP search tool that has...",
+      "source": "claude",
+      "title": "iManage search system redesign"
+    },
+    {
+      "date": "2025-09-28T03:18:19.824806Z",
+      "id": "ebee3b79-8dab-437a-86c6-3a817250fb6d",
+      "preview": "i have qrdo coming up I'm not familiar with what QRDO refers to - could you let me know what that is? It sounds like it might be some kind of event, deadline, or process you have coming up that...",
+      "source": "claude",
+      "title": "QRDO preparation"
+    },
+    {
+      "date": "2025-09-27T04:26:11.191252Z",
+      "id": "d94f0554-fc31-473a-a1b1-744090194036",
+      "preview": "Ok - I want to build a custom integration to add my own MCP server to Docker MCP gateway. Please look up the latest docs on how to do this. Tell me when you're ready to proceed. I'll help you build a...",
+      "source": "claude",
+      "title": "Docker MCP gateway integration"
+    },
+    {
+      "date": "2025-10-03T22:57:28.585231Z",
+      "id": "6f0728d0-6998-4578-b183-2bf97b2700ad",
+      "preview": "this model a bad idea? vito95311/Qwen3-Omni-30B-A3B-Thinking-GGUF-INT8FP16 Looking at this model critically: **Red flags:** 1. **\"A3B\" in the name** - This typically indicates aggressive quantization...",
+      "source": "claude",
+      "title": "The Builder \ud83d\udc77\ud83c\udffc\u200d\u2642\ufe0f"
+    }
+  ],
+  "pagination": {
+    "has_next": true,
+    "has_prev": false,
+    "limit": 50,
+    "page": 1,
+    "total": 2616
+  }
+}

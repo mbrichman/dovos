@@ -435,81 +435,116 @@ class LegacyAPIAdapter:
     def export_to_openwebui(self, doc_id: str) -> Dict[str, Any]:
         """Export conversation to OpenWebUI format."""
         import requests
-        import os
+        import config
+        from uuid import UUID
+        
+        # Import the converter functions
+        from claude_to_openwebui_converter import convert_conversation
         
         try:
-            # Get the conversation
-            doc_result = self.get_conversation_by_id(doc_id)
-            if not doc_result or not doc_result.get("documents"):
-                return {
-                    "success": False,
-                    "error": "Conversation not found"
-                }
+            # Try to get raw messages from database
+            try:
+                conv_uuid = UUID(doc_id)
+                with get_unit_of_work() as uow:
+                    conversation = uow.conversations.get_by_id(conv_uuid)
+                    if not conversation:
+                        return {
+                            "success": False,
+                            "error": "Conversation not found"
+                        }
+                    
+                    # Get raw messages from database and convert to dicts while in session
+                    db_messages = uow.messages.get_by_conversation(conv_uuid)
+                    messages = []
+                    for msg in db_messages:
+                        messages.append({
+                            "role": msg.role,
+                            "content": msg.content
+                        })
+                    
+                    metadata = {
+                        "title": conversation.title,
+                        "earliest_ts": conversation.created_at.isoformat() if conversation.created_at else "",
+                        "latest_ts": conversation.updated_at.isoformat() if conversation.updated_at else ""
+                    }
+            except (ValueError, TypeError):
+                # Fallback to legacy ID format or legacy method
+                doc_result = self.get_conversation_by_id(doc_id)
+                if not doc_result or not doc_result.get("documents"):
+                    return {
+                        "success": False,
+                        "error": "Conversation not found"
+                    }
+                
+                # Parse the conversation into messages
+                document = doc_result["documents"][0]
+                metadata = doc_result["metadatas"][0] if doc_result.get("metadatas") else {}
+                messages = self._parse_conversation_messages(document, metadata)
             
-            document = doc_result["documents"][0]
-            metadata = doc_result["metadatas"][0] if doc_result.get("metadatas") else {}
-            
-            # Parse into messages
-            messages = self._parse_conversation_messages(document, metadata)
-            
-            # Create chat_messages for OpenWebUI
+            # Create chat_messages in the format expected by the converter
             chat_messages = []
             for msg in messages:
+                # Handle both dict and object formats
+                role = msg.get("role") if isinstance(msg, dict) else msg.role
+                content = msg.get("content") if isinstance(msg, dict) else msg.content
+                
                 chat_msg = {
-                    "sender": msg["role"],
-                    "text": msg["content"],
-                    "created_at": msg.get("timestamp", "")
+                    "sender": "human" if role == "user" else "assistant" if role == "assistant" else role,
+                    "text": content,
+                    "created_at": metadata.get("earliest_ts", "")
                 }
                 chat_messages.append(chat_msg)
             
             # Build conversation object
-            conversation = {
+            claude_conv = {
                 "name": metadata.get("title", "Untitled Conversation"),
                 "created_at": metadata.get("earliest_ts", ""),
-                "updated_at": metadata.get("latest_ts", ""),
+                "updated_at": metadata.get("latest_ts") or metadata.get("earliest_ts", ""),
                 "chat_messages": chat_messages
             }
             
-            # Check if OpenWebUI is configured
-            openwebui_url = os.getenv("OPENWEBUI_URL", "")
-            openwebui_api_key = os.getenv("OPENWEBUI_API_KEY", "")
-            
-            if not openwebui_url or not openwebui_api_key:
+            # Convert to OpenWebUI format
+            try:
+                openwebui_conv = convert_conversation(claude_conv)
+            except Exception as e:
                 return {
                     "success": False,
-                    "error": "OpenWebUI not configured. Set OPENWEBUI_URL and OPENWEBUI_API_KEY environment variables."
+                    "error": f"Conversion failed: {str(e)}"
                 }
             
-            # Send to OpenWebUI
+            # Send to OpenWebUI server using config values
             headers = {
-                "Authorization": f"Bearer {openwebui_api_key}",
+                "Authorization": f"Bearer {config.OPENWEBUI_API_KEY}",
                 "Content-Type": "application/json"
             }
             
-            response = requests.post(
-                f"{openwebui_url}/api/v1/chats",
-                headers=headers,
-                json={"title": conversation["name"], "messages": chat_messages},
-                timeout=30
-            )
-            
-            if response.status_code in [200, 201]:
-                return {
-                    "success": True,
-                    "message": "Conversation exported to OpenWebUI successfully"
-                }
-            else:
+            try:
+                # OpenWebUI's chat creation endpoint
+                response = requests.post(
+                    f"{config.OPENWEBUI_URL}/api/v1/chats/new",
+                    headers=headers,
+                    json=openwebui_conv,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    return {
+                        "success": True,
+                        "message": "Conversation exported to OpenWebUI successfully"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": f"OpenWebUI API error: {response.status_code}",
+                        "detail": response.text
+                    }
+                    
+            except requests.exceptions.RequestException as e:
                 return {
                     "success": False,
-                    "error": f"OpenWebUI API error: {response.status_code}",
-                    "detail": response.text
+                    "error": f"Failed to connect to OpenWebUI: {str(e)}"
                 }
         
-        except requests.exceptions.RequestException as e:
-            return {
-                "success": False,
-                "error": f"Failed to connect to OpenWebUI: {str(e)}"
-            }
         except Exception as e:
             logger.error(f"Export to OpenWebUI failed: {e}")
             return {
@@ -554,9 +589,39 @@ class LegacyAPIAdapter:
             })
         
         return messages
+    
+    # ===== SETTINGS METHODS =====
+    
+    def get_all_settings(self) -> Dict[str, str]:
+        """Get all settings from database."""
+        try:
+            with get_unit_of_work() as uow:
+                return uow.settings.get_all_as_dict()
+        except Exception as e:
+            logger.error(f"Failed to get settings: {e}")
+            return {}
+    
+    def get_setting(self, key: str) -> Optional[str]:
+        """Get a single setting by key."""
+        try:
+            with get_unit_of_work() as uow:
+                return uow.settings.get_value(key)
+        except Exception as e:
+            logger.error(f"Failed to get setting {key}: {e}")
+            return None
+    
+    def set_setting(self, key: str, value: str) -> bool:
+        """Save or update a setting."""
+        try:
+            with get_unit_of_work() as uow:
+                uow.settings.create_or_update(key, value)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to set setting {key}: {e}")
+            return False
 
 
-# Global adapter instance 
+# Global adapter instance
 _adapter = None
 
 def get_legacy_adapter() -> LegacyAPIAdapter:

@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-10-06T20:53:48.960068",
+  "test_environment": {
+    "python_version": "3.13.5 (main, Jun 11 2025, 15:36:57) [Clang 17.0.0 (clang-1700.0.13.3)]",
+    "working_directory": "/Users/markrichman/projects/dovos"
+  },
+  "tests_run": [],
+  "pytest_summary": {
+    "total": 0,
+    "collected": 66,
+    "deselected": 53
+  }
+}

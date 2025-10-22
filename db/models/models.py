@@ -91,6 +91,20 @@ class Job(Base):
         return f"<Job(id={self.id}, kind='{self.kind}', status='{self.status}')>"
 
 
+class Setting(Base):
+    __tablename__ = 'settings'
+    
+    id = Column(String, primary_key=True)  # e.g., 'openwebui_url', 'openwebui_api_key'
+    value = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)  # For documentation
+    category = Column(String, default='general')  # e.g., 'openwebui', 'search', 'general'
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<Setting(id='{self.id}', value='{self.value[:50] if self.value else None}...')>"
+
+
 # Add indexes programmatically (these match the schema.sql indexes)
 Index('idx_conversations_created_at', Conversation.created_at.desc())
 Index('idx_conversations_updated_at', Conversation.updated_at.desc())

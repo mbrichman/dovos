@@ -12,6 +12,7 @@ from db.repositories.conversation_repository import ConversationRepository
 from db.repositories.message_repository import MessageRepository
 from db.repositories.embedding_repository import EmbeddingRepository
 from db.repositories.job_repository import JobRepository
+from db.repositories.setting_repository import SettingRepository
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class UnitOfWork:
         self._messages: Optional[MessageRepository] = None
         self._embeddings: Optional[EmbeddingRepository] = None
         self._jobs: Optional[JobRepository] = None
+        self._settings: Optional[SettingRepository] = None
     
     @property
     def session(self) -> Session:
@@ -64,6 +66,13 @@ class UnitOfWork:
         if self._jobs is None:
             self._jobs = JobRepository(self.session)
         return self._jobs
+    
+    @property
+    def settings(self) -> SettingRepository:
+        """Get the settings repository."""
+        if self._settings is None:
+            self._settings = SettingRepository(self.session)
+        return self._settings
     
     def commit(self):
         """Commit the current transaction."""

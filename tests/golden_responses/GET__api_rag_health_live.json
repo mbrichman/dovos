@@ -1,0 +1,6 @@
+{
+  "collection_name": "chat_history",
+  "document_count": 2616,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "status": "healthy"
+}

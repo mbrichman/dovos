@@ -518,6 +518,58 @@ class PostgresController:
             
         return conversations, "Unknown"
     
+    # ===== SETTINGS ENDPOINTS =====
+    
+    def get_settings_page(self) -> Any:
+        """
+        GET /settings
+        
+        Render the settings page with current settings.
+        """
+        from flask import render_template
+        try:
+            # Fetch all settings from database
+            settings = self.adapter.get_all_settings()
+            return render_template('settings.html', settings=settings)
+        except Exception as e:
+            logger.error(f"Failed to load settings page: {e}")
+            return render_template('settings.html', settings={})
+    
+    def handle_settings(self, request_obj) -> Dict[str, Any]:
+        """
+        POST /api/settings - Save settings
+        GET /api/settings - Retrieve settings
+        """
+        try:
+            from flask import request as flask_request
+            
+            if flask_request.method == 'POST':
+                data = request_obj.get_json() or {}
+                
+                # Save settings
+                for key, value in data.items():
+                    if value:  # Only save non-empty values
+                        self.adapter.set_setting(key, value)
+                
+                return {
+                    "success": True,
+                    "message": "Settings saved successfully"
+                }
+            else:
+                # GET request - return current settings
+                settings = self.adapter.get_all_settings()
+                return {
+                    "success": True,
+                    "settings": settings
+                }
+        
+        except Exception as e:
+            logger.error(f"Settings operation failed: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
     # ===== UTILITY METHODS =====
     
     def _parse_date_range(self, start_str: Optional[str], end_str: Optional[str]) -> Optional[Tuple[datetime, datetime]]:

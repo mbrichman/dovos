@@ -16,7 +16,12 @@ def create_app():
     # Initialize data layer based on feature flag
     if app.config["USE_PG_SINGLE_STORE"]:
         print("🚀 Using PostgreSQL single-store architecture")
-        # TODO: Initialize Postgres repositories and SearchService
+        # Initialize database tables
+        from db.database import create_tables
+        try:
+            create_tables()
+        except Exception as e:
+            print(f"⚠️ Database table creation warning: {e}")
         archive = None  # Placeholder - will implement in next steps
     else:
         print("📚 Using legacy ChromaDB + SQLite architecture")

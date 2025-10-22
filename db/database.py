@@ -77,3 +77,14 @@ def check_extensions() -> dict:
         logger.error(f"Extension check failed: {e}")
         
     return extensions
+
+
+def create_tables():
+    """Create all tables defined in the ORM models."""
+    try:
+        from db.models.models import Base
+        Base.metadata.create_all(engine)
+        logger.info("All tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create tables: {e}")
+        raise

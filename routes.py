@@ -64,6 +64,20 @@ def init_routes(app, archive):
         else:
             return conversation_controller.api_conversation(conversation_id)
 
+    @app.route("/settings")
+    def settings():
+        if use_postgres:
+            return postgres_controller.get_settings_page()
+        else:
+            return conversation_controller.settings()
+    
+    @app.route("/api/settings", methods=["GET", "POST"])
+    def api_settings():
+        if use_postgres:
+            return jsonify(postgres_controller.handle_settings(request))
+        else:
+            return jsonify({"error": "Settings not available in legacy mode"}), 501
+    
     @app.route("/stats")
     def stats():
         if use_postgres:
@@ -121,8 +135,11 @@ def init_routes(app, archive):
     def export_to_openwebui(doc_id):
         """Export a conversation to OpenWebUI"""
         if use_postgres:
-            return jsonify(postgres_controller.export_to_openwebui(doc_id))
+            result = postgres_controller.export_to_openwebui(doc_id)
+            # Result is always a dict from postgres_controller
+            return jsonify(result)
         else:
+            # Result from conversation_controller is already (response, status_code) tuple
             return conversation_controller.export_to_openwebui(doc_id)
     
     @app.route("/api/export/openwebui/<doc_id>", methods=["POST"])
