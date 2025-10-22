@@ -587,6 +587,73 @@ class ConversationController:
         
         return filtered_items
     
+    def _get_source_breakdown(self, all_conversations):
+        """Count conversations by source (ChatGPT, Claude, etc.)"""
+        source_counts = {}
+        
+        if not all_conversations or not all_conversations.get('metadatas'):
+            return source_counts
+        
+        for metadata in all_conversations.get('metadatas', []):
+            # Get the original source if available, otherwise use the storage source
+            source = metadata.get('original_source', metadata.get('source', 'unknown')).lower()
+            
+            # Map postgres -> imported (since we don't know original type)
+            if source == 'postgres':
+                source = 'imported'
+            
+            if source not in source_counts:
+                source_counts[source] = 0
+            source_counts[source] += 1
+        
+        return source_counts
+    
+    def stats_with_postgres_adapter(self, postgres_controller):
+        """Display statistics using PostgreSQL backend with legacy UI"""
+        try:
+            # Get statistics from PostgreSQL backend
+            stats_data = postgres_controller.get_stats()
+            
+            # Get source breakdown - need to call a method that gets actual sources
+            all_conversations = postgres_controller.get_conversations()
+            source_counts = self._get_source_breakdown(all_conversations)
+            
+            # Format stats for legacy template
+            # The template expects: total, full, chunked, sources, date_range, collection_info
+            document_count = int(stats_data.get('document_count', 0))
+            
+            formatted_stats = {
+                'total': document_count,
+                'full': document_count,  # PostgreSQL stores full documents
+                'chunked': 0,  # Not chunked in PostgreSQL mode
+                'sources': source_counts,
+                'date_range': {
+                    'earliest': stats_data.get('earliest_ts', ''),
+                    'latest': stats_data.get('latest_ts', '')
+                } if stats_data.get('earliest_ts') else None,
+                'collection_info': {
+                    'dimensions': 384,  # MiniLM uses 384 dimensions
+                    'last_updated': stats_data.get('last_updated', '')
+                } if stats_data.get('last_updated') else None,
+                'collection_name': stats_data.get('collection_name', 'chat_history'),
+                'embedding_model': stats_data.get('embedding_model', 'all-MiniLM-L6-v2'),
+                'status': stats_data.get('status', 'healthy')
+            }
+            
+            return render_template("stats.html", stats=formatted_stats)
+        
+        except Exception as e:
+            print(f"Error getting PostgreSQL stats: {e}")
+            # Return empty stats rather than error
+            return render_template("stats.html", stats={
+                'total': 0,
+                'full': 0,
+                'chunked': 0,
+                'sources': {},
+                'collection_name': 'chat_history',
+                'embedding_model': 'all-MiniLM-L6-v2'
+            })
+    
     def clear_database(self):
         """Clear the entire database"""
         try:

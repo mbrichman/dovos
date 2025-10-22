@@ -67,8 +67,7 @@ def init_routes(app, archive):
     @app.route("/stats")
     def stats():
         if use_postgres:
-            from flask import render_template
-            return render_template("postgres_mode.html")
+            return conversation_controller.stats_with_postgres_adapter(postgres_controller)
         else:
             return conversation_controller.stats()
 

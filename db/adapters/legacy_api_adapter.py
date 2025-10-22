@@ -305,13 +305,14 @@ class LegacyAPIAdapter:
     
     def get_stats(self) -> Dict[str, Any]:
         """Get database statistics in legacy format."""
-        stats = self.search_service.get_search_stats()
+        # Get conversation count (not message count)
+        conversation_count = self.get_count()
         
         # Map to legacy format
         return {
             "status": "healthy",
             "collection_name": "chat_history",  # Legacy collection name
-            "document_count": stats["total_messages"],
+            "document_count": conversation_count,
             "embedding_model": "all-MiniLM-L6-v2"
         }
     
