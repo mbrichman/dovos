@@ -155,10 +155,15 @@ class LegacyAPIAdapter:
             
             document = "\n\n---\n\n".join(document_parts)
             
+            # Extract source from first message's metadata if available
+            source = "unknown"
+            if messages and messages[0].message_metadata:
+                source = messages[0].message_metadata.get('source', 'unknown')
+            
             metadata = {
                 "id": str(conversation.id),
                 "title": conversation.title,
-                "source": "postgres",
+                "source": source,  # Use actual source from import
                 "message_count": message_count,
                 "earliest_ts": earliest_ts.isoformat() if earliest_ts else conversation.created_at.isoformat(),
                 "latest_ts": latest_ts.isoformat() if latest_ts else conversation.updated_at.isoformat(),
