@@ -360,19 +360,15 @@ class PostgresController:
         """Import conversations from JSON data into PostgreSQL."""
         from db.repositories.unit_of_work import get_unit_of_work
         
-        # Detect format (Claude vs ChatGPT)
-        if isinstance(data, list):
-            # ChatGPT format - list of conversations
-            conversations = data
-            format_type = "ChatGPT"
-        elif isinstance(data, dict) and 'conversations' in data:
-            # Claude format - dict with conversations array
-            conversations = data['conversations']
-            format_type = "Claude"
-        else:
-            raise ValueError("Unknown JSON format")
+        # Detect format (Claude vs ChatGPT) using proper detection method
+        conversations, format_type = self._detect_json_format(data)
+        if not conversations:
+            raise ValueError("Unknown JSON format - no conversations found")
         
+        print(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
+        logger.info(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
         logger.info(f"📥 Importing {len(conversations)} conversations from {format_type} format into PostgreSQL")
+        print(f"📥 Importing {len(conversations)} conversations from {format_type} format into PostgreSQL")
         
         imported_count = 0
         
@@ -403,11 +399,18 @@ class PostgresController:
                     # to avoid nested transactions
                     for msg in messages:
                         if msg['content'].strip():  # Skip empty messages
+                            # Store source and conversation info in message metadata
+                            message_metadata = {
+                                'source': format_type.lower(),
+                                'conversation_title': title,
+                                'original_conversation_id': conv_data.get('id') or conv_data.get('uuid') or str(conversation.id)
+                            }
+                            
                             message = uow.messages.create(
                                 conversation_id=conversation.id,
                                 role=msg['role'],
                                 content=msg['content'],
-                                message_metadata={}
+                                message_metadata=message_metadata
                             )
                             uow.session.flush()  # Get the message ID
                             
@@ -429,13 +432,18 @@ class PostgresController:
                 imported_count += 1
                 
                 if imported_count % 50 == 0:
+                    print(f"📊 Imported {imported_count} conversations...")
                     logger.info(f"📊 Imported {imported_count} conversations...")
             
             except Exception as e:
-                logger.error(f"Failed to import conversation '{conv_data.get('title', 'Unknown')}': {e}")
+                error_msg = f"Failed to import conversation '{conv_data.get('title', 'Unknown')}': {e}"
+                print(f"❌ {error_msg}")
+                logger.error(error_msg)
                 continue
         
-        logger.info(f"✅ Successfully imported {imported_count} conversations into PostgreSQL")
+        completion_msg = f"✅ Successfully imported {imported_count} conversations into PostgreSQL"
+        print(completion_msg)
+        logger.info(completion_msg)
         return imported_count
     
     def _extract_chatgpt_messages(self, mapping: Dict) -> List[Dict]:
@@ -481,6 +489,34 @@ class PostgresController:
                 })
         
         return messages
+    
+    def _detect_json_format(self, data):
+        """Detect whether JSON is ChatGPT or Claude format (copied from original)"""
+        # Ensure data is a list
+        if isinstance(data, dict):
+            conversations = data.get("conversations", [])
+        else:
+            conversations = data if isinstance(data, list) else []
+            
+        if not conversations:
+            return [], "Unknown"
+            
+        # Check first conversation to determine format
+        first_conv = conversations[0] if conversations else {}
+        
+        # Claude format has 'uuid', 'name', and 'chat_messages'
+        if (first_conv.get("uuid") and 
+            first_conv.get("name") is not None and  # name can be empty string
+            "chat_messages" in first_conv):
+            return conversations, "Claude"
+            
+        # ChatGPT format has 'title', 'mapping', and timestamps as epoch
+        elif (first_conv.get("title") is not None and 
+              "mapping" in first_conv and
+              first_conv.get("create_time")):
+            return conversations, "ChatGPT"
+            
+        return conversations, "Unknown"
     
     # ===== UTILITY METHODS =====
     
