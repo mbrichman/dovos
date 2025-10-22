@@ -3,12 +3,14 @@
 import sys
 sys.path.append('.')
 
-from chat_archive import clean_text_content
+from scripts.utils.chat_archive import clean_text_content
 import markdown
 import re
+import os
 
 # Load the table test message
-with open("table_test_message.txt", "r", encoding="utf-8") as f:
+fixture_path = os.path.join(os.path.dirname(__file__), "..", "fixtures", "table_test_message.txt")
+with open(fixture_path, "r", encoding="utf-8") as f:
     raw_content = f.read()
 
 print("Creating table rendering test...")

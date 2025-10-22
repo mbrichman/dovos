@@ -3,11 +3,13 @@
 import sys
 sys.path.append('.')
 
-from chat_archive import clean_text_content
+from scripts.utils.chat_archive import clean_text_content
 import markdown
+import os
 
 # Load our preserved unit test artifact
-with open("unit_test_message.txt", "r", encoding="utf-8") as f:
+fixture_path = os.path.join(os.path.dirname(__file__), "..", "fixtures", "unit_test_message.txt")
+with open(fixture_path, "r", encoding="utf-8") as f:
     raw_content = f.read()
 
 print("=== ORIGINAL CONTENT ===")

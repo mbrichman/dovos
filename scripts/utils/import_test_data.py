@@ -7,7 +7,7 @@ import json
 import tempfile
 import os
 import sys
-from chat_archive import ChatArchive
+from scripts.utils.chat_archive import ChatArchive
 
 def import_test_data():
     """Import synthetic test data into the database"""

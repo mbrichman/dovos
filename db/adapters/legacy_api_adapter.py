@@ -461,7 +461,7 @@ class LegacyAPIAdapter:
         from uuid import UUID
         
         # Import the converter functions
-        from claude_to_openwebui_converter import convert_conversation
+        from scripts.utils.claude_to_openwebui_converter import convert_conversation
         
         try:
             # Try to get raw messages from database
