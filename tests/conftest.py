@@ -201,6 +201,12 @@ def test_db_engine(test_db_url):
     yield engine
     
     # Cleanup: drop all tables after test session
+    # Drop views first to avoid dependency issues
+    with engine.connect() as conn:
+        conn.execute(text("DROP VIEW IF EXISTS embedding_coverage CASCADE"))
+        conn.execute(text("DROP VIEW IF EXISTS conversation_summaries CASCADE"))
+        conn.commit()
+    
     Base.metadata.drop_all(engine)
     engine.dispose()
 
