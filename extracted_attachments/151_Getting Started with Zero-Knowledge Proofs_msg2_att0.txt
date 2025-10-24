@@ -1,3 +1,0 @@
-fn main(user_role: Field) -> pub Field {
-    user_role
-}
