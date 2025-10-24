@@ -1,0 +1,379 @@
+# chat_archive — full maintainable implementation
+# =================================================
+# This canvas contains a *complete* Python package ready to copy–paste into a
+# project directory (one file per "### -- module.py --" block).  Everything is
+# runnable out‑of‑the‑box:
+#   $ python -m chat_archive.cli --help
+# You only need the following dependencies:
+#   pip install typer rich chromadb sentence-transformers python-docx
+# ---------------------------------------------------------------------------
+
+### -- chat_archive/__init__.py --
+"""High‑level namespace exports."""
+from importlib import metadata as _md
+__version__ = _md.version(__name__) if _md.packages_distributions().get(__name__) else "0.1.0"
+
+
+### -- chat_archive/config.py --
+from pathlib import Path
+
+PERSIST_DIR         = Path("./chroma_storage")
+META_DB             = Path("./metadata_store.json")
+COLLECTION_NAME     = "chat_history"
+DEFAULT_EMBED_MODEL = "all-MiniLM-L6-v2"
+BACKUP_ROOT         = Path("./backups")
+
+
+### -- chat_archive/utils.py --
+"""Generic helpers (no business logic)."""
+from __future__ import annotations
+import hashlib, json, shutil
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Tuple, Optional
+from rich.console import Console
+
+console = Console()
+ISO_FMT = "%Y-%m-%dT%H:%M:%S"
+
+
+def ts_iso(ts: float|None) -> Optional[str]:
+    if ts is None: return None
+    try: return datetime.fromtimestamp(ts).strftime(ISO_FMT)
+    except (OSError, ValueError): return None
+
+
+def parse_date_range(rng: str) -> Tuple[Optional[str], Optional[str]]:
+    """Return (start_iso, end_iso) or (None, None) on error."""
+    rng = rng.strip().lower()
+    now = datetime.now()
+    presets = {"last week": 7, "last month": 30, "last year": 365}
+    if rng in presets:
+        start = now - timedelta(days=presets[rng])
+        return start.strftime(ISO_FMT), now.strftime(ISO_FMT)
+    if " to " in rng:
+        a, b = [s.strip() for s in rng.split(" to ", 1)]
+        try:
+            start = datetime.fromisoformat(a)
+            end   = datetime.fromisoformat(b).replace(hour=23, minute=59, second=59)
+            return start.strftime(ISO_FMT), end.strftime(ISO_FMT)
+        except ValueError:
+            console.print("[red]Invalid date format.[/]")
+            return None, None
+    # single date
+    try:
+        d = datetime.fromisoformat(rng)
+        return d.strftime(ISO_FMT), d.replace(hour=23, minute=59, second=59).strftime(ISO_FMT)
+    except ValueError:
+        console.print("[red]Invalid date format.[/]")
+        return None, None
+
+
+def md5_file(path: Path) -> str:
+    h = hashlib.md5()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def backup_tree(src: Path, dst_root: Path) -> Path:
+    dst_root.mkdir(parents=True, exist_ok=True)
+    dst = dst_root / f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    shutil.copytree(src, dst, dirs_exist_ok=True)
+    console.print(f"[green]Backup saved to {dst}[/]")
+    return dst
+
+
+### -- chat_archive/embeddings.py --
+"""Thin wrapper around SentenceTransformer with lazy loading & memoisation."""
+from functools import lru_cache
+from typing import Sequence
+from sentence_transformers import SentenceTransformer
+from .config import DEFAULT_EMBED_MODEL
+from .utils import console
+
+@lru_cache(maxsize=1)
+def _model():
+    console.status("[green]Loading embedding model…")
+    return SentenceTransformer(DEFAULT_EMBED_MODEL)
+
+
+def embed(texts: Sequence[str]) -> list[list[float]]:
+    return _model().encode(list(texts), show_progress_bar=False).tolist()
+
+
+### -- chat_archive/store.py --
+"""Wrapper around ChromaDB’s PersistentClient with a minimal API surface."""
+from __future__ import annotations
+import chromadb
+from typing import Any, Iterable
+from .config import PERSIST_DIR, COLLECTION_NAME
+
+class VectorStore:
+    def __init__(self):
+        self._client = chromadb.PersistentClient(str(PERSIST_DIR))
+        self._col    = self._client.get_or_create_collection(COLLECTION_NAME)
+
+    # high‑level ops ---------------------------------------------------
+    def add(self, *, docs: Iterable[str], ids: list[str], embeds: list[list[float]], metas: list[dict[str, Any]]):
+        self._col.add(documents=list(docs), ids=ids, embeddings=embeds, metadatas=metas)
+
+    def update(self, *, id: str, doc: str, embed: list[float], meta: dict[str, Any]):
+        self._col.update(ids=[id], documents=[doc], embeddings=[embed], metadatas=[meta])
+
+    def delete(self, ids: list[str]):
+        self._col.delete(ids=ids)
+
+    def query(self, *, embed: list[float], n: int = 5, where: dict|None = None):
+        return self._col.query(query_embeddings=[embed], n_results=n, where=where)
+
+    def get(self, *, where: dict|None = None, include: list[str]|None = None, limit: int|None = None):
+        return self._col.get(where=where, include=include, limit=limit)
+
+    def count(self):
+        return self._col.count()
+
+
+### -- chat_archive/metadata.py --
+"""Filesystem‑backed metadata store used to track checksums & timestamps."""
+from __future__ import annotations
+import json, hashlib
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Any
+from .config import META_DB
+from .utils import console
+
+class MetaStore(dict):
+    def __init__(self):
+        super().__init__()
+        if META_DB.exists():
+            try:
+                self.update(json.loads(META_DB.read_text()))
+            except json.JSONDecodeError:
+                console.print("[red]Corrupt metadata store – starting fresh.")
+
+    def save(self):
+        META_DB.write_text(json.dumps(self, indent=2))
+
+    @staticmethod
+    def checksum(text: str) -> str:
+        return hashlib.md5(text.encode()).hexdigest()
+
+    # convenience helpers ---------------------------------------------
+    def upsert(self, doc_id: str, meta: Dict[str, Any]):
+        self[doc_id] = meta
+        self.save()
+
+
+### -- chat_archive/importer.py --
+"""Implements ingestion helpers for different source types (Word, JSON)."""
+from __future__ import annotations
+from pathlib import Path
+from typing import Tuple, List
+import re, json
+from datetime import datetime
+from docx import Document
+from .utils import md5_file, ts_iso
+
+ROLE_RE = re.compile(r"^(You|ChatGPT|Assistant|System|User)(?:\s+said)?:?$", re.I)
+
+# ---- .docx ingestion ------------------------------------------------
+
+def import_docx(path: Path) -> Tuple[str, str, dict]:
+    doc  = Document(path)
+    parts: List[str] = []
+    role, buf = None, []
+
+    def flush():
+        nonlocal parts, buf, role
+        if role and buf:
+            parts.append(f"**{role}**:\n\n" + "\n".join(buf) + "\n")
+            buf = []
+
+    for p in doc.paragraphs:
+        txt = p.text.strip()
+        if not txt:
+            flush(); role=None; continue
+        if ROLE_RE.match(txt):
+            flush(); role = ROLE_RE.match(txt).group(1); continue
+        buf.append(txt)
+    flush()
+
+    full_text = "\n".join(parts)
+    doc_id    = f"docx-{md5_file(path)}"
+    meta      = {
+        "title": path.name,
+        "source": "docx",
+        "file_path": str(path),
+        "file_hash": md5_file(path),
+        "last_indexed": datetime.now().isoformat()
+    }
+    return doc_id, full_text, meta
+
+# ---- ChatGPT JSON ingestion (legacy index) -------------------------
+
+def import_chat_json(path: Path) -> List[tuple[str,str,dict]]:
+    with path.open('r', encoding='utf-8') as f:
+        data = json.load(f)
+    conversations = data if isinstance(data, list) else data.get("conversations", [])
+    results = []
+    for convo in conversations:
+        convo_id = convo.get("id") or f"anon-{hash(convo)}"
+        title    = convo.get("title", "Untitled")
+        msgs     = []
+        timestamps = []
+        mapping  = convo.get("mapping", {})
+        for m in sorted(mapping.values(), key=lambda m: m.get("create_time",0)):
+            msg = m.get("message")
+            if not msg: continue
+            role = msg.get("author", {}).get("role", "unknown")
+            parts = msg.get("content", {}).get("parts", [])
+            text  = " ".join(str(p) for p in parts)
+            ts    = m['message'].get('create_time') if m.get('message') else None
+            if ts: timestamps.append(ts)
+            stamp = ts_iso(ts) or "unknown time"
+            if role == "user":
+                msgs.append(f"**You said** *(on {stamp})*:\n\n{text}")
+            elif role == "assistant":
+                msgs.append(f"**ChatGPT said** *(on {stamp})*:\n\n{text}")
+            else:
+                msgs.append(f"*{role}* *(on {stamp})*:\n\n{text}")
+        content = "\n\n".join(msgs)
+        meta = {
+            "title": title,
+            "source": "json",
+            "id": convo_id,
+            "earliest_ts": ts_iso(min(timestamps)) if timestamps else None,
+            "latest_ts": ts_iso(max(timestamps)) if timestamps else None,
+        }
+        results.append((f"chat-{convo_id}", content, meta))
+    return results
+
+
+### -- chat_archive/archive.py --
+"""Facade combining VectorStore + MetaStore + embedding pipeline."""
+from __future__ import annotations
+from typing import Iterable, Any
+from datetime import datetime
+from pathlib import Path
+from .store import VectorStore
+from .metadata import MetaStore
+from .embeddings import embed
+from .utils import console, backup_tree
+from .config import PERSIST_DIR, BACKUP_ROOT
+
+class Archive:
+    def __init__(self):
+        self.store = VectorStore()
+        self.meta  = MetaStore()
+
+    # ---- high‑level document ops ------------------------------------
+    def upsert(self, *, doc_id: str, text: str, meta: dict[str, Any]):
+        vector = embed([text])[0]
+        if doc_id in self.meta:
+            self.store.update(id=doc_id, doc=text, embed=vector, meta=meta)
+        else:
+            self.store.add(docs=[text], ids=[doc_id], embeds=[vector], metas=[meta])
+        self.meta.upsert(doc_id, meta | {"checksum": MetaStore.checksum(text)})
+
+    def count(self):
+        return self.store.count()
+
+    def query(self, text: str, k: int = 5, where: dict|None=None):
+        vec = embed([text])[0]
+        return self.store.query(embed=vec, n=k, where=where)
+
+    # ---- maintenance -------------------------------------------------
+    def backup(self) -> Path:
+        return backup_tree(PERSIST_DIR, BACKUP_ROOT)
+
+    def clear(self):
+        backup = self.backup()
+        console.print(f"[yellow]Backup created at {backup}. Proceeding to delete collection…")
+        self.store._client.delete_collection(COLLECTION_NAME)  # type: ignore
+        self.meta.clear(); self.meta.save()
+        console.print("[red]Collection cleared.[/]")
+
+
+### -- chat_archive/cli.py --
+"""Typer‑powered command‑line interface."""
+from __future__ import annotations
+import typer, sys
+from pathlib import Path
+from rich.table import Table
+from .archive import Archive
+from .importer import import_docx, import_chat_json
+from .utils import console, parse_date_range
+
+app = typer.Typer(help="chat-archive — semantic search & archive tool")
+arc = Archive()
+
+# ---------------- commands ------------------------------------------
+
+@app.command()
+def stats():
+    """Print basic collection statistics."""
+    console.print(f"[bold]Documents:[/] {arc.count()}")
+
+
+@app.command()
+def index_docs(folder: Path = typer.Argument(..., exists=True, file_okay=False)):
+    """Index every .docx file recursively under FOLDER."""
+    files = [p for p in folder.rglob("*.docx") if not p.name.startswith("~$")]  # skip temp files
+    if not files: console.print("[red]No .docx files found."); raise typer.Exit()
+
+    for f in files:
+        doc_id, text, meta = import_docx(f)
+        if not text.strip(): continue
+        arc.upsert(doc_id=doc_id, text=text, meta=meta)
+    console.print(f"[green]Indexed {len(files)} files. Total docs: {arc.count()}")
+
+
+@app.command()
+def index_json(file: Path = typer.Argument(..., exists=True, dir_okay=False)):
+    """Index a ChatGPT `conversations.json` export."""
+    docs = import_chat_json(file)
+    for doc_id, text, meta in docs:
+        if not text.strip(): continue
+        arc.upsert(doc_id=doc_id, text=text, meta=meta)
+    console.print(f"[green]Indexed {len(docs)} conversations. Total docs: {arc.count()}")
+
+
+@app.command()
+def search(query: str = typer.Argument(...), top_k: int = typer.Option(5, "--top", "-k")):
+    """Semantic search across the archive."""
+    res = arc.query(query, k=top_k)
+    if not res['documents'][0]:
+        console.print("[red]No matches.")
+        raise typer.Exit()
+
+    table = Table(title="Search Results")
+    table.add_column("#", style="cyan"), table.add_column("Title", style="green"), table.add_column("Snippet")
+    for i,(doc, meta) in enumerate(zip(res['documents'][0], res['metadatas'][0]),1):
+        snippet = (doc[:120] + '…') if len(doc) > 120 else doc
+        table.add_row(str(i), meta.get('title','Untitled')[:50], snippet)
+    console.print(table)
+
+
+@app.command()
+def backup():
+    arc.backup()
+
+
+@app.command()
+def clear(confirm: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation")):
+    if confirm or typer.confirm("This will delete *all* indexed data after creating a backup. Continue?"):
+        arc.clear()
+    else:
+        console.print("[bold]Cancelled.[/]")
+
+
+# Entry‑point helper --------------------------------------------------
+if __name__ == "__main__":
+    try:
+        app()
+    except Exception as exc:
+        console.print(f"[red]Error:[/] {exc}")
+        sys.exit(1)

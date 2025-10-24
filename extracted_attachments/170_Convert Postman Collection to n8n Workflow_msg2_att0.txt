@@ -1,0 +1,4244 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "iManage.paw",
+    "version": "v0.0.0"
+  },
+  "host": "richmanor.atldev1.imanagelabs.com",
+  "schemes": [
+    "https"
+  ],
+  "basePath": "/",
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Request (3)",
+        "description": "",
+        "operationId": "d7e48582-e68a-478b-ae06-7ea51804c0d9",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "c90b5529-e28a-4ff6-97af-13528d43eb0d",
+            "name": "ajs_anonymous_id",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "145",
+            "name": "ajs_group_id",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "386475339863294105",
+            "name": "ajs_user_id",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "453faaacb06df8a4632bd66581cd121d",
+            "name": "mellon-cookie",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"format\":\"\\\"\\\"\",\"limit\":\"1000\",\"queries\":\"select * from FEATURE_CUSTOMER_OVERRIDESwhere FEATURE_ID = 32\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Document",
+        "description": "",
+        "operationId": "d82e4ac4-cb48-43fc-b80c-f17b048e9f4f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"default_security\":\"private\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Share Login",
+        "description": "",
+        "operationId": "2666b1ef-e85c-4725-a63d-c3249bfeb5f2",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "description",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "true",
+            "name": "enabled",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "755ad2c8-4a8c-4df7-9250-7bc55904871d",
+            "name": "X-Client-Id",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"identity\":\"mark.richman@imanage.com\",\"secret\":\"Vaxtuv-nofjix-5cavro\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/auth/oauth2/token": {
+      "post": {
+        "summary": "Refresh Token Login",
+        "description": "",
+        "operationId": "59113016-87d0-464f-898a-0612c049e658",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "Cookie",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "refresh_token",
+            "name": "grant_type",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "qgjlb14BwiNvqYyCF_sDVcyFg6AYUb1HafBhbQyuqMg",
+            "name": "refresh_token",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "64ee450f-c54f-4cb4-9576-eed7b9ce799f",
+            "name": "client_id",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "b6f3c511-af74-4532-99c4-f6fd5c5763c3",
+            "name": "client_secret",
+            "required": false,
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api": {
+      "get": {
+        "summary": "Get Discovery",
+        "description": "",
+        "operationId": "efa334cd-cb11-4673-9553-2784872b7799",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/apps": {
+      "get": {
+        "summary": "Get Apps",
+        "description": "",
+        "operationId": "7ca5b122-73dd-4490-a397-07457d6e02a0",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/captions": {
+      "get": {
+        "summary": "Get Captions",
+        "description": "",
+        "operationId": "f8b7ffd8-8c6f-4f87-90e6-43cc129d68e8",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "01slH8ZS_YHTEL8DZHmcWR2J77ESsPo6-B2RlVpG080",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/settings/global/users//wsSearchLanguage": {
+      "put": {
+        "summary": "Set Search Language",
+        "description": "",
+        "operationId": "d25149ef-3616-45f4-9739-658f12796d96",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"type\":\"value\",\"value\":\"en,es,fr\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/captions/custom4": {
+      "get": {
+        "summary": "Get Caption",
+        "description": "",
+        "operationId": "48d6a608-2e29-4df0-a945-836013b4fe26",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/custom1/recent": {
+      "get": {
+        "summary": "Get Custom 1 Recent",
+        "description": "",
+        "operationId": "d91e9e12-d82a-45ab-914a-a82c4a155d95",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/customs/custom1": {
+      "get": {
+        "summary": "Get All Library Custom 1",
+        "description": "",
+        "operationId": "643fc0c4-657b-4aeb-882d-95ae9b4310b8",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "50",
+            "name": "limit",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "standard_cursor",
+            "name": "paging_mode",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/custom1/recent": {
+      "get": {
+        "summary": "Get Library Custom 1 Recent",
+        "description": "",
+        "operationId": "b9bcbc82-1f1e-4a70-8ee8-f2cd380ea64e",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/custom1/custom1Id": {
+      "get": {
+        "summary": "Get Library Custom 1",
+        "description": "",
+        "operationId": "d767e8aa-abfe-410c-b119-b83da3bf42e6",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/custom1/custom1Id/custom2/custom2Id": {
+      "get": {
+        "summary": "Get Library Custom 1 To Custom 2",
+        "description": "",
+        "operationId": "066c8582-bbce-43eb-8d8d-d3dbe876fbf7",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/customs/custom1/custom1Id/custom2/search": {
+      "get": {
+        "summary": "Get Library Custom 1 To Custom Search 2",
+        "description": "",
+        "operationId": "569ae130-4344-4a3b-a35c-c6667c13a251",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/customs/customTable": {
+      "get": {
+        "summary": "Get All Custom Values",
+        "description": "",
+        "operationId": "7e682b9f-deb1-4563-bebe-1d582f505032",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/customs/custom1/search": {
+      "get": {
+        "summary": "Get All Custom Values Search",
+        "description": "",
+        "operationId": "0b7a132c-032a-4d17-84ce-71edd98c105c",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "1210",
+            "name": "offset",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "9999",
+            "name": "limit",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/recent-documents": {
+      "get": {
+        "summary": "Get Library Recent Documents",
+        "description": "",
+        "operationId": "5ca00316-0e30-40cc-ac77-88e98d38612d",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/search": {
+      "post": {
+        "summary": "Search Documents",
+        "description": "",
+        "operationId": "21ee95e7-1a8b-4a0c-ab67-8a1c36e0cafd",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": true,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"profile_fields\":{\"document\":[\"name\",\"file_edit_date\"]},\"filters\":{\"document_number\":\"64844,64841,64874\"}}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/documents": {
+      "get": {
+        "summary": "Get Documents",
+        "description": "",
+        "operationId": "a4d82d8c-bfaf-4ca9-8b5f-cc00d59d6e85",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "standard_cursor",
+            "name": "paging_mode",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "9999",
+            "name": "limit",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"checked_out\":true}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents": {
+      "get": {
+        "summary": "Get Library Documents",
+        "description": "",
+        "operationId": "2fb55c69-33bf-4fab-8a4a-c9b045d5cb9c",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "standard",
+            "name": "paging_mode",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "11000",
+            "name": "exp_crawl_offset",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"paging_mode\":\"standard\",\"exp_crawl_offset\":\"25000\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/checked-out": {
+      "get": {
+        "summary": "Get Library Checked Out Documents",
+        "description": "",
+        "operationId": "3bc3af2a-c400-4352-943c-52924881dbb3",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/recent-documents": {
+      "get": {
+        "summary": "Get Recent Documents",
+        "description": "",
+        "operationId": "beba136f-3609-45a8-9cf0-17a8aa0064c7",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/download": {
+      "get": {
+        "summary": "Download Document",
+        "description": "",
+        "operationId": "3fcc8724-2bb6-4ce4-b9fc-35cf1c0e2ad2",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/download/fileName.txt": {
+      "get": {
+        "summary": "Download Document With Filename",
+        "description": "",
+        "operationId": "d2a14289-6834-4f12-9edf-92722597193f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CUS02!39.1": {
+      "get": {
+        "summary": "Get Document",
+        "description": "",
+        "operationId": "360e4067-ab48-484e-a600-247c45b5e528",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Patch Document",
+        "description": "",
+        "operationId": "4d07135e-646a-4263-8b05-3c8bfae69b4d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"extended.bool1\":true}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Document",
+        "description": "",
+        "operationId": "44777d9c-dba3-48f0-a4cd-72f9acdcc376",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/customers/188/libraries/chicagoactive/documents/15.1/rate-limited-download": {
+      "get": {
+        "summary": "Get Document RL",
+        "description": "",
+        "operationId": "f9945cea-5eef-4050-b485-a1b352914a64",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/path": {
+      "get": {
+        "summary": "Get Document Path",
+        "description": "",
+        "operationId": "d93b1021-c9c6-4c34-b7bf-c1ce1261c4aa",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/rate-limited-download": {
+      "get": {
+        "summary": "Get Document Rate Limit",
+        "description": "",
+        "operationId": "e5621fb4-4fe2-42ad-9814-705b6a479b3c",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/name-value-pairs": {
+      "get": {
+        "summary": "Get Document NVP",
+        "description": "",
+        "operationId": "6ae93321-d0fc-46da-96e9-048e25b1d99d",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/templates": {
+      "get": {
+        "summary": "Get Templates",
+        "description": "",
+        "operationId": "4a487869-6add-407b-a770-7816c3083901",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/ChicagoActive!1/name-value-pairs": {
+      "get": {
+        "summary": "Get Template NVPS",
+        "description": "",
+        "operationId": "4ccaaf8f-7868-488a-8036-cf2dc4f98fe4",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/history": {
+      "get": {
+        "summary": "Get Document History",
+        "description": "",
+        "operationId": "a9b808ec-a56b-4014-ab1c-97b3704ef443",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/history/versions": {
+      "get": {
+        "summary": "Get Document Version History",
+        "description": "",
+        "operationId": "db348f6e-afbe-4f26-9e69-e4c579166406",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v1/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/history/activities": {
+      "get": {
+        "summary": "Get Document Activity History",
+        "description": "",
+        "operationId": "827ca148-d111-4511-a716-4df9b0e7a9b9",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/history/users": {
+      "get": {
+        "summary": "Get Document User History",
+        "description": "",
+        "operationId": "6b99a085-d446-446f-86fc-6ac5593e3373",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/highlights": {
+      "get": {
+        "summary": "Get Document Highlights",
+        "description": "",
+        "operationId": "7af106fe-4da5-47cf-a970-ed8ad401c331",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/operations": {
+      "get": {
+        "summary": "Get Document Operations",
+        "description": "",
+        "operationId": "d2b0d310-8596-4fcb-9411-b110d319dd60",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/CUS02!11/documents": {
+      "post": {
+        "summary": "Upload Document To Folder",
+        "description": "",
+        "operationId": "b8f9686a-b433-4dd3-b5dd-937da90806d8",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "{ \"doc_profile\":{ \"name\":\"Restricted37\",\"type\":\"WORDX\"}, \"warnings_for_required_and_disabled_fields\":true\n}",
+            "name": "profile",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "",
+            "name": "file",
+            "required": false,
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CUS02!39.1/versions": {
+      "post": {
+        "summary": "Upload New Document Version",
+        "description": "",
+        "operationId": "9adec174-1cf6-4533-934b-e9eff6685b4d",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "{ \"doc_profile\":{ \"name\":\"Restricted\",\"type\":\"WORDX\"}, \"warnings_for_required_and_disabled_fields\":true\n}",
+            "name": "profile",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "",
+            "name": "file",
+            "required": false,
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CUS02!39.1/checkout": {
+      "post": {
+        "summary": "Checkout Document",
+        "description": "",
+        "operationId": "79594d13-a84d-483e-8166-207390f31ead",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"appname\" : \"pdfDocs\",\n  \"comments\": \"test.\",\n  \"due_date\": \"2018-08-18T04:46:00Z\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/CHICAGOACTIVE!10502/document-shortcuts": {
+      "post": {
+        "summary": "Shortcut Document",
+        "description": "",
+        "operationId": "bc987a3c-e17b-4de2-b6d1-0a85a5e35f3d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Shortcut to the Document\",\"target\":{\"id\":\"CHICAGOACTIVE!33702.1\",\"type\":\"WORD\"}}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CUS02!39.1/file": {
+      "put": {
+        "summary": "Update Document Version",
+        "description": "Generated from a curl request: \ncurl -X POST \\\n  https://wrtest2.imanage.com/api/v1/folders/Active%21108/documents \\\n  -H 'cache-control: no-cache' \\\n  -H 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \\\n  -H 'postman-token: 356b3308-4185-36ff-d5a7-d3299312313d' \\\n  -H 'x-client-id: f3009e33-a188-4017-a481-6fbf35c9fc5a' \\\n  -H 'x-client-version: 1.0.0.0' \\\n  -F profile=undefined \\\n  -F file=undefined",
+        "operationId": "5cb7da7f-f938-425a-aeeb-e53f2413b307",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "application/x-www-form-urlencoded",
+            "name": "//Content-Type",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "",
+            "name": "profile",
+            "required": false,
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "default": "",
+            "name": "file",
+            "required": false,
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CUS02!39.1/lock": {
+      "delete": {
+        "summary": "Remove Document Lock",
+        "description": "",
+        "operationId": "092fbca9-8ab8-4f19-9ca8-16062e3717e1",
+        "consumes": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"type\": \"value\",\n  \"value\": [true, false, 123, \"123\", {\"abc\":\"123\", \"def\":[]}]\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/documents/CHICAGOACTIVE!64874.1/move": {
+      "post": {
+        "summary": "Move Document",
+        "description": "",
+        "operationId": "f06d9346-b6ac-4353-a70e-1f37d2f834ca",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"destination_folder_id\":\"active!13\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/parents": {
+      "post": {
+        "summary": "Get Parent Folder",
+        "description": "",
+        "operationId": "931f0aa9-381c-4f41-adfa-db8a38e91c19",
+        "consumes": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"limit\": 100,\n  \"cursor\": \"1000001\",\n  \"document_numbers\": [\n    33\n  ]\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/CHICAGOACTIVE!64874.1/declare": {
+      "put": {
+        "summary": "Declare Record",
+        "description": "",
+        "operationId": "431bea2c-cdc1-4344-a180-32be0297726c",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/documents/shred-async": {
+      "post": {
+        "summary": "Shred Async",
+        "description": "",
+        "operationId": "e2d8d4ff-2c41-46e7-823d-94fd748b1018",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"documents\":[\"US!33.1\"]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/tasks/5b8f5331-3c4b-4beb-96a0-07ac554abc71/results": {
+      "get": {
+        "summary": "Task Status",
+        "description": "",
+        "operationId": "29c96cac-1bfc-455b-abce-2b800ed16f12",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188//libraries/chicagoactive/documents/security/search": {
+      "post": {
+        "summary": "Check Bulk Security",
+        "description": "",
+        "operationId": "e62082aa-56d7-4f62-9dec-a979af38fd7f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"user_id\":\"MARKR\",\"document_ids\":[\"CHICAGOACTIVE!64877.1\",\"CHICAGOACTIVE!64876.1\"]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/folders": {
+      "get": {
+        "summary": "Get Folders",
+        "description": "",
+        "operationId": "ba986384-0832-4246-bf86-561c07c77327",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"container_id\":\"ACTIVE!3\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders": {
+      "get": {
+        "summary": "Get Library Folders",
+        "description": "",
+        "operationId": "2725b6a2-38d5-41d8-a4d2-7c47251cdb69",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/children": {
+      "get": {
+        "summary": "Get Folder Children",
+        "description": "",
+        "operationId": "d9b5e2fd-c713-4dfe-bd62-7f13d64fe64c",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/name-value-pairs": {
+      "get": {
+        "summary": "Get Folder NVP",
+        "description": "",
+        "operationId": "d09adcd5-8335-41cf-84ac-00219f46e7f1",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/operations": {
+      "get": {
+        "summary": "Get Folder Operations",
+        "description": "",
+        "operationId": "aab8cfb6-eb06-453e-bc3a-f42f1bcd239e",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/security": {
+      "get": {
+        "summary": "Get Folder Security",
+        "description": "",
+        "operationId": "e443ea1b-0651-4098-9389-f0c9233b12dc",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/documents": {
+      "get": {
+        "summary": "Get Folder Documents",
+        "description": "",
+        "operationId": "03835c0b-7397-4f5d-b95c-04900834b9d7",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/CUS02!11": {
+      "patch": {
+        "summary": "Patch Folder",
+        "description": "",
+        "operationId": "95cb8899-c8f2-4627-adcd-e88d3b41608d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\": \"Updated Folder Name\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/web/api/v2/customers/188/libraries/Active/workspaces/CUS02!10/folders": {
+      "post": {
+        "summary": "Create Folder",
+        "description": "",
+        "operationId": "0473efd0-c821-4094-a5d9-7f2a7ef719c1",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"CMEK Project\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/CUS02!11/subfolders": {
+      "post": {
+        "summary": "Create Folder Subfolders",
+        "description": "",
+        "operationId": "71a405dd-fcc9-40bb-9a0c-944c9e1b708d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Richman Folder\",\"owner\":\"ZIA\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/folderId/search-folders": {
+      "post": {
+        "summary": "Create Folder Search Folders",
+        "description": "",
+        "operationId": "93d09287-695b-4797-80c6-56b2d481eff7",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Sub Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/libraries/chicagoactive/types": {
+      "get": {
+        "summary": "Type Mappings",
+        "description": "",
+        "operationId": "63692441-8abd-4325-a103-7a428d4d4f11",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/change-events": {
+      "get": {
+        "summary": "Get Change Events",
+        "description": "",
+        "operationId": "d881a97e-e88f-4380-9fb9-e2b0e6447c38",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "1651363692829438",
+            "name": "cursor",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "container",
+            "name": "item_types",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/auth/api/v1/system-login": {
+      "post": {
+        "summary": "Audit Hub Auth",
+        "description": "",
+        "operationId": "914c76e5-a181-414c-81ab-4971d541b4bf",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "lLhDyKg03AsVnMIniamYJMYSrAqlFUNQ50KYqN5RT3o",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "@T}PokmQ7nW]nQp\\}3FQ8TWRwTpP5TWOpkGQp4V\\4\\p\\6TZQ53FPzDGQ4DWR{HWP6PWQ8PWR}fWP",
+            "name": "cursor",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "10",
+            "name": "limit",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"email\":\"mig@andrewweiss.com\",\"password\":\"wO;vj]lKKr\\\"B930#\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/audithub/api/v1/private/customers/303/regions/us05/events/crawl": {
+      "post": {
+        "summary": "Audit Hub Query",
+        "description": "",
+        "operationId": "a8383ae1-e8cc-49c7-9d48-461bce63248c",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "l72keZfv5VhBdS6SE5fa9vz5yMCztoIYBC7KXI3Vssc",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/change-events/queues": {
+      "post": {
+        "summary": "New Queue",
+        "description": "",
+        "operationId": "83c18957-f161-4122-90c8-8dcd03f7a16d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"queue_id\": \"MYQUEUENAME\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/change-events/queues/MYQUEUENAME": {
+      "get": {
+        "summary": "Latest Change from Queue",
+        "description": "",
+        "operationId": "99779997-7dc8-47e8-add5-2d18d5ad54f3",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"queue_id\": \"MYQUEUENAME\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/libraries/chicagoactive/operations": {
+      "get": {
+        "summary": "Operations",
+        "description": "",
+        "operationId": "64033707-18f4-418d-93e1-8fb820e0cc6f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users/me": {
+      "get": {
+        "summary": "Get Current User Profile",
+        "description": "",
+        "operationId": "60580d8d-adbc-4ffa-a75e-40d2ba698d6b",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Sub Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users/roles": {
+      "get": {
+        "summary": "Get Current User Profile Duplicate",
+        "description": "",
+        "operationId": "5e5f7f57-2cd9-4e67-9ae6-71017e163fef",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Sub Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/users/mark/": {
+      "get": {
+        "summary": "Update User Photo",
+        "description": "",
+        "operationId": "cb8b7d32-cbfd-4fda-9c4c-f4147bbd532f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"allow_login\":\"true\",\"full_name\":\"Bobby McGee\",\"id\":\"mark\",\"email\":\"mark@markrichman.net\",\"preferred_library\":\"Active\",\"user_id_ex\":\"mark\",\"user_nos\":\"2\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users/me/preferences": {
+      "get": {
+        "summary": "Get User Prefs",
+        "description": "",
+        "operationId": "9cd23c83-ac9d-4105-8e54-aad3cf1b4dcc",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Sub Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users/me/photo": {
+      "get": {
+        "summary": "Get User Photo",
+        "description": "",
+        "operationId": "c4fd1036-4603-4085-979a-cc14a6b230d7",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Sub Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/my-favorites/children": {
+      "get": {
+        "summary": "Get My Favorites Children",
+        "description": "",
+        "operationId": "bb7ec4e3-faa1-4dd4-8307-a5e559bb07d8",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/my-favorites/shortcuts": {
+      "post": {
+        "summary": "Create My Favorites Shortcut",
+        "description": "",
+        "operationId": "593a72e6-417b-4f03-92fe-d2d864ac902e",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"id\":\"CUS02!39.1\",\n\t\"name\":\"Generated Favorites Shortcut\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users//my-matters/children": {
+      "get": {
+        "summary": "Get My Matters Children",
+        "description": "",
+        "operationId": "28b9e25d-2022-4e01-8c4e-4835e4d63db3",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users//my-matters/security": {
+      "get": {
+        "summary": "Get My Matters Security",
+        "description": "",
+        "operationId": "2e51cefb-656f-4b0d-8632-599865be0c91",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users//my-matters/subscriptions": {
+      "get": {
+        "summary": "Get My Matters Subscriptions",
+        "description": "",
+        "operationId": "2c9180df-d4c0-4787-ace0-b46fc662a1be",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create My Matters Subscription",
+        "description": "",
+        "operationId": "b7a7e856-2e4f-4245-a956-eacbf30afa7f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"userid\": \"\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users//my-matters/available-subscriptions": {
+      "get": {
+        "summary": "Get My Matters Available Subscriptions",
+        "description": "",
+        "operationId": "555a4b8b-5f98-4c7c-8c35-ad93bcf52b5f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users//my-matters/shortcuts": {
+      "post": {
+        "summary": "Create My Matters Shortcut",
+        "description": "",
+        "operationId": "1f69991b-25ee-4efa-8da7-e8cb7eea41ca",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"id\":\"CUS02!10\",\n\t\"name\":\"Generated Workspace Shortcut\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/folders/CHICAGOACTIVE!13908/documents/supervised": {
+      "post": {
+        "summary": "specify doc num -- supervised document import",
+        "description": "",
+        "operationId": "0657c514-13eb-4f02-bae3-9854a82d561c",
+        "consumes": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/642/settings/global/im.document.defaultDocumentClass": {
+      "put": {
+        "summary": "Default Doc Class",
+        "description": "",
+        "operationId": "5a48f100-21b3-4e51-b8c4-e72aa17cc868",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"key\":\"im.document.defaultDocumentClass\",\"type\":\"value\",\"value\":\"PLAIN\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "get": {
+        "summary": "Default Doc Class Duplicate",
+        "description": "",
+        "operationId": "034f560a-abbd-47b9-a09d-19656aef2fad",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/platform/api/v2/customers/188/settings/system/access-token": {
+      "put": {
+        "summary": "Absolute Timeout",
+        "description": "",
+        "operationId": "499d1403-5158-4c1c-a80e-2d8625bb6fb3",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"absolute_timeout_enabled\":true,\"absolute_timeout_seconds\":86400}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/settings/global/im.policy.folderSearchUsesStartsWith": {
+      "put": {
+        "summary": "Folder Search Leading *",
+        "description": "",
+        "operationId": "63c35349-9e6c-4cfc-ac06-5f49db73a207",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"type\":\"value\",\"value\":true}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/platform/api/v2/customers/188/settings/system/idp": {
+      "patch": {
+        "summary": "IDP Setting",
+        "description": "",
+        "operationId": "36c2c9ff-c158-4659-bc71-4581247c9c7b",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"seamless_idp_enabled\":true}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/cc/api/v2/customers/188/settings/global/im.document.versionEditing": {
+      "put": {
+        "summary": "Request",
+        "description": "",
+        "operationId": "404f8d38-babc-48f0-9f32-088f3008ad05",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"value\":\"latestVersionOnly\",\"type\":\"value\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/cc/api/v2/customers/188/settings/global/im.feature.versionEditing": {
+      "get": {
+        "summary": "Request Duplicate",
+        "description": "",
+        "operationId": "2f1fc7dd-34b6-4a08-b8a5-5554d82b15bc",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/trustees": {
+      "get": {
+        "summary": "Get Trustees",
+        "description": "",
+        "operationId": "8d7bbd3c-fc6e-4b60-a3f2-78b70935902f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/libraries/chicagoactive/users": {
+      "get": {
+        "summary": "Get Library Users",
+        "description": "",
+        "operationId": "f1597f8b-b4b2-4334-afaf-7ff0db3885a4",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/users": {
+      "get": {
+        "summary": "Scoped User Search",
+        "description": "",
+        "operationId": "96f0368d-7194-4e1b-ba78-3b5cab9fad00",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "default": "true",
+            "name": "total",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "false",
+            "name": "allow_logon",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"filters\":{\"allow_logon\":false}}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/users/markr": {
+      "get": {
+        "summary": "Get Library User",
+        "description": "",
+        "operationId": "c6e0ab22-87ea-4191-83d9-798b886e0933",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/US/groups/nrtadmin/members": {
+      "get": {
+        "summary": "Get Group Members",
+        "description": "",
+        "operationId": "9c634637-2ff2-415c-9729-b7eb32d42d3f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/users/mark/roles": {
+      "get": {
+        "summary": "Get Library Users Roles",
+        "description": "",
+        "operationId": "fc26c88d-0f66-4a17-ae09-73d3205a0af8",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/users": {
+      "post": {
+        "summary": "New Global User",
+        "description": "",
+        "operationId": "a5ce9f99-fd91-4b1d-961e-af6d6c148fcc",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"id\":\"jeffo14\",\"full_name\":\"jeffo14\",\"user_id_ex\":\"jeggo14\",\"email\":\"jeffo14@badguy17.wtf\",\"allow_logon\":true,\"user_password\":\"password123\",\"preferred_library\":\"ACTIVE\",\"user_nos\":2}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/users/AARON.RANGEL": {
+      "get": {
+        "summary": "Get Global User",
+        "description": "",
+        "operationId": "be17a84c-64f9-4969-8593-d2812b8b3644",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"id\":\"jeffo14\",\"full_name\":\"jeffo14\",\"user_id_ex\":\"jeggo14\",\"email\":\"jeffo14@badguy17.wtf\",\"allow_logon\":true,\"user_password\":\"password123\",\"preferred_library\":\"ACTIVE\",\"user_nos\":2}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/users/jeffo11": {
+      "patch": {
+        "summary": "Update Global User",
+        "description": "",
+        "operationId": "6f552fda-8162-451b-9fdc-846ce919ec21",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"allow_logon\":false}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/workspaces/search": {
+      "post": {
+        "summary": "Search Workspace",
+        "description": "",
+        "operationId": "d5afc756-e90d-404e-8e26-8449c73a0fd5",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"filters\":{\"language\":\"en,es,fr\",\"libraries\":\"Australia2,AzureEU,Brazil,CUS01,CUS02,CanadaActive,ChicagoActive,EUS201,JapanActive,LondonActive,SingaporeActive,SydneyActive,UAE\",\"name\":\"drosden\"},\"limit\":500,\"profile_fields\":{\"workspace\":[\"id\",\"name\"]},\"timezone_offset\":360}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces": {
+      "get": {
+        "summary": "Get Library Workspaces",
+        "description": "",
+        "operationId": "d74988df-4c24-47b6-877b-7f6f353397f6",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Workspace",
+        "description": "",
+        "operationId": "96a154de-6f25-48ee-b523-617fe0df1224",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"API Test Workspace\",\"default_security\":\"public\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/customers/188/workspaces": {
+      "get": {
+        "summary": "Get Workspaces",
+        "description": "",
+        "operationId": "acba66d9-3107-4d1a-b901-fce2a34d08c0",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038": {
+      "get": {
+        "summary": "Get Workspace",
+        "description": "",
+        "operationId": "d2e766ed-ad52-455d-ac53-83e4e65294a9",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038/name-value-pairs": {
+      "get": {
+        "summary": "Get Workspace NVP",
+        "description": "",
+        "operationId": "1cee20c0-884e-4954-880f-29215f5337c3",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038/children": {
+      "get": {
+        "summary": "Get Workspace Children Documents",
+        "description": "",
+        "operationId": "2403e3f2-fc9c-4d52-b661-6fede5cf7525",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038/operations": {
+      "get": {
+        "summary": "Get Workspace Operations",
+        "description": "",
+        "operationId": "56c4268a-3a52-46cd-9234-3e511b71dd2d",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038/security": {
+      "get": {
+        "summary": "Get Workspace Security",
+        "description": "",
+        "operationId": "7b5938f8-c46c-4096-861e-3930a5165ac3",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Update Workspace Security",
+        "description": "",
+        "operationId": "302d635e-d82e-417f-af5e-0721fbc17468",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n    \"default_security\": \"public\",\n    \"include\": [\n        {\n            \"access_level\": \"full_access\",\n            \"id\": \"ACTIVE_REGULAR3\",\n            \"type\": \"user\"\n        },\n        {\n            \"access_level\": \"read\",\n            \"id\": \"ACTIVE_TIER3\",\n            \"type\": \"user\"\n        }\n    ]\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/ACTIVE/workspaces": {
+      "get": {
+        "summary": "Get Workspace User Security",
+        "description": "",
+        "operationId": "d47a60e9-c8de-4a78-8ee7-6415540028b0",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CHICAGOACTIVE!46038/users/search": {
+      "get": {
+        "summary": "Get Workspace Users",
+        "description": "",
+        "operationId": "3d20cdc9-9858-4ab6-b7fb-92282b912890",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CUS02!10/tabs": {
+      "post": {
+        "summary": "Create Workspace Tab",
+        "description": "",
+        "operationId": "ab169a04-3a27-41c6-ac25-c857f1eda4be",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"Enron Staffing\",\"description\":\"Staff for Enron case\",\"default_security\":\"inherit\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CUS02!10/folders": {
+      "post": {
+        "summary": "Create Workspace Folder",
+        "description": "",
+        "operationId": "76c40859-f4dd-4c5d-b63d-b875f34432e2",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"name\":\"CMEK Project\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CUS02!10/search-folders": {
+      "post": {
+        "summary": "Create Workspace Search Folder Copy",
+        "description": "",
+        "operationId": "c1e4db31-3597-4cfb-a118-9740e7920fa6",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n\t\"name\":\"Demo Search Folder\",\n\t\"default_security\":\"inherit\",\n\t\"searchprofile\":{\n\t\t\"name\":\"Search Parameter\",\n\t\t\"documents_only\":\"true\"\n\t}\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/libraries/chicagoactive/workspaces/CUS02!10": {
+      "patch": {
+        "summary": "Patch Workspace",
+        "description": "",
+        "operationId": "8ae9f8f4-a983-47d5-9664-98daa5d78bc7",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Workspace",
+        "description": "",
+        "operationId": "38d05188-d010-457c-9340-74b0f6df66c8",
+        "consumes": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\n  \"type\": \"value\",\n  \"value\": [true, false, 123, \"123\", {\"abc\":\"123\", \"def\":[]}]\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/libraries/chicagoactive/sync/workspaces/crawl": {
+      "post": {
+        "summary": "Request",
+        "description": "",
+        "operationId": "c66c95dc-b7a5-4f7a-a908-ec3a4163fcde",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "mSZXwK3TGgo6tiaGOz4GZqK4aZTfvfBTnTs8VfZqoxA",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"cursor\":\"\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/api/v2/customers/188/libraries/chicagoactive/sync/documents/recent-activities/crawl": {
+      "post": {
+        "summary": "Crawl Document Activity",
+        "description": "",
+        "operationId": "b89858c5-55eb-4752-86dd-08f83569a23d",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "mSZXwK3TGgo6tiaGOz4GZqK4aZTfvfBTnTs8VfZqoxA",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"cursor\":\"\",\"limit\":\"1000\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/cc/api/platform/v2/customers/188/settings/system/domains": {
+      "get": {
+        "summary": "Get Domains",
+        "description": "",
+        "operationId": "191a8e56-5d98-4679-80c7-12910798f89f",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Domain",
+        "description": "",
+        "operationId": "1feb587b-733b-445d-8028-74dc0ba3fc06",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"subdomain\":\"floofer\",\"type\":\"secondary\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/work/cc/api/platform/v2/customers/188/settings/system/domains/387999997845597655": {
+      "delete": {
+        "summary": "Delete Domain",
+        "description": "",
+        "operationId": "f039baba-2be1-400f-86c5-2b7109b7630d",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/encryption/master-keys": {
+      "get": {
+        "summary": "Get Master Keys",
+        "description": "",
+        "operationId": "859d201b-230e-4e84-9448-f29bcfcf67a8",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/api/v2/customers/188/features": {
+      "get": {
+        "summary": "Get Features",
+        "description": "",
+        "operationId": "c36aed10-bb0a-45b4-a6bd-ecc109da1031",
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/auth/api/v1/login": {
+      "post": {
+        "summary": "Auth",
+        "description": "",
+        "operationId": "faa414e3-1387-4296-89d6-608f60ab74c2",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "Cookie",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"email\":\"mark.richman@us.imanage.work\",\"password\":\"pH$UngyGe8xL8GSm\"}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/customers/188/libraries/chicagoactive/users/markr/my-favorites/admin-import": {
+      "post": {
+        "summary": "Admin Import Favorites",
+        "description": "",
+        "operationId": "2d3d7c84-15a1-46b6-bd09-9c46109ee140",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"shortcuts\":[{\"name\":\"Admin Import New Matter\",\"target_id\":\"ChicagoActive!46025\",\"wstype\":\"workspace\"}]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/documents/ACTIVE!52497.1/history/admin-import": {
+      "post": {
+        "summary": "admin-import post document audit logs",
+        "description": "",
+        "operationId": "8c9077eb-8e68-44f1-9726-5339f8fa118f",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "gakW8S3Cu1ruPMJ9-91nKioXAbpQ9_jX3N0PE0e4mbM",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "\n[\n\t{\"activity\": \"view\", \"activity_date\": \"2019-03-27T06:48:14.847800-07:00\", \"user\": \"acase\", \"application_name\": \"Work Web\"},\n\t{\"activity\": \"view\", \"activity_date\": \"2019-03-28T06:48:14.847800-07:00\", \"user\": \"jim.vogel\", \"application_name\": \"Work Web\"}\n\t]\n"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/supervised-workspaces": {
+      "post": {
+        "summary": "supervised workspace import",
+        "description": "",
+        "operationId": "baf49d5a-7661-40ad-a588-5317c796107c",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "gakW8S3Cu1ruPMJ9-91nKioXAbpQ9_jX3N0PE0e4mbM",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{ \n\t\"name\": \"gfutestsws\",\n\t\"owner\": \"BCUMMINGS\",\n\t\"last_user\": \"BCUMMINGS\",\n\t\"default_security\": \"public\",\n\t\"create_date\": \"2017-03-19T20:11:20Z\",\n\t\"edit_date\": \"2018-03-19T20:11:20Z\",\n\t\n\t\"document_number\": 554513,\n\t\"is_external_as_normal\": true,\n\t\"description\": \"Supervised Workspace\",\n\t\"retain_days\": 100,\n\t\"comment\": \"Supervised Workspace test\"\n\t, \"is_hipaa\": false\n\t, \"is_declared\": true\n\t, \"declared_date\": \"2016-03-19T20:11:20Z\"\n\t, \"indexable\": true\n\t, \"is_container_saved_search\": true\n\t, \"is_content_saved_search\": true\n\t, \"is_restorable\": true\n\t, \"subclass\": \"programs\"\n\t, \"custom1\": \"0995\"\n\t, \"custom2\": \"0021\"\n\t, \"custom3\": \"ACTIVE\"\n\t, \"custom4\": \"NC\"\n\t, \"custom5\": \"AGR\"\n\t, \"custom6\": \"CHICAGO\"\n\t, \"custom7\": \"Custom7Testing\"\n\t, \"custom8\": \"Custom8Testing\"\n\t, \"custom9\": \"Custom9Testing\"\n\t, \"custom10\": \"Custom10Testing\"\n\t, \"custom11\": \"Custom11Testing\"\n\t, \"custom12\": \"BANK\"\n\t, \"custom13\": \"ACTIVE\"\n\t, \"custom14\": \"NC\"\n\t, \"custom15\": \"AGR\"\n\t, \"custom16\": \"CHICAGO\"\n\t, \"custom17\": 17\n\t, \"custom18\": 18\n\t, \"custom19\": 19\n\t, \"custom20\": 20\n\t, \"custom21\": \"2021-03-19T20:11:20Z\"\n\t, \"custom22\": \"2022-03-19T20:11:20Z\"\n\t, \"custom23\": \"2023-03-19T20:11:20Z\"\n\t, \"custom24\": \"2024-03-19T20:11:20Z\"\n\t, \"custom25\": true\n\t, \"custom26\": true\n\t, \"custom27\": false\n\t, \"custom28\": false\n\t, \"custom29\": \"BANK\"\n\t, \"custom30\": \"106\"\n    , \"project_custom1\": \"12345678\"\n    , \"project_custom2\": \"0001\"\n    , \"project_custom3\": \"APPROVED\"\n}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/customers": {
+      "get": {
+        "summary": "Customers",
+        "description": "",
+        "operationId": "7e95b6fa-eb90-4148-b79d-10dcdef82efb",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "DlzSoo0ptSRguw7Sr4amHO0A_9gdOwaJruYDpBVkGd4",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"id\":745,\"name\":\"test11\",\"description\":null,\"contact\":\"Mark\",\"address\":null,\"phone\":null,\"email\":\"markrichman@me.com\",\"domain\":\"scooby.co.uk\",\"internalDomains\":null,\"authProvider\":\"OIDC\",\"ldapHost\":null,\"ldapPort\":null,\"ldapUserName\":null,\"ldapPassword\":null,\"ldapBaseDn\":null,\"samlIdp\":null,\"oidcIdp\":null,\"virtualIdp\":{\"realm\":\"test11_745_Virtual\",\"clientId\":\"imanagevirtual\",\"discoveryUrl\":\"https://keycloak.service.imanagecloud.com:443/idp/realms/test11_745_Virtual/.well-known/openid-configuration\"},\"config\":{\"FEATURE_WORK\":true,\"FEATURE_SHARE\":true,\"FEATURE_THREAT_MANAGER\":false},\"pods\":[]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Tenant",
+        "description": "",
+        "operationId": "f9b8bcde-9b52-4679-b62b-ac5fa8b217ab",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "b_R3ZW7Tm1_XDxBl9IS4I7Qy7BhuQw5LjBU2fM9cbI0",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"id\":745,\"name\":\"test11\",\"description\":null,\"contact\":\"Mark\",\"address\":null,\"phone\":null,\"email\":\"markrichman@me.com\",\"domain\":\"scooby.co.uk\",\"internalDomains\":null,\"authProvider\":\"OIDC\",\"ldapHost\":null,\"ldapPort\":null,\"ldapUserName\":null,\"ldapPassword\":null,\"ldapBaseDn\":null,\"samlIdp\":null,\"oidcIdp\":null,\"virtualIdp\":{\"realm\":\"test11_745_Virtual\",\"clientId\":\"imanagevirtual\",\"discoveryUrl\":\"https://keycloak.service.imanagecloud.com:443/idp/realms/test11_745_Virtual/.well-known/openid-configuration\"},\"config\":{\"FEATURE_WORK\":true,\"FEATURE_SHARE\":true,\"FEATURE_THREAT_MANAGER\":false},\"pods\":[]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    },
+    "/check-user": {
+      "get": {
+        "summary": "Check User",
+        "description": "",
+        "operationId": "36eac144-e9c5-48e9-8079-d0c3caed0a76",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "default": "DlzSoo0ptSRguw7Sr4amHO0A_9gdOwaJruYDpBVkGd4",
+            "name": "X-Auth-Token",
+            "required": false,
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "{\"id\":745,\"name\":\"test11\",\"description\":null,\"contact\":\"Mark\",\"address\":null,\"phone\":null,\"email\":\"markrichman@me.com\",\"domain\":\"scooby.co.uk\",\"internalDomains\":null,\"authProvider\":\"OIDC\",\"ldapHost\":null,\"ldapPort\":null,\"ldapUserName\":null,\"ldapPassword\":null,\"ldapBaseDn\":null,\"samlIdp\":null,\"oidcIdp\":null,\"virtualIdp\":{\"realm\":\"test11_745_Virtual\",\"clientId\":\"imanagevirtual\",\"discoveryUrl\":\"https://keycloak.service.imanagecloud.com:443/idp/realms/test11_745_Virtual/.well-known/openid-configuration\"},\"config\":{\"FEATURE_WORK\":true,\"FEATURE_SHARE\":true,\"FEATURE_THREAT_MANAGER\":false},\"pods\":[]}"
+            },
+            "in": "body",
+            "name": "body"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "no response description was provided for this operation"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

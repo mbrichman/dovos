@@ -1,0 +1,325 @@
+# chat_web – maintainable Flask refactor
+# ====================================
+# Copy each "### -- module.py --" block into its own file under a
+# `chat_web` package (or keep as one file if you prefer).  Then run:
+#   $ flask --app chat_web run --debug
+# Requires: Flask, Flask-WTF, WTForms, Rich, chromadb, sentence-transformers, python-docx
+# ---------------------------------------------------------------------------
+
+### -- chat_web/config.py --
+from pathlib import Path
+
+# ─── Persisted data ──────────────────────────────────────────────────────
+BASE_DIR         = Path(__file__).resolve().parent
+PERSIST_DIR      = BASE_DIR / "chroma_storage"
+PERSIST_DIR.mkdir(exist_ok=True)
+COLLECTION_NAME  = "chat_history"
+META_DB          = BASE_DIR / "metadata_store.json"
+BACKUP_DIR       = BASE_DIR / "backups"
+
+# ─── Embeddings ──────────────────────────────────────────────────────────
+DEFAULT_MODEL    = "all-MiniLM-L6-v2"
+
+# ─── Flask ───────────────────────────────────────────────────────────────
+SECRET_KEY       = "change-me-in-production"
+
+
+### -- chat_web/utils.py --
+from __future__ import annotations
+import hashlib, json, shutil, re
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
+from rich.console import Console
+
+console = Console()
+ISO_FMT = "%Y-%m-%dT%H:%M:%S"
+ROLE_HDRS = {
+    "you said": "you-said",
+    "chatgpt said": "chatgpt-said",
+}
+
+
+def md5_file(p: Path) -> str:
+    h = hashlib.md5()
+    with p.open('rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''): h.update(chunk)
+    return h.hexdigest()
+
+
+def ts_iso(ts: float|None) -> Optional[str]:
+    if ts is None: return None
+    try: return datetime.fromtimestamp(ts).strftime(ISO_FMT)
+    except ValueError: return None
+
+
+def parse_date(rng: str|None):
+    if not rng: return None, None
+    rng = rng.lower()
+    now = datetime.now()
+    presets = {"today": 0, "week":7, "month":30, "year":365}
+    if rng in presets:
+        start = now - timedelta(days=presets[rng])
+        return start.strftime(ISO_FMT), now.strftime(ISO_FMT)
+    return None, None
+
+
+def highlight(html: str, concepts: list[str]|None=None):
+    for hdr, cls in ROLE_HDRS.items():
+        html = re.sub(fr"\*\*{re.escape(hdr)}:\*\*", f"<div class='{cls}'><strong>{hdr.title()}:</strong></div>", html, flags=re.I)
+    if concepts:
+        for word in concepts:
+            html = re.sub(fr"\b({re.escape(word)})\b", r"<span class='concept'>\1</span>", html, flags=re.I)
+    return html
+
+
+### -- chat_web/embeddings.py --
+from functools import lru_cache
+from sentence_transformers import SentenceTransformer
+from .config import DEFAULT_MODEL
+from .utils import console
+
+@lru_cache(maxsize=1)
+def model():
+    console.status("[green]Loading embedding model…")
+    return SentenceTransformer(DEFAULT_MODEL)
+
+
+def embed(texts):
+    return model().encode(texts, show_progress_bar=False).tolist()
+
+
+### -- chat_web/store.py --
+import chromadb
+from typing import Any, Iterable
+from .config import PERSIST_DIR, COLLECTION_NAME
+
+class VectorStore:
+    def __init__(self):
+        self._client = chromadb.PersistentClient(str(PERSIST_DIR))
+        self._col    = self._client.get_or_create_collection(COLLECTION_NAME)
+
+    # ─── basic crud ────────────────────────────────────────────────────
+    def add(self, *, docs: Iterable[str], ids: list[str], embeds, metas):
+        self._col.add(documents=list(docs), ids=ids, embeddings=embeds, metadatas=metas)
+
+    def update(self, *, id: str, doc: str, embed, meta):
+        self._col.update(ids=[id], documents=[doc], embeddings=[embed], metadatas=[meta])
+
+    def delete(self, ids: list[str]):
+        self._col.delete(ids=ids)
+
+    def query(self, *, embed, n:int=5, where=None):
+        return self._col.query(query_embeddings=[embed], n_results=n, where=where)
+
+    def get(self, *, where=None, include=None, limit=None):
+        return self._col.get(where=where, include=include, limit=limit)
+
+    def count(self):
+        return self._col.count()
+
+
+### -- chat_web/metadata.py --
+import json, hashlib
+from pathlib import Path
+from .config import META_DB
+from .utils import console
+
+class MetaStore(dict):
+    """JSON-backed dict for checksums & timestamps."""
+    def __init__(self):
+        super().__init__()
+        if META_DB.exists():
+            try: self.update(json.loads(META_DB.read_text()))
+            except json.JSONDecodeError: console.print("[red]Corrupt metadata store; starting fresh.")
+
+    def save(self):
+        META_DB.write_text(json.dumps(self, indent=2))
+
+    @staticmethod
+    def checksum(s: str):
+        return hashlib.md5(s.encode()).hexdigest()
+
+
+### -- chat_web/archive.py --
+from __future__ import annotations
+from typing import Any
+from datetime import datetime
+from .store import VectorStore
+from .metadata import MetaStore
+from .embeddings import embed
+from .utils import console
+
+class Archive:
+    def __init__(self):
+        self.store = VectorStore()
+        self.meta  = MetaStore()
+
+    # ─── high-level api ────────────────────────────────────────────────
+    def upsert(self, *, id: str, text: str, meta: dict[str,Any]):
+        vec = embed([text])[0]
+        if id in self.meta:
+            self.store.update(id=id, doc=text, embed=vec, meta=meta)
+        else:
+            self.store.add(docs=[text], ids=[id], embeds=[vec], metas=[meta])
+        self.meta[id] = meta | {"checksum": MetaStore.checksum(text), "last_indexed": datetime.now().isoformat()}
+        self.meta.save()
+
+    def count(self):
+        return self.store.count()
+
+    def search(self, text:str, k:int=5, where=None):
+        return self.store.query(embed=embed([text])[0], n=k, where=where)
+
+    def docs(self, **kw):
+        return self.store.get(**kw)
+
+archive = Archive()  # singleton for app
+
+
+### -- chat_web/forms.py --
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, IntegerField
+from wtforms.validators import DataRequired, Optional
+
+class SearchForm(FlaskForm):
+    query         = StringField("Query", validators=[DataRequired()])
+    results_count = IntegerField("Results", default=5, validators=[Optional()])
+    search_type   = SelectField("Type", choices=[("semantic","Semantic"),("keyword","Keyword")])
+    date_filter   = SelectField("Date", choices=[("all","All"),("today","Today"),("week","Last week"),("month","Last month"),("year","Last year")])
+
+
+### -- chat_web/ingest.py --
+"""Importers for .json and .docx."""
+from pathlib import Path
+from typing import List, Tuple
+from datetime import datetime
+import json, re
+from docx import Document
+from .utils import md5_file, ts_iso
+
+ROLE_RE = re.compile(r"^(You|ChatGPT|Assistant|System|User)(?:\s+said)?:?$", re.I)
+
+def from_docx(path: Path) -> Tuple[str,str,dict]:
+    doc, parts, role, buf = Document(path), [], None, []
+    def flush():
+        nonlocal buf, role
+        if role and buf:
+            parts.append(f"**{role}**:\n\n"+"\n".join(buf)+"\n"); buf=[]
+    for p in doc.paragraphs:
+        t=p.text.strip();
+        if not t: flush(); role=None; continue
+        if ROLE_RE.match(t): flush(); role=ROLE_RE.match(t).group(1); continue
+        buf.append(t)
+    flush()
+    full="\n".join(parts)
+    meta={"title": path.name,"source":"docx","file_path":str(path)}
+    return f"docx-{md5_file(path)}", full, meta
+
+
+def from_chat_json(path: Path) -> List[Tuple[str,str,dict]]:
+    data=json.loads(path.read_text())
+    convs=data if isinstance(data,list) else data.get("conversations",[])
+    out=[]
+    for idx,cv in enumerate(convs):
+        msgs=[]; ts=[]
+        for m in sorted(cv.get("mapping",{}).values(), key=lambda m: m.get("create_time",0)):
+            message=m.get("message");
+            if not message:continue
+            role=message.get("author",{}).get("role","unknown")
+            text=" ".join(p for p in message.get("content",{}).get("parts",[]) if isinstance(p,str)).strip()
+            if not text:continue
+            stamp=message.get("create_time")
+            ts.append(stamp) if stamp else None
+            dt=ts_iso(stamp) or "unknown time"
+            hdr="You said" if role=="user" else "ChatGPT said" if role=="assistant" else role.capitalize()
+            msgs.append(f"**{hdr}** *(on {dt})*:\n\n{text}")
+        if not msgs:continue
+        earliest, latest = (min(ts),max(ts)) if ts else (None,None)
+        meta={"title":cv.get("title",f"Chat {idx}"),"source":"json","earliest_ts":ts_iso(earliest),"latest_ts":ts_iso(latest)}
+        doc_id=f"chat-{cv.get('id',idx)}"
+        out.append((doc_id,"\n\n".join(msgs),meta))
+    return out
+
+
+### -- chat_web/blueprints/main.py --
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
+from pathlib import Path
+import markdown
+from .forms import SearchForm
+from ..archive import archive
+from ..utils import highlight, parse_date
+from ..ingest import from_docx, from_chat_json
+
+bp = Blueprint("main", __name__)
+
+@bp.route("/", methods=["GET","POST"])
+def index():
+    form = SearchForm()
+    results = []
+    if form.validate_on_submit():
+        start,end = parse_date(form.date_filter.data)
+        where = {"earliest_ts":{"$gte":start},"latest_ts":{"$lte":end}} if start else None
+        res = archive.search(form.query.data, k=form.results_count.data, where=where)
+        for doc, meta in zip(res['documents'][0], res['metadatas'][0]):
+            html = highlight(markdown.markdown(doc, extensions=["extra"]), concepts=["attachment","eclipse","the Pattern"])
+            results.append({"title":meta.get("title","Untitled"),"html":html,"meta":meta})
+    return render_template("index.html", form=form, results=results, count=archive.count())
+
+@bp.route("/upload", methods=["POST"])
+def upload():
+    file = request.files.get("file")
+    if not file: flash("No file uploaded","error"); return redirect(url_for("main.index"))
+    tmp=Path("/tmp")/file.filename
+    file.save(tmp)
+    try:
+        if tmp.suffix==".json":
+            for doc_id,text,meta in from_chat_json(tmp): archive.upsert(id=doc_id,text=text,meta=meta)
+        elif tmp.suffix==".docx":
+            doc_id,text,meta = from_docx(tmp); archive.upsert(id=doc_id,text=text,meta=meta)
+        else:
+            flash("Unsupported file type","error"); return redirect(url_for("main.index"))
+        flash("File indexed successfully","success")
+    finally:
+        tmp.unlink(missing_ok=True)
+    return redirect(url_for("main.index"))
+
+@bp.route("/stats")
+def stats():
+    meta = archive.docs(include=["metadatas"], limit=9999)["metadatas"]
+    sources={}
+    for m in meta: sources[m.get("source","unknown")]=sources.get(m.get("source","unknown"),0)+1
+    return render_template("stats.html", total=archive.count(), sources=sources)
+
+@bp.route("/export/<doc_id>")
+def export(doc_id):
+    res=archive.docs(where={"id":doc_id}, include=["documents","metadatas"])
+    if not res or not res.get("documents"): return "Not found",404
+    doc,res_meta = res["documents"][0], res["metadatas"][0]
+    md = f"# {res_meta.get('title','Conversation')}\n\n"+doc
+    return Response(md,mimetype="text/markdown",headers={"Content-Disposition":f"attachment; filename={doc_id}.md"})
+
+
+### -- chat_web/__init__.py --
+from flask import Flask
+from .config import SECRET_KEY
+from .blueprints import main as main_bp
+
+
+def create_app():
+    app = Flask(__name__)
+    app.config.update(SECRET_KEY=SECRET_KEY)
+    app.register_blueprint(main_bp.bp)
+    return app
+
+
+### -- chat_web/blueprints/__init__.py --
+from . import main
+
+
+### -- run.py --
+"""Convenience script: `python run.py`"""
+from chat_web import create_app
+app = create_app()
+if __name__ == "__main__":
+    app.run(debug=True)

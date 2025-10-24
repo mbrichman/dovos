@@ -82,7 +82,14 @@ temp_upload.*
 temp_docx_dir/
 
 # Logs
-*.logchroma_db/
+*.log
+chroma_db/
 extracted_attachments/
 data/
 scripts/archived/
+
+# Large data files
+Source Files/
+*.json
+!tests/**/*.json
+!api/**/*.json

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversations - ChatGPT Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1100px;
+        }
+        .header {
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #17a2b8;
+        }
+        .conversation-card {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eaeaea;
+        }
+
+        .conversation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+
+        .conversation-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .conversation-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+            background-color: #f1f1f1;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .conversation-preview {
+            padding: 1rem;
+            background-color: white;
+            color: #555;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .conversation-preview::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+        }
+
+        .conversation-footer {
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .filters {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .date-header {
+            margin: 1.5rem 0 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header d-flex justify-content-between align-items-center">
+            <h2>Conversations</h2>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/conversations">Conversations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/stats">Stats</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="filters">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Source</label>
+                    <select class="form-select" id="sourceFilter">
+                        <option value="all" selected>All Sources</option>
+                        <option value="json">JSON Export</option>
+                        <option value="docx">Word Documents</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="all" selected>All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">Past Week</option>
+                        <option value="month">Past Month</option>
+                        <option value="year">Past Year</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Sort Order</label>
+                    <select class="form-select" id="sortOrder">
+                        <option value="newest" selected>Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Replace this section in your conversations.html template -->
+
+        <!-- Replace the entire conversation list section in conversations.html -->
+
+{% if conversations %}
+    <div id="conversationList">
+        <!-- No date headers at all, just the conversation cards -->
+        {% for conversation in conversations %}
+            <div class="conversation-card" data-source="{{ conversation.meta.source }}" data-date="{{ conversation.meta.earliest_ts }}">
+                <div class="conversation-header">
+                    <h5 class="conversation-title">{{ conversation.meta.title }}</h5>
+                    <span class="conversation-date date-to-format">{{ conversation.meta.earliest_ts }}</span>
+                </div>
+                <div class="conversation-preview">
+                    {{ conversation.preview|safe }}
+                </div>
+                <div class="conversation-footer">
+                    <a href="/view/{{ conversation.id }}" class="btn btn-sm btn-outline-primary">View Conversation</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+            
+    {% if page_count > 1 %}
+    <div class="page-navigation">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('conversations', page=current_page-1) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                
+                {% for p in range(1, page_count + 1) %}
+                <li class="page-item {% if p == current_page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('conversations', page=p) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                
+                <li class="page-item {% if current_page == page_count %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('conversations', page=current_page+1) }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">💬</div>
+        <h3>No Conversations Found</h3>
+        <p>Upload some ChatGPT conversations to get started.</p>
+        <a href="/upload" class="btn btn-primary mt-3">Upload Conversations</a>
+    </div>
+{% endif %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format dates
+            formatDates();
+            
+            // Set up filtering
+            setupFilters();
+        });
+        
+        function formatDates() {
+            const dateElements = document.querySelectorAll('.date-to-format');
+            
+            dateElements.forEach(function(element) {
+                const dateStr = element.textContent.trim();
+                const formattedDate = formatDateNicely(dateStr);
+                element.textContent = formattedDate;
+            });
+        }
+        
+        function setupFilters() {
+            const sourceFilter = document.getElementById('sourceFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const sortOrder = document.getElementById('sortOrder');
+            
+            if (!sourceFilter || !dateFilter || !sortOrder) return;
+            
+            const filters = [sourceFilter, dateFilter, sortOrder];
+            
+            filters.forEach(filter => {
+                filter.addEventListener('change', applyFilters);
+            });
+            
+            // Apply filters on load (in case of page refresh with selection)
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            const sourceFilter = document.getElementById('sourceFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            // Get all conversation cards
+            const cards = document.querySelectorAll('.conversation-card');
+            
+            cards.forEach(card => {
+                // Start with visible
+                let shouldShow = true;
+                
+                // Apply source filter
+                if (sourceFilter !== 'all') {
+                    const cardSource = card.getAttribute('data-source');
+                    if (cardSource !== sourceFilter) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // Apply date filter
+                if (shouldShow && dateFilter !== 'all') {
+                    const cardDate = new Date(card.getAttribute('data-date'));
+                    const now = new Date();
+                    
+                    if (isNaN(cardDate.getTime())) {
+                        // If date parsing fails, show the card anyway
+                    } else {
+                        // Apply date filters
+                        if (dateFilter === 'today') {
+                            if (cardDate.toDateString() !== now.toDateString()) {
+                                shouldShow = false;
+                            }
+                        } else if (dateFilter === 'week') {
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            if (cardDate < weekAgo) {
+                                shouldShow = false;
+                            }
+                        } else if (dateFilter === 'month') {
+                            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            if (cardDate < monthAgo) {
+                                shouldShow = false;
+                            }
+                        } else if (dateFilter === 'year') {
+                            const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                            if (cardDate < yearAgo) {
+                                shouldShow = false;
+                            }
+                        }
+                    }
+                }
+                
+                // Show or hide the card
+                card.style.display = shouldShow ? 'block' : 'none';
+            });
+            
+            // Apply sort order - Note: This would require DOM manipulation
+            // For better performance, this should be done server-side by changing the sort parameter in the URL
+            
+            // Show or hide date headers based on visible cards
+            updateDateHeaders();
+        }
+        
+        function updateDateHeaders() {
+            // Get all date headers
+            const dateHeaders = document.querySelectorAll('.date-header');
+            
+            dateHeaders.forEach(header => {
+                // Find the next header or the end
+                let nextHeader = header.nextElementSibling;
+                while (nextHeader && !nextHeader.classList.contains('date-header')) {
+                    nextHeader = nextHeader.nextElementSibling;
+                }
+                
+                // Check if there are any visible cards between this header and the next
+                let hasVisibleCards = false;
+                let current = header.nextElementSibling;
+                
+                while (current && current !== nextHeader) {
+                    if (current.classList.contains('conversation-card') && current.style.display !== 'none') {
+                        hasVisibleCards = true;
+                        break;
+                    }
+                    current = current.nextElementSibling;
+                }
+                
+                // Show or hide the header
+                header.style.display = hasVisibleCards ? 'block' : 'none';
+            });
+        }
+        
+        // Helper function to format dates nicely
+        // Replace this in your conversations.html template's JavaScript section
+// Find the formatDateNicely function and update it:
+
+// Add or update this function in your JavaScript:
+
+function formatDateNicely(dateStr) {
+    try {
+        // Handle different formats
+        let date;
+        
+        // Try parsing different date formats
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}T/)) {
+            // ISO format: 2025-03-03T10:01:18
+            date = new Date(dateStr);
+        } 
+        else if (dateStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
+            // Format: 2025-03-03 10:01:18
+            date = new Date(dateStr.replace(' ', 'T'));
+        }
+        else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // Format: 2025-03-03
+            date = new Date(dateStr);
+        }
+        else {
+            // Unknown format, return as is
+            return dateStr;
+        }
+        
+        // If date parsing failed, return original
+        if (isNaN(date.getTime())) {
+            return dateStr;
+        }
+        
+        // Format the date as day number and time 
+        const day = date.getDate();
+        const time = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        return `${day}, ${time}`;
+    } catch (e) {
+        console.error("Error formatting date:", e);
+        return dateStr;
+    }
+}
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1171 @@
+import json
+import os
+import re
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from flask import Flask, render_template, request
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, IntegerField
+from wtforms.validators import DataRequired, Optional
+
+from sentence_transformers import SentenceTransformer
+import chromadb
+import markdown
+from docx import Document
+
+# === CONFIG ===
+COLLECTION_NAME = "chat_history"
+PERSIST_DIR = "./chroma_storage"
+DEFAULT_EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+
+# Create storage dir if it doesn't exist
+Path(PERSIST_DIR).mkdir(exist_ok=True)
+
+
+# === ChatArchive Class ===
+class ChatArchive:
+    def __init__(self):
+        self.embedder = None
+        self.chroma_client = None
+        self.collection = None
+        self._initialize()
+
+    def _initialize(self):
+        """Initialize embedding model and database connection"""
+        # Initialize chromadb client
+        self.chroma_client = chromadb.PersistentClient(path=PERSIST_DIR)
+
+        # Initialize collection
+        self.collection = self.chroma_client.get_or_create_collection(
+            COLLECTION_NAME,
+            metadata={
+                "description": "ChatGPT conversation history with timestamp indexing"
+            },
+        )
+
+    def load_embedder(self):
+        """Load the embedding model (done lazily to save resources)"""
+        if self.embedder is None:
+            print("Loading embedding model...")
+            self.embedder = SentenceTransformer(DEFAULT_EMBEDDING_MODEL)
+        return self.embedder
+
+    def get_count(self):
+        """Get the number of documents in the collection"""
+        return self.collection.count()
+
+    def delete_collection(self):
+        """Delete the collection"""
+        self.chroma_client.delete_collection(COLLECTION_NAME)
+        # Reinitialize
+        self.collection = self.chroma_client.create_collection(COLLECTION_NAME)
+
+    def add_documents(self, documents, embeddings, metadatas, ids):
+        """Add documents to the collection"""
+        self.collection.add(
+            documents=documents, embeddings=embeddings, metadatas=metadatas, ids=ids
+        )
+
+    def query(self, query_embeddings, n_results=5, where=None):
+        """Query the collection"""
+        if where:
+            return self.collection.query(
+                query_embeddings=query_embeddings, n_results=n_results, where=where
+            )
+        else:
+            return self.collection.query(
+                query_embeddings=query_embeddings, n_results=n_results
+            )
+
+    def get_documents(self, where=None, include=None, limit=None):
+        """Get documents from the collection"""
+        kwargs = {}
+        if where:
+            kwargs["where"] = where
+        if include:
+            kwargs["include"] = include
+        if limit:
+            kwargs["limit"] = limit
+
+        return self.collection.get(**kwargs)
+
+    def search(self, query_text, n_results=5, date_range=None, keyword_search=False):
+        """Unified search interface"""
+        # Load embedder if needed
+        embedder = self.load_embedder()
+
+        # Handle date filtering
+        date_filter = None
+        if date_range:
+            start_date, end_date = date_range
+            if start_date and end_date:
+                date_filter = {
+                    "$and": [
+                        {"earliest_ts": {"$gte": start_date}},
+                        {"latest_ts": {"$lte": end_date}},
+                    ]
+                }
+
+        if keyword_search:
+            # Get all docs matching date filter if specified
+            where_filter = date_filter if date_filter else None
+            all_docs = self.get_documents(
+                where=where_filter, include=["documents", "metadatas"], limit=9999
+            )
+            terms = (
+                query_text.replace("AND", "&&")
+                .replace("OR", "||")
+                .replace("NOT", "!!")
+                .split()
+            )
+            matches = []
+
+            def match(doc):
+                text = doc.lower()
+                expr = ""
+                for term in terms:
+                    if term == "&&":
+                        expr += " and "
+                    elif term == "||":
+                        expr += " or "
+                    elif term == "!!":
+                        expr += " not "
+                    else:
+                        expr += f"'{term.lower()}' in text"
+                try:
+                    return eval(expr)
+                except Exception:
+                    return False
+
+            for idx, doc in enumerate(all_docs["documents"]):
+                if match(doc):
+                    matches.append((doc, all_docs["metadatas"][idx]))
+
+            # Format results like a query response
+            if not matches:
+                return {"documents": [[]], "metadatas": [[]]}
+
+            documents = [m[0] for m in matches[:n_results]]
+            metadatas = [m[1] for m in matches[:n_results]]
+
+            return {"documents": [documents], "metadatas": [metadatas]}
+        else:
+            # Vector search
+            embedding = embedder.encode([query_text])[0]
+
+            # Perform the query with date filter if specified
+            return self.query(
+                query_embeddings=[embedding.tolist()],
+                n_results=n_results,
+                where=date_filter,
+            )
+
+    def index_json(self, json_path, chunk_size=0):
+        """Index ChatGPT conversations from a JSON export"""
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            print("Invalid JSON file")
+            return False, "Invalid JSON file"
+        except FileNotFoundError:
+            print(f"File '{json_path}' not found")
+            return False, f"File '{json_path}' not found"
+
+        # Load embedder
+        embedder = self.load_embedder()
+
+        conversations = (
+            data if isinstance(data, list) else data.get("conversations", [])
+        )
+        print(f"Found {len(conversations)} conversations in the JSON file")
+
+        if len(conversations) == 0:
+            return False, "No conversations found in the JSON file"
+
+        documents, metadatas, ids = [], [], []
+
+        for idx, conv in enumerate(conversations):
+            messages = []
+            message_map = conv.get("mapping", {})
+            ordered = sorted(
+                message_map.values(), key=lambda m: m.get("create_time", 0)
+            )
+
+            # Store all timestamps for more comprehensive filtering
+            timestamps = []
+
+            for msg in ordered:
+                message = msg.get("message")
+                if not message:
+                    continue
+
+                role = message.get("author", {}).get("role", "unknown")
+                parts = message.get("content", {}).get("parts", [])
+                content = " ".join([p for p in parts if isinstance(p, str)]).strip()
+                if not content:
+                    continue
+
+                ts = message.get("create_time", None)
+                if ts:
+                    timestamps.append(ts)
+                dt_str = (
+                    datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+                    if ts
+                    else "unknown time"
+                )
+
+                if role == "user":
+                    messages.append(f"**You said** *(on {dt_str})*:\n\n{content}")
+                elif role == "assistant":
+                    messages.append(f"**ChatGPT said** *(on {dt_str})*:\n\n{content}")
+                else:
+                    messages.append(
+                        f"*{role.capitalize()}* *(on {dt_str})*:\n\n{content}"
+                    )
+
+            # Calculate earliest and latest timestamps
+            valid_timestamps = [ts for ts in timestamps if ts]
+            earliest_ts = min(valid_timestamps) if valid_timestamps else None
+            latest_ts = max(valid_timestamps) if valid_timestamps else None
+
+            # Convert timestamps to ISO format for better filtering
+            earliest_ts_iso = (
+                datetime.fromtimestamp(earliest_ts).isoformat() if earliest_ts else None
+            )
+            latest_ts_iso = (
+                datetime.fromtimestamp(latest_ts).isoformat() if latest_ts else None
+            )
+
+            full_text = "\n\n".join(messages)
+
+            # Skip empty conversations
+            if not full_text.strip():
+                continue
+
+            # Handle chunking if enabled
+            if chunk_size > 0 and len(messages) > chunk_size:
+                chunks = [
+                    messages[i : i + chunk_size]
+                    for i in range(0, len(messages), chunk_size)
+                ]
+
+                for chunk_idx, chunk in enumerate(chunks):
+                    chunk_text = "\n\n".join(chunk)
+                    chunk_title = f"{conv.get('title', f'Chat {idx}')} (Part {chunk_idx+1}/{len(chunks)})"
+
+                    documents.append(chunk_text)
+
+                    # Create a metadata dict with no None values
+                    metadata_dict = {
+                        "title": chunk_title,
+                        "source": "json",
+                        "message_count": len(chunk),
+                        "is_chunk": True,
+                        "chunk_index": chunk_idx,
+                        "total_chunks": len(chunks),
+                    }
+
+                    # Only add fields that aren't None
+                    if conv.get("id"):
+                        metadata_dict["id"] = f"{conv.get('id')}-{chunk_idx}"
+                        metadata_dict["conversation_id"] = conv.get("id")
+                    if earliest_ts_iso:
+                        metadata_dict["earliest_ts"] = earliest_ts_iso
+                    if latest_ts_iso:
+                        metadata_dict["latest_ts"] = latest_ts_iso
+
+                    metadatas.append(metadata_dict)
+                    ids.append(f"chat-{idx}-chunk-{chunk_idx}")
+            else:
+                documents.append(full_text)
+
+                # Create a metadata dict with no None values
+                metadata_dict = {
+                    "title": conv.get("title", f"Chat {idx}"),
+                    "source": "json",
+                    "message_count": len(messages),
+                    "is_chunk": False,
+                }
+
+                # Only add fields that aren't None
+                if conv.get("id"):
+                    metadata_dict["id"] = conv.get("id")
+                if earliest_ts_iso:
+                    metadata_dict["earliest_ts"] = earliest_ts_iso
+                if latest_ts_iso:
+                    metadata_dict["latest_ts"] = latest_ts_iso
+
+                metadatas.append(metadata_dict)
+                ids.append(f"chat-{idx}")
+
+        if not documents:
+            return False, "No valid conversations found to index"
+
+        # Process in batches to avoid memory issues with large datasets
+        batch_size = 100
+        total_indexed = 0
+
+        for i in range(0, len(documents), batch_size):
+            end = min(i + batch_size, len(documents))
+
+            batch_docs = documents[i:end]
+            batch_metas = metadatas[i:end]
+            batch_ids = ids[i:end]
+
+            embeddings = embedder.encode(batch_docs, show_progress_bar=False)
+
+            self.add_documents(
+                documents=batch_docs,
+                embeddings=embeddings.tolist(),
+                metadatas=batch_metas,
+                ids=batch_ids,
+            )
+
+            total_indexed += len(batch_docs)
+
+        return True, f"Successfully indexed {total_indexed} documents"
+
+    def index_docx(self, doc_folder):
+        """Index Word documents containing chat conversations"""
+        # Load the embedder
+        embedder = self.load_embedder()
+
+        documents, metadatas, ids = [], [], []
+
+        def extract_timestamp(text):
+            """Try to extract timestamps from text using regex"""
+            # Look for common date formats
+            date_patterns = [
+                r"(\d{4}-\d{2}-\d{2})",  # YYYY-MM-DD
+                r"(\d{2}/\d{2}/\d{4})",  # MM/DD/YYYY
+                r"(\w+ \d{1,2}, \d{4})",  # Month DD, YYYY
+            ]
+
+            for pattern in date_patterns:
+                matches = re.findall(pattern, text)
+                if matches:
+                    try:
+                        # Try different formats
+                        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%B %d, %Y"):
+                            try:
+                                dt = datetime.strptime(matches[0], fmt)
+                                return dt.isoformat()
+                            except ValueError:
+                                continue
+                    except Exception:
+                        pass
+            return None
+
+        def format_paragraphs(doc):
+            lines = []
+            timestamps = []
+            current_role = None
+            current_content = []
+
+            for p in doc.paragraphs:
+                text = p.text.strip()
+                if not text:
+                    if current_role and current_content:
+                        formatted_content = "\n".join(current_content)
+                        lines.append(f"**{current_role}**:\n\n{formatted_content}\n")
+                        current_content = []
+                    continue
+
+                # Extract potential timestamp
+                ts = extract_timestamp(text)
+                if ts:
+                    timestamps.append(ts)
+
+                # Check if this is a role indicator
+                role_match = re.match(
+                    r"^(You|ChatGPT|User|Assistant|System)(\s+said)?:?$",
+                    text,
+                    re.IGNORECASE,
+                )
+                if role_match:
+                    # Save previous content if any
+                    if current_role and current_content:
+                        formatted_content = "\n".join(current_content)
+                        lines.append(f"**{current_role}**:\n\n{formatted_content}\n")
+
+                    current_role = role_match.group(1)
+                    current_content = []
+                else:
+                    # Add to current content
+                    if current_role:
+                        current_content.append(text)
+                    else:
+                        lines.append(text)
+
+            # Don't forget the last block
+            if current_role and current_content:
+                formatted_content = "\n".join(current_content)
+                lines.append(f"**{current_role}**:\n\n{formatted_content}\n")
+
+            return "\n".join(lines), timestamps
+
+        # Check if folder exists
+        if not os.path.isdir(doc_folder):
+            return False, f"Folder '{doc_folder}' not found"
+
+        docx_files = [
+            f
+            for f in os.listdir(doc_folder)
+            if f.endswith(".docx")
+            and not f.startswith("~$")
+            and os.path.isfile(os.path.join(doc_folder, f))
+        ]
+
+        if not docx_files:
+            return False, f"No .docx files found in '{doc_folder}'"
+
+        print(f"Found {len(docx_files)} Word documents")
+
+        for idx, filename in enumerate(docx_files):
+            full_path = os.path.join(doc_folder, filename)
+            try:
+                doc = Document(full_path)
+                full_text, timestamps = format_paragraphs(doc)
+
+                if not full_text.strip():
+                    continue
+
+                # Get file creation time as fallback timestamp
+                file_create_time = datetime.fromtimestamp(
+                    os.path.getctime(full_path)
+                ).isoformat()
+
+                # Use extracted timestamps if available, otherwise use file timestamps
+                earliest_ts = min(timestamps) if timestamps else file_create_time
+                latest_ts = max(timestamps) if timestamps else file_create_time
+
+                documents.append(full_text)
+
+                # Create metadata with no None values
+                metadata_dict = {
+                    "title": filename,
+                    "source": "docx",
+                    "file_path": full_path,
+                }
+
+                # Only add timestamps if they exist
+                if earliest_ts:
+                    metadata_dict["earliest_ts"] = earliest_ts
+                if latest_ts:
+                    metadata_dict["latest_ts"] = latest_ts
+
+                metadatas.append(metadata_dict)
+                ids.append(f"docx-{idx}")
+
+            except Exception as e:
+                print(f"Error processing {filename}: {str(e)}")
+
+        if not documents:
+            return False, "No valid documents found to index"
+
+        print(f"Embedding {len(documents)} documents")
+
+        # Process in batches
+        batch_size = 100
+        total_indexed = 0
+
+        for i in range(0, len(documents), batch_size):
+            end = min(i + batch_size, len(documents))
+
+            batch_docs = documents[i:end]
+            batch_metas = metadatas[i:end]
+            batch_ids = ids[i:end]
+
+            embeddings = embedder.encode(batch_docs, show_progress_bar=False)
+
+            self.add_documents(
+                documents=batch_docs,
+                embeddings=embeddings.tolist(),
+                metadatas=batch_metas,
+                ids=batch_ids,
+            )
+
+            total_indexed += len(batch_docs)
+
+        return True, f"Successfully indexed {total_indexed} documents"
+
+
+# Create global archive instance
+archive = ChatArchive()
+
+
+# === Flask App ===
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "your-secret-key-change-this-in-production"
+
+
+# === Forms ===
+class SearchForm(FlaskForm):
+    query = StringField("Search Query", validators=[DataRequired()])
+    results_count = IntegerField(
+        "Number of Results", default=5, validators=[Optional()]
+    )
+    search_type = SelectField(
+        "Search Type",
+        choices=[("semantic", "Semantic Search"), ("keyword", "Keyword Search")],
+        default="semantic",
+    )
+    date_from = StringField("From Date (YYYY-MM-DD)", validators=[Optional()])
+    date_to = StringField("To Date (YYYY-MM-DD)", validators=[Optional()])
+
+
+# === Utilities ===
+def highlight_concepts(html, concepts=None):
+    """Highlight role headers and key concepts in the text"""
+    # Highlight role headers first
+    html = re.sub(
+        r"\*\*You said:\*\*",
+        r"<div class='you-said'><strong>You said:</strong></div>",
+        html,
+        flags=re.IGNORECASE,
+    )
+    html = re.sub(
+        r"\*\*ChatGPT said:\*\*",
+        r"<div class='chatgpt-said'><strong>ChatGPT said:</strong></div>",
+        html,
+        flags=re.IGNORECASE,
+    )
+
+    # Highlight key concepts
+    if concepts:
+        for word in concepts:
+            pattern = r"\b(" + re.escape(word) + r")\b"
+            html = re.sub(
+                pattern, r"<span class='concept'>\1</span>", html, flags=re.IGNORECASE
+            )
+
+    return html
+
+
+# === Routes ===
+@app.route("/", methods=["GET", "POST"])
+def index():
+    search_form = SearchForm()
+    search_triggered = False
+    results = []
+    stats = {}
+
+    # Get DB stats
+    doc_count = archive.get_count()
+    stats["doc_count"] = doc_count
+
+    # Check if search was triggered (either by form submission or URL parameter)
+    query = None
+
+    if request.method == "POST":
+        # Handle traditional form submission (POST)
+        if search_form.validate_on_submit():
+            query = search_form.query.data
+            search_triggered = True
+    elif request.method == "GET" and request.args.get("q"):
+        # Handle URL parameter (GET)
+        query = request.args.get("q")
+        # Populate the form with the query from URL
+        search_form.query.data = query
+        search_triggered = True
+
+    # Perform search if triggered
+    if search_triggered and query:
+        # Default values for optional parameters
+        n_results = 5
+        keyword_search = False
+        date_range = None
+
+        # Use form values if available (POST method) or defaults (GET method with URL params)
+        if request.method == "POST" and hasattr(search_form, "results_count"):
+            n_results = search_form.results_count.data or 5
+
+        if request.method == "POST" and hasattr(search_form, "search_type"):
+            keyword_search = search_form.search_type.data == "keyword"
+
+        if (
+            request.method == "POST"
+            and hasattr(search_form, "date_from")
+            and hasattr(search_form, "date_to")
+        ):
+            if search_form.date_from.data and search_form.date_to.data:
+                date_range = (search_form.date_from.data, search_form.date_to.data)
+
+        # Perform search
+        raw_results = archive.search(
+            query_text=query,
+            n_results=n_results,
+            date_range=date_range,
+            keyword_search=keyword_search,
+        )
+
+        # Process results
+        if raw_results["documents"][0]:
+            for doc, meta in zip(
+                raw_results["documents"][0], raw_results["metadatas"][0]
+            ):
+                # Convert markdown to HTML and highlight
+                html = markdown.markdown(doc, extensions=["extra"])
+                html = highlight_concepts(
+                    html, concepts=["attachment", "eclipse", "the Pattern"]
+                )
+
+                # Get dates from metadata
+                date_str = meta.get("earliest_ts", "Unknown date")
+                if date_str != "Unknown date":
+                    try:
+                        date_obj = datetime.fromisoformat(date_str)
+                        date_str = date_obj.strftime("%Y-%m-%d %H:%M")
+                    except:
+                        pass
+
+                results.append(
+                    {
+                        "title": meta.get("title", "Untitled"),
+                        "date": date_str,
+                        "html": html,
+                        "meta": meta,
+                    }
+                )
+
+    return render_template(
+        "index.html",
+        search_form=search_form,
+        search_triggered=search_triggered,
+        results=results,
+        stats=stats,
+        request=request,  # Pass request object to template
+    )
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    if request.method == "POST":
+        if "file" not in request.files:
+            return "No file part", 400
+
+        file = request.files["file"]
+        if file.filename == "":
+            return "No selected file", 400
+
+        if file and file.filename.endswith(".json"):
+            # Save file to temp location
+            temp_path = "temp_upload.json"
+            file.save(temp_path)
+
+            # Index the file
+            success, message = archive.index_json(temp_path)
+
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+            if success:
+                return f"Success: {message}", 200
+            else:
+                return f"Error: {message}", 400
+
+        elif file and file.filename.endswith(".docx"):
+            # Save file to temp location
+            temp_path = "temp_upload.docx"
+            file.save(temp_path)
+
+            # Make a temp directory for the file
+            temp_dir = "temp_docx_dir"
+            os.makedirs(temp_dir, exist_ok=True)
+            os.rename(temp_path, os.path.join(temp_dir, file.filename))
+
+            # Index the file
+            success, message = archive.index_docx(temp_dir)
+
+            # Clean up temp files
+            if os.path.exists(os.path.join(temp_dir, file.filename)):
+                os.remove(os.path.join(temp_dir, file.filename))
+            if os.path.exists(temp_dir):
+                os.rmdir(temp_dir)
+
+            if success:
+                return f"Success: {message}", 200
+            else:
+                return f"Error: {message}", 400
+
+        else:
+            return "Unsupported file type", 400
+
+    return render_template("upload.html")
+
+
+@app.route("/api/search", methods=["GET"])
+def api_search():
+    query = request.args.get("q")
+    if not query:
+        return {"error": "No query provided"}, 400
+
+    n_results = int(request.args.get("n", 5))
+    keyword = request.args.get("keyword", "false").lower() == "true"
+
+    raw_results = archive.search(
+        query_text=query, n_results=n_results, keyword_search=keyword
+    )
+
+    results = []
+    if raw_results["documents"][0]:
+        for doc, meta in zip(raw_results["documents"][0], raw_results["metadatas"][0]):
+            results.append(
+                {
+                    "title": meta.get("title", "Untitled"),
+                    "date": meta.get("earliest_ts", "Unknown"),
+                    "content": doc,
+                    "metadata": meta,
+                }
+            )
+
+    return {"query": query, "results": results}
+
+
+@app.route("/stats")
+def stats():
+    # Get basic stats
+    doc_count = archive.get_count()
+
+    # Get all metadata to analyze
+    all_meta = archive.get_documents(include=["metadatas"], limit=9999)["metadatas"]
+
+    # Count by source
+    sources = {}
+    for meta in all_meta:
+        source = meta.get("source", "unknown")
+        sources[source] = sources.get(source, 0) + 1
+
+    # Get date range
+    dates = [meta.get("earliest_ts") for meta in all_meta if meta.get("earliest_ts")]
+    date_range = None
+    if dates:
+        dates.sort()
+        date_range = {"earliest": dates[0], "latest": dates[-1]}
+
+    # Count by chunks
+    chunked = sum(1 for meta in all_meta if meta.get("is_chunk", False))
+
+    stats_data = {
+        "total": doc_count,
+        "sources": sources,
+        "date_range": date_range,
+        "chunked": chunked,
+        "full": doc_count - chunked,
+    }
+
+    return render_template("stats.html", stats=stats_data)
+
+
+from datetime import datetime, timedelta  # Make sure timedelta is imported
+
+# In your conversations route, remove the date grouping logic completely:
+
+
+@app.route("/conversations")
+@app.route("/conversations/<int:page>")
+def conversations(page=1):
+    """Display all documents in a list with filtering and pagination"""
+    # Items per page
+    per_page = 20
+
+    # Get filter parameters from URL
+    source_filter = request.args.get("source", "all")
+    date_filter = request.args.get("date", "all")
+    sort_order = request.args.get("sort", "newest")
+
+    # Get ALL documents directly, but only include valid parameters
+    all_docs = archive.get_documents(include=["documents", "metadatas"], limit=9999)
+
+    if not all_docs or not all_docs.get("documents"):
+        print("DEBUG: No documents found in the database")
+        return render_template("conversations.html", conversations=None)
+
+    print(f"DEBUG: Found {len(all_docs['documents'])} total documents")
+
+    # Get all items - with minimal processing and filtering
+    items = []
+
+    for idx, doc in enumerate(all_docs["documents"]):
+        # Get metadata for this document
+        meta = (
+            all_docs["metadatas"][idx]
+            if idx < len(all_docs.get("metadatas", []))
+            else {}
+        )
+
+        # IDs are returned automatically with the query
+        doc_id = (
+            all_docs["ids"][idx]
+            if "ids" in all_docs and idx < len(all_docs["ids"])
+            else f"doc-{idx}"
+        )
+
+        # Skip empty documents
+        if not doc or not doc.strip():
+            continue
+
+        # Basic preview
+        preview = doc[:500] + "..." if len(doc) > 500 else doc
+        preview_html = markdown.markdown(preview, extensions=["extra"])
+
+        # Get a title - with fallbacks
+        title = meta.get("title", "")
+        if not title:
+            # Try to extract a title from the first line of content
+            first_line = doc.split("\n")[0] if doc else ""
+            if (
+                first_line and len(first_line) < 100
+            ):  # Only use as title if reasonably short
+                title = first_line.strip("# ")
+            else:
+                title = f"Conversation {idx+1}"
+
+        # Get a date for sorting
+        date_obj = None
+
+        # Try standard metadata fields
+        for date_field in [
+            "update_time",
+            "create_time",
+            "latest_ts",
+            "earliest_ts",
+            "modified",
+            "created",
+        ]:
+            if meta.get(date_field) and not date_obj:
+                try:
+                    date_value = meta[date_field]
+                    # Handle epoch timestamps (floating point seconds)
+                    if isinstance(date_value, (float, int)):
+                        date_obj = datetime.fromtimestamp(date_value)
+                        break
+                    # Handle ISO format strings
+                    elif isinstance(date_value, str):
+                        date_obj = datetime.fromisoformat(date_value)
+                        break
+                except (ValueError, TypeError):
+                    pass
+
+        # Try to extract any date from the document content
+        if not date_obj:
+            date_patterns = [
+                r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}",  # ISO format or space-separated
+                r"\d{4}-\d{2}-\d{2}",  # Just date
+                r"\d{2}/\d{2}/\d{4}",  # MM/DD/YYYY
+                r"\w+ \d{1,2}, \d{4}",  # Month Day, Year
+            ]
+
+            for pattern in date_patterns:
+                matches = re.findall(pattern, doc)
+                if matches:
+                    try:
+                        date_str = matches[0]
+                        # Try different date formats
+                        for fmt in (
+                            "%Y-%m-%d %H:%M:%S",
+                            "%Y-%m-%dT%H:%M:%S",
+                            "%Y-%m-%d",
+                            "%m/%d/%Y",
+                            "%B %d, %Y",
+                        ):
+                            try:
+                                date_obj = datetime.strptime(date_str, fmt)
+                                break
+                            except ValueError:
+                                continue
+                        if date_obj:
+                            break
+                    except:
+                        pass
+
+        # Last resort: use creation time of metadata if available
+        if not date_obj:
+            # Use current time as absolute last resort
+            date_obj = datetime.now()
+
+        # Store original index in metadata for ordering
+        meta["original_index"] = idx
+
+        # Add to items list
+        items.append(
+            {
+                "id": doc_id,
+                "meta": {
+                    "title": title,
+                    "source": meta.get("source", "unknown"),
+                    "earliest_ts": meta.get("earliest_ts", ""),
+                    "message_count": meta.get("message_count", 0),
+                    "original_index": meta.get("original_index", idx),
+                },
+                "date_obj": date_obj,
+                "preview": preview_html,
+            }
+        )
+
+    print(f"DEBUG: Processed {len(items)} valid items for display")
+
+    # Apply source filter
+    if source_filter != "all":
+        items = [item for item in items if item["meta"].get("source") == source_filter]
+
+    # Apply date filter
+    if date_filter != "all":
+        now = datetime.now()
+        if date_filter == "today":
+            items = [item for item in items if item["date_obj"].date() == now.date()]
+        elif date_filter == "week":
+            week_ago = now - timedelta(days=7)
+            items = [item for item in items if item["date_obj"] >= week_ago]
+        elif date_filter == "month":
+            month_ago = now - timedelta(days=30)
+            items = [item for item in items if item["date_obj"] >= month_ago]
+        elif date_filter == "year":
+            year_ago = now - timedelta(days=365)
+            items = [item for item in items if item["date_obj"] >= year_ago]
+
+    # Apply sort order
+    if sort_order == "newest":
+        # Sort by date (newest first)
+        items.sort(key=lambda x: x["date_obj"], reverse=True)
+    elif sort_order == "oldest":
+        # Sort by date (oldest first)
+        items.sort(key=lambda x: x["date_obj"])
+    elif sort_order == "original":
+        # Sort by original order
+        items.sort(key=lambda x: x["meta"].get("original_index", float("inf")))
+
+    # Calculate pagination
+    total_items = len(items)
+    page_count = (total_items + per_page - 1) // per_page  # Ceiling division
+
+    # Make sure page is in valid range
+    page = max(1, min(page, page_count)) if page_count > 0 else 1
+
+    # Get items for current page
+    start_idx = (page - 1) * per_page
+    end_idx = min(start_idx + per_page, total_items)
+    page_items = items[start_idx:end_idx]
+
+    return render_template(
+        "conversations.html",
+        conversations=page_items,
+        current_page=page,
+        page_count=page_count,
+        total_items=total_items,
+        source_filter=source_filter,
+        date_filter=date_filter,
+        sort_order=sort_order,
+    )
+
+
+@app.route("/view/<doc_id>")
+def view_conversation(doc_id):
+    """View a single conversation"""
+    # Get document by ID using the where filter
+    # Since we can't use the 'ids' parameter directly, we need to use 'where' with a field that contains the ID
+
+    # First, try to get the document with the ID in the 'id' field
+    doc_result = archive.get_documents(
+        where={"id": doc_id}, include=["documents", "metadatas"]
+    )
+
+    # If that doesn't work, the ID might be stored in other fields or be a generated ID like 'chat-0'
+    if not doc_result or not doc_result.get("documents") or not doc_result["documents"]:
+        # If doc_id is in the format "chat-X", extract the index
+        if doc_id.startswith("chat-"):
+            try:
+                idx = int(doc_id.split("-")[1])
+                # Get all documents and find the one with the matching index
+                all_docs = archive.get_documents(
+                    include=["documents", "metadatas"], limit=9999
+                )
+
+                if (
+                    all_docs
+                    and all_docs.get("documents")
+                    and idx < len(all_docs["documents"])
+                ):
+                    # Create a filtered result with only the matching document
+                    doc_result = {
+                        "documents": [all_docs["documents"][idx]],
+                        "metadatas": [
+                            all_docs["metadatas"][idx]
+                            if idx < len(all_docs.get("metadatas", []))
+                            else {}
+                        ],
+                        "ids": [
+                            all_docs["ids"][idx]
+                            if "ids" in all_docs and idx < len(all_docs["ids"])
+                            else doc_id
+                        ],
+                    }
+                else:
+                    # Document not found
+                    return "Conversation not found", 404
+            except (ValueError, IndexError):
+                # Invalid chat-X format
+                return "Conversation not found", 404
+        else:
+            # Try other possible ID fields
+            where_conditions = [{"conversation_id": doc_id}, {"original_index": doc_id}]
+
+            for condition in where_conditions:
+                doc_result = archive.get_documents(
+                    where=condition, include=["documents", "metadatas"]
+                )
+                if (
+                    doc_result
+                    and doc_result.get("documents")
+                    and doc_result["documents"]
+                ):
+                    break
+
+            # If still not found
+            if (
+                not doc_result
+                or not doc_result.get("documents")
+                or not doc_result["documents"]
+            ):
+                return "Conversation not found", 404
+
+    document = doc_result["documents"][0]
+    metadata = doc_result["metadatas"][0] if doc_result.get("metadatas") else {}
+
+    # Parse the document to extract messages
+    messages = []
+
+    # Simple parsing of markdown format with "You said" and "ChatGPT said" headers
+    # This is a basic implementation - might need adjustment based on actual format
+    lines = document.split("\n")
+    current_role = None
+    current_content = []
+    current_timestamp = None
+
+    for line in lines:
+        # Check for message headers with timestamps
+        user_match = re.search(r"\*\*You said\*\* \*\(on ([^)]+)\)\*:", line)
+        assistant_match = re.search(r"\*\*ChatGPT said\*\* \*\(on ([^)]+)\)\*:", line)
+        system_match = re.search(r"\*([^*]+)\* \*\(on ([^)]+)\)\*:", line)
+
+        if user_match:
+            # Save previous message if any
+            if current_role:
+                messages.append(
+                    {
+                        "role": current_role,
+                        "content": markdown.markdown(
+                            "\n".join(current_content), extensions=["extra"]
+                        ),
+                        "timestamp": current_timestamp,
+                    }
+                )
+
+            # Start new user message
+            current_role = "user"
+            current_content = []
+            current_timestamp = user_match.group(1)
+
+        elif assistant_match:
+            # Save previous message if any
+            if current_role:
+                messages.append(
+                    {
+                        "role": current_role,
+                        "content": markdown.markdown(
+                            "\n".join(current_content), extensions=["extra"]
+                        ),
+                        "timestamp": current_timestamp,
+                    }
+                )
+
+            # Start new assistant message
+            current_role = "assistant"
+            current_content = []
+            current_timestamp = assistant_match.group(1)
+
+        elif system_match:
+            # Save previous message if any
+            if current_role:
+                messages.append(
+                    {
+                        "role": current_role,
+                        "content": markdown.markdown(
+                            "\n".join(current_content), extensions=["extra"]
+                        ),
+                        "timestamp": current_timestamp,
+                    }
+                )
+
+            # Start new system message
+            current_role = "system"
+            current_content = []
+            current_timestamp = system_match.group(2)
+
+        elif current_role:
+            # Add line to current message
+            current_content.append(line)
+
+    # Don't forget the last message
+    if current_role:
+        messages.append(
+            {
+                "role": current_role,
+                "content": markdown.markdown(
+                    "\n".join(current_content), extensions=["extra"]
+                ),
+                "timestamp": current_timestamp,
+            }
+        )
+
+    # Create conversation object
+    conversation = {"id": doc_id, "meta": metadata, "document": document}
+
+    return render_template("view.html", conversation=conversation, messages=messages)
+
+
+@app.route("/export/<doc_id>")
+def export_conversation(doc_id):
+    """Export a conversation as markdown"""
+    # Get document by ID
+    doc_result = archive.get_documents(ids=[doc_id], include=["documents", "metadatas"])
+
+    if not doc_result or not doc_result.get("documents") or not doc_result["documents"]:
+        # Document not found
+        return "Conversation not found", 404
+
+    document = doc_result["documents"][0]
+    metadata = doc_result["metadatas"][0] if doc_result.get("metadatas") else {}
+
+    # Create filename
+    title = metadata.get("title", "conversation").replace(" ", "_")
+    filename = f"{title}.md"
+
+    # Add headers to the markdown
+    markdown_content = f"# {metadata.get('title', 'Conversation')}\n\n"
+
+    if metadata.get("earliest_ts"):
+        try:
+            date_obj = datetime.fromisoformat(metadata["earliest_ts"])
+            date_str = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+            markdown_content += f"Date: {date_str}\n\n"
+        except:
+            pass
+
+    markdown_content += document
+
+    # Create response with markdown file
+    from flask import Response
+
+    response = Response(markdown_content, mimetype="text/markdown")
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+
+    return response
+
+
+# === Main ===
+if __name__ == "__main__":
+    app.run(debug=True)

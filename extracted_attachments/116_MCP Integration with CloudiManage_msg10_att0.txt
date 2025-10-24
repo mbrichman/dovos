@@ -1,0 +1,55 @@
+2025-05-03T02:32:49.822Z [cloudimanage] [info] Initializing server...
+2025-05-03T02:32:49.851Z [cloudimanage] [info] Server started and connected successfully
+2025-05-03T02:32:49.854Z [cloudimanage] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+/usr/bin/ruby: No such file or directory -- /path/to/your/connector.rb (LoadError)
+2025-05-03T02:32:50.486Z [cloudimanage] [info] Server transport closed
+2025-05-03T02:32:50.486Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:32:50.487Z [cloudimanage] [info] Server transport closed unexpectedly, this is likely due to the process exiting early. If you are developing this MCP server you can add output to stderr (i.e. `console.error('...')` in JavaScript, `print('...', file=sys.stderr)` in python) and it will appear in this log.
+2025-05-03T02:32:50.487Z [cloudimanage] [error] Server disconnected. For troubleshooting guidance, please visit our [debugging documentation](https://modelcontextprotocol.io/docs/tools/debugging) {"context":"connection"}
+2025-05-03T02:32:50.487Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:34:26.247Z [cloudimanage] [info] Initializing server...
+2025-05-03T02:34:26.272Z [cloudimanage] [info] Server started and connected successfully
+2025-05-03T02:34:26.288Z [cloudimanage] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+/usr/bin/ruby: No such file or directory -- ~/projects/iman_mcp/iman_mcp.rb (LoadError)
+2025-05-03T02:34:26.593Z [cloudimanage] [info] Server transport closed
+2025-05-03T02:34:26.593Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:34:26.594Z [cloudimanage] [info] Server transport closed unexpectedly, this is likely due to the process exiting early. If you are developing this MCP server you can add output to stderr (i.e. `console.error('...')` in JavaScript, `print('...', file=sys.stderr)` in python) and it will appear in this log.
+2025-05-03T02:34:26.594Z [cloudimanage] [error] Server disconnected. For troubleshooting guidance, please visit our [debugging documentation](https://modelcontextprotocol.io/docs/tools/debugging) {"context":"connection"}
+2025-05-03T02:34:26.594Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:35:06.262Z [cloudimanage] [info] Initializing server...
+2025-05-03T02:35:06.293Z [cloudimanage] [info] Server started and connected successfully
+2025-05-03T02:35:06.297Z [cloudimanage] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require': cannot load such file -- rest_client (LoadError)
+	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'
+	from /Users/markrichman/projects/iman_mcp/iman_mcp.rb:2:in `<main>'
+2025-05-03T02:35:06.492Z [cloudimanage] [info] Server transport closed
+2025-05-03T02:35:06.492Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:35:06.492Z [cloudimanage] [info] Server transport closed unexpectedly, this is likely due to the process exiting early. If you are developing this MCP server you can add output to stderr (i.e. `console.error('...')` in JavaScript, `print('...', file=sys.stderr)` in python) and it will appear in this log.
+2025-05-03T02:35:06.492Z [cloudimanage] [error] Server disconnected. For troubleshooting guidance, please visit our [debugging documentation](https://modelcontextprotocol.io/docs/tools/debugging) {"context":"connection"}
+2025-05-03T02:35:06.492Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:37:29.433Z [cloudimanage] [info] Initializing server...
+2025-05-03T02:37:29.465Z [cloudimanage] [info] Server started and connected successfully
+2025-05-03T02:37:29.468Z [cloudimanage] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require': cannot load such file -- rest_client (LoadError)
+	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'
+	from /Users/markrichman/projects/iman_mcp/iman_mcp.rb:2:in `<top (required)>'
+	from /Users/markrichman/projects/iman_mcp/wrapper.rb:12:in `load'
+	from /Users/markrichman/projects/iman_mcp/wrapper.rb:12:in `<main>'
+2025-05-03T02:37:29.672Z [cloudimanage] [info] Server transport closed
+2025-05-03T02:37:29.672Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:37:29.672Z [cloudimanage] [info] Server transport closed unexpectedly, this is likely due to the process exiting early. If you are developing this MCP server you can add output to stderr (i.e. `console.error('...')` in JavaScript, `print('...', file=sys.stderr)` in python) and it will appear in this log.
+2025-05-03T02:37:29.672Z [cloudimanage] [error] Server disconnected. For troubleshooting guidance, please visit our [debugging documentation](https://modelcontextprotocol.io/docs/tools/debugging) {"context":"connection"}
+2025-05-03T02:37:29.672Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:39:28.600Z [cloudimanage] [info] Initializing server...
+2025-05-03T02:39:28.607Z [cloudimanage] [info] Server started and connected successfully
+2025-05-03T02:39:28.610Z [cloudimanage] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require': cannot load such file -- rest_client (LoadError)
+	from /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'
+	from /Users/markrichman/projects/iman_mcp/iman_mcp.rb:2:in `<top (required)>'
+	from /Users/markrichman/projects/iman_mcp/wrapper.rb:12:in `load'
+	from /Users/markrichman/projects/iman_mcp/wrapper.rb:12:in `<main>'
+2025-05-03T02:39:28.692Z [cloudimanage] [info] Server transport closed
+2025-05-03T02:39:28.692Z [cloudimanage] [info] Client transport closed
+2025-05-03T02:39:28.693Z [cloudimanage] [info] Server transport closed unexpectedly, this is likely due to the process exiting early. If you are developing this MCP server you can add output to stderr (i.e. `console.error('...')` in JavaScript, `print('...', file=sys.stderr)` in python) and it will appear in this log.
+2025-05-03T02:39:28.693Z [cloudimanage] [error] Server disconnected. For troubleshooting guidance, please visit our [debugging documentation](https://modelcontextprotocol.io/docs/tools/debugging) {"context":"connection"}
+2025-05-03T02:39:28.693Z [cloudimanage] [info] Client transport closed

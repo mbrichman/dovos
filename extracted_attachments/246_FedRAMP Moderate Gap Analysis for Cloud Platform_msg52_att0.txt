@@ -1,0 +1,67 @@
+4. Platform Activity Auditing Gap
+
+Control Reference: AU-3 - CONTENT OF AUDIT RECORDS, AU-6 - AUDIT REVIEW, ANALYSIS, AND REPORTING
+Enhancement: AU-3 (1) - ADDITIONAL AUDIT INFORMATION
+
+Control Language: "The information system generates audit records containing information that establishes what type of event occurred, when the event occurred, where the event occurred, the source of the event, the outcome of the event, and the identity of any individuals or subjects associated with the event."
+
+“The organization:
+a. Reviews and analyzes information system audit records [Assignment: organization-defined frequency] for indications of [Assignment: organization-defined inappropriate or unusual activity]; and
+b. Reports findings to [Assignment: organization-defined personnel or roles].
+
+Federal Web Application Requirements (GSA AU-2): "Web applications should log all administrator activity, authentication checks, authorization checks, data deletions, data access, data changes, and permission changes."
+
+Current State Gap: This is a shared control between iManage as the cloud provider and our customer. Our platform has no auditing capabilities for customersadministrative actions including:
+
+New user creation and account modifications
+
+Role changes and privilege escalation
+
+Administrative settings changes
+
+Platform configuration modifications
+
+This directly violates GSA's explicit requirement that web applications must log "all administrator activity" and "permission changes."
+
+Regulatory Impact: "The service provider defines audit record types session, connection, transaction, or activity duration; individual identities of group account users; full-text of privileged commands. The audit record types are approved and accepted by the JAB/AO."
+
+Competitor Comparison:
+
+Box: Security Logs keep track of changes made to settings in Admin Console, showing what settings have been changed within a given time period, and who made said changes (Box Security Logs Documentation)
+
+NetDocuments: Administrative Activity Log (AAL) comprehensively tracks group membership changes, security policy creation, default cabinet security modifications, account privilege promotions, and all global access changes (NetDocuments AAL Documentation). According to former NetDocuments staff, these capabilities were "deal-breakers for the largest FedRAMP customer that ND has" and represent "minimum acceptable requirements per their contract"
+
+5. Document Security Change Auditing
+
+Control Reference: AU-3 - CONTENT OF AUDIT RECORDS
+
+
+Control Language: "Audit record content that may be necessary to satisfy the requirement of this control, includes, for example, time stamps, source and destination addresses, user/process identifiers, event descriptions, success/fail indications, filenames involved, and access control or flow control rules invoked."
+
+Federal Web Application Requirements (GSA AU-2): "Web applications should log all administrator activity, authentication checks, authorization checks, data deletions, data access, data changes, and permission changes."
+
+Current State Gap: Our platform only indicates that document security settings have changed but does not log:
+
+Previous security state of documents
+
+Specific changes made to security settings
+
+User who made the security modifications
+
+Detailed change descriptions
+
+This violates GSA's explicit requirement for web applications to log "data changes" and "permission changes" with sufficient detail for audit purposes.
+
+Regulatory Impact: This creates insufficient audit trails for compliance requirements and incident investigation capabilities. The NetDocuments colleague emphasized that ACL snapshot capabilities were "deal-breakers" for their largest FedRAMP customer, making this a critical compliance requirement.
+
+Competitor Comparison:
+
+Box: Box Reporting feature provides audit trails for viewing activity on folders, showing who accessed information and when (Box User Activity Report)
+
+NetDocuments: Provides comprehensive document ACL history logging for all document/container objects, including person/group names, unique IDs, and specific access changes (NetDocuments Document History). Critical Enhancement: Since April 2022, NetDocuments' Consolidated Activity Log (CAL) captures the entire ACL before and after every change, enabling precise point-in-time ACL reconstruction (NetDocuments CAL Documentation). This capability was specifically developed to meet the "minimum acceptable requirements" of their largest FedRAMP customer and is considered essential for federal compliance
+
+ND experience
+
+While working with a critical government agency over a multi-year timeframe the customer "stressed multiple times" that ACL snapshot capabilities were non-negotiable and threatened to go to another service if the requirement was not met. This underscores the critical importance of comprehensive audit logging for federal compliance.
+
+Industry Standard Implications: NetDocuments developed their enhanced Consolidated Activity Log specifically to meet these federal requirements, capturing complete before/after states of all ACL changes since April 2022. The fact that competitors including ND and Box have invested significantly in these capabilities demonstrates that our current gaps represent fundamental blockers to federal market entry.

@@ -1,0 +1,284 @@
+DovOS: Operator‑Blind Client‑Side Encryption (CSE) + TEEs — Engineering Design v1
+
+Goal: Ship DovOS so you can host it while being cryptographically unable to read customer data. Default to client‑side keys. Offer a fast hybrid path using attested TEEs for vector search/LLM inference. Keep the posture honest: lose the keys, data is gone.
+
+⸻
+
+0) High‑Level Architecture
+
+Trust anchors
+	•	Client device keystore (Secure Enclave/Keychain, TPM/DPAPI, Android StrongBox). Holds Master Key (MK) / Passkey material.
+	•	Attested TEEs (AMD SEV‑SNP or Intel TDX CVMs; NVIDIA H100 CC for GPU). Keys only flow to enclaves with verified measurements.
+
+Core components
+	•	Client SDKs: Web (TS), Desktop (Electron), CLI (Python). Do crypto, chunking, embeddings (local), device enrollment, recovery.
+	•	Verifier: Public service that validates TEE attestation evidence and publishes allowed measurements per release.
+	•	Gateway/API: Authn/authz, routes to object store and search workers. No plaintext logs. Zero key custody.
+	•	Object Store: Blobs of ciphertext (docs, vectors, indices). Versioned, immutable, lifecycle‑managed.
+	•	Search/LLM Workers (TEEs): Run ANN (HNSW/IVF‑PQ) + re‑rank + generation inside enclaves. Expose attestation and ephemeral enclave public keys.
+	•	Optional Tenant KMS: For HYOK/BYOK. Release keys only to verified enclaves, or never—pure CSE.
+
+Data classes
+	•	Source text, chunk metadata, embedding vectors, indexes, chat transcripts, usage telemetry (strictly minimized).
+
+⸻
+
+1) Threat Model (condensed)
+
+Adversaries: Cloud operator/host OS, your own SREs/DBAs, curious contractors, network attackers, co‑tenants, snapshot/backup thieves.
+
+Out‑of‑scope (this release): Side‑channel class leakage (cache/EM), coerced endpoints, malware on the customer device, traffic analysis beyond padding/batching.
+
+Security guarantees
+	•	Storage and transport are encrypted with customer‑held keys; operator cannot decrypt.
+	•	Compute: plaintext exists only inside attested enclaves, with verifiable measurements.
+	•	You cannot assist recovery without customer factors. (Document this clearly.)
+
+⸻
+
+2) Cryptographic Design
+
+Algorithms
+	•	Symmetric: AES‑256‑GCM (default) or XChaCha20‑Poly1305 for wide‑nonce safety.
+	•	KDF: HKDF‑SHA‑256 for KEK derivation; Argon2id for passphrase‑bound unlock when a passphrase is involved.
+	•	Asymmetric: X25519 (ECIES‑style wrap) for enclave session key exchange; Ed25519 for signatures.
+	•	Hash: BLAKE3 or SHA‑256 (choose one; BLAKE3 for speed).
+
+Keys
+	•	MK (Master Key): Created on first run, stored only in device keystore / SEP / TPM. Never leaves device in plaintext.
+	•	KEK (Key‑Encryption Key): HKDF(MK, context) per collection; rotates independently.
+	•	DEK (Data‑Encryption Key): New per object (chunk/vector/index shard). 32‑byte random. Wrapped under KEK (envelope encryption).
+
+Associated Data (AAD)
+Include tenant_id, collection_id, object_id, schema_version, purpose (doc|vector|index|chat) in AEAD AAD to bind ciphertext to context and prevent swap attacks.
+
+Keybag & Metadata
+
+{
+  "version": 1,
+  "tenant_id": "t_...",
+  "collections": [
+    {
+      "id": "c_...",
+      "kek_wrapped": {
+        "algo": "AES256-GCM",
+        "nonce": "...",
+        "ct": "..."
+      },
+      "kek_kdf": {
+        "alg": "HKDF-SHA256",
+        "salt": "...",
+        "info": "dovos:kek:c_...:v1"
+      },
+      "rotation": {"current": "kek_v3", "history": ["kek_v1","kek_v2"]}
+    }
+  ]
+}
+
+Recovery
+	•	Generate a recovery secret R and split via Shamir (e.g., 2‑of‑5). Allow storage on hardware keys, printed codes, second device.
+	•	Recovery reconstructs an MK‑Unwrap Key that can re‑wrap the KEK to a new device keystore. No server custody.
+
+⸻
+
+3) Data Flows
+
+3.1 Ingest (Pure CSE)
+	1.	Client chunks and sanitizes document.
+	2.	Client computes embeddings locally (quantized encoder or LM Studio).
+	3.	For each object (chunk text, metadata, vector):
+	•	Generate DEK; encrypt with AES‑GCM: ct, nonce, tag = Enc(DEK, plaintext, AAD).
+	•	Wrap DEK under KEK: DEK_wrapped = Enc(KEK, DEK, AAD_obj).
+	4.	Upload {ciphertext_blob, DEK_wrapped, headers} to /objects.
+	5.	Server stores as opaque blob. No plaintext indexing.
+
+3.2 Query (Hybrid TEE — pragmatic)
+	1.	Client requests a worker GET /attest?nonce=... → receives attestation evidence + worker ephemeral enclave_pub.
+	2.	Client verifies evidence against Verifier + checks published measurements.
+	3.	Client selects the DEKs needed (or a small superset) and rewraps them to the enclave:
+	•	Derive ephemeral ECDH: ss = X25519(client_ephemeral, enclave_pub).
+	•	Derive session key k_s = HKDF(ss, info="dovos:tee-wrap").
+	•	Send wrap = AEAD_Enc(k_s, DEK || object_id) in POST /search alongside encrypted query vector.
+	4.	Enclave unwraps DEKs with k_s, decrypts vectors/indices inside the enclave, runs ANN + re‑rank, returns encrypted results (with enclave’s response key negotiated in step 3) → client decrypts, fetches objects, and renders.
+
+3.3 Query (All‑Client — max privacy)
+	•	Client fetches encrypted shards by coarse filters (date/labels/tenant‑local tags), decrypts locally, runs ANN locally. Slower, but fully server‑blind.
+
+3.4 Optional HYOK/KMS Path
+	•	Instead of client rewrap, enclave requests unwrap directly from tenant’s KMS using attestation‑gated release. Client still verifies attestation before permitting the flow.
+
+⸻
+
+4) Server API (minimal)
+
+POST /v1/objects
+  Body: {
+    object_id, tenant_id, collection_id,
+    purpose, aead_algo,
+    ct, nonce, tag, aad, dek_wrapped,
+    size_padded
+  }
+  Returns: { etag, version }
+
+GET /v1/attest?nonce=...  → 200 { quote, enclave_pub, measurement, ts }
+
+POST /v1/search
+  Body: {
+    tenant_id, collection_id,
+    policy: "tee"|"client",
+    query_vector_enc, wraps: [ {object_id, wrap_ct, wrap_nonce, wrap_tag} ],
+    kdf_info,
+    retrieval: {k: 20, ef: 128, filters: {...}}
+  }
+  Returns: { results_enc, timings }
+
+GET /v1/measurements → { release: "2025.08.0", allowed: ["mhash1", "mhash2"] }
+
+Authn: OIDC for users + PATs for automation.
+Authz: tenant/collection scoped. Never leak object IDs across tenants.
+
+⸻
+
+5) Client SDK Interfaces
+
+TypeScript (Web/Electron)
+
+export async function initTenant(): Promise<TenantHandle>;
+export async function encryptAndUpload(obj: Uint8Array, meta: AAD): Promise<ObjectID>;
+export async function query(q: Query, mode: "tee"|"client");
+export async function enrollDevice(existingHandle: TenantHandle): Promise<void>;
+export async function exportRecoveryShares(n: number, threshold: number): Promise<Share[]>;
+export async function rotateKeys(collectionId: string): Promise<void>;
+
+Python (CLI/Daemon) mirrors the same, built on libsodium/pyca.
+
+⸻
+
+6) Reference Code Snippets
+
+AES‑GCM envelope (TS, WebCrypto)
+
+async function aeadEncrypt(key: CryptoKey, plaintext: Uint8Array, aad: Uint8Array) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name: "AES-GCM", iv, additionalData: aad}, key, plaintext);
+  return {iv, ct: new Uint8Array(ct)};
+}
+
+X25519 wrap to enclave (TS + noble‑curves)
+
+import {x25519} from '@noble/curves/ed25519';
+import {hkdf} from '@noble/hashes/hkdf';
+import {sha256} from '@noble/hashes/sha256';
+
+function wrapForEnclave(enclavePub: Uint8Array, dek: Uint8Array) {
+  const clientPriv = x25519.utils.randomPrivateKey();
+  const clientPub = x25519.getPublicKey(clientPriv);
+  const ss = x25519.getSharedSecret(clientPriv, enclavePub);
+  const ks = hkdf(sha256, ss, undefined, new TextEncoder().encode('dovos:tee-wrap'), 32);
+  const {iv, ct} = aeadEncrypt(importAesKey(ks), concat(dek, objectId), aad);
+  return {clientPub, iv, ct};
+}
+
+Attestation verify (pseudocode)
+
+quote = GET("/attest?nonce=...")
+assert verify_quote(quote, expected_measurement, nonce)
+# verify_quote should validate HW root cert chain, freshness, and that enclave_pub is bound into the quote report
+
+
+⸻
+
+7) Indexing Inside the Enclave
+	•	Build HNSW/IVF‑PQ structures in TEE. Persist only as ciphertext shards (DEK per shard). On query, enclave unwraps the few needed DEKs.
+	•	Parameter defaults: HNSW M=16, efConstruction=200; query ef=128 (tunable per latency SLO). IVF‑PQ for very large corpora (e.g., IVF=4096, PQ=Mx8bits after product quantization). All heap and graph traversal happen in enclave RAM.
+
+⸻
+
+8) Metadata Leakage Controls
+	•	Pad objects to size buckets (4/8/16 KiB). Record size_padded only.
+	•	Batch queries in fixed cadence windows where feasible; add +/- jitter to response times.
+	•	Optional: ORAM‑like indirection for super‑sensitive tenants (defer unless demanded).
+
+⸻
+
+9) Key Rotation & Revocation
+	•	Rotation: generate new KEK, re‑wrap DEKs lazily on next touch. Maintain at most N historical KEKs per collection.
+	•	Revocation: client can tombstone MK/KEK; server immediately rejects unwraps/wraps for that tenant; data remains undecryptable.
+	•	Disaster: you cannot assist without recovery shares. Surface that in admin UI and docs.
+
+⸻
+
+10) Telemetry & Logging
+	•	No plaintext payloads—ever. Log only request IDs, timings, byte counts, and TEE attestation hashes.
+	•	Seal enclave metrics; export as encrypted counters.
+	•	Crash dumps disabled or encrypted with enclave‑sealed key.
+
+⸻
+
+11) Operational Runbook (short)
+	•	Release: publish measurement hashes and SBOM per build.
+	•	Provision: workers boot; register quotes with Verifier; refuse traffic until allow‑listed.
+	•	Rotate: regular measurement rollovers; dual‑run window where both old/new measurements are allowed; publish deprecation date.
+	•	Backups: ciphertext only; object store versioned; test restore regularly.
+	•	Incident: if measurement compromised, yank from allow‑list → clients refuse wraps automatically.
+
+⸻
+
+12) Testing Strategy
+	•	Cryptographic unit tests: AEAD invariants, AAD tamper detection, KDF vectors.
+	•	Fuzz the envelope format and keybag parser.
+	•	Attestation E2E: golden quotes, nonce mismatch, stale quote, wrong measurement.
+	•	Privacy regression: ensure no plaintext in logs; check size‑bucket and padding invariants.
+	•	Perf: measure overhead of client wrap + enclave decrypt; load‑test ANN latency envelopes.
+
+⸻
+
+13) Rollout Plan (capability slices)
+	1.	MVP (Pure CSE, client‑only search): ingest + local ANN; slow but fully blind.
+	2.	Hybrid TEE search: rewrap‑to‑enclave, HNSW in enclave; publish verifier & measurements.
+	3.	GPU TEE tier: H100 CC for embedding + re‑rank + LLM.
+	4.	Optional HYOK/KMS: integrate tenant KMS with attestation‑gated release.
+	5.	Private‑Query Add‑on: AHE inner‑product for small sensitive sets.
+
+⸻
+
+14) Open Questions / Decisions
+	•	Which attestation verifier to standardize on (cloud‑native vs vendor‑neutral)?
+	•	Exact minimum viable padding schedule (privacy vs cost).
+	•	Do we persist indexes encrypted or rebuild in memory at boot? (Boot‑time vs storage‑IO trade‑off.)
+	•	Tenant KMS integrations to prioritize first.
+
+⸻
+
+15) Appendix: Data Structures
+
+Ciphertext Object
+
+{
+  "object_id": "o_...",
+  "tenant_id": "t_...",
+  "collection_id": "c_...",
+  "purpose": "vector",
+  "aead": {"alg": "AES256-GCM", "nonce": "...", "ct": "...", "tag": "..."},
+  "aad": "base64url(...)",
+  "dek_wrapped": {"alg": "AES256-GCM", "nonce": "...", "ct": "..."},
+  "size_padded": 8192,
+  "created_at": "...",
+  "version": 1
+}
+
+Search Response (Encrypted)
+
+{
+  "results_enc": {"nonce": "...", "ct": "...", "tag": "..."},
+  "timings": {"prep_ms": 5, "ann_ms": 32, "rerank_ms": 18}
+}
+
+
+⸻
+
+16) What This Gives You (explicit)
+	•	You never hold plaintext keys. Storage holds ciphertext only.
+	•	Compute happens in code you and your customers can verify.
+	•	Revocation and rotation are tenant‑controlled. Your ops cannot decrypt backups or memory.
+	•	A realistic performance path via TEEs, with an even stricter client‑only mode when needed.

@@ -1,0 +1,91 @@
+PRIVACY POLICY
+Effective Date: May 13, 2024
+Last Updated: April 7, 2025
+
+Welcome to RedPill (redpill.ai) by Hashforest Technology LLC, a decentralized AI aggregator platform that integrates the world's top AI models with Web3 infrastructure in a privacy-preserving and verifiable manner ("Company," "we," "our," or "us"). We respect your privacy and are committed to protecting the personal information of our users ("User," "you," or "your"). This Privacy Policy describes how we collect, use, disclose, and protect your information when you use our services, including our website, applications, and associated products (collectively, the "Services"). By accessing or using our Services, you agree to this Privacy Policy and our Terms of Service.
+
+1. Scope
+This Privacy Policy applies to all of the services offered by RedPill and its affiliates, including Hashforest Technology LLC, and services offered on third-party sites, such as analytics and infrastructure providers. This Privacy Policy does not apply to services that have separate privacy policies that do not incorporate this one.
+
+This Privacy Policy does not apply to:
+
+The information practices of other companies and organizations that advertise or link to our services.
+Services offered by other companies or individuals, including external APIs, platforms, or AI providers used within RedPill.
+This Privacy Policy governs all RedPill users and supersedes the privacy policies of any underlying third-party providers used to access AI models or blockchain infrastructure, to the extent applicable.
+
+2. Information We Collect
+Automatically Collected Information
+
+We use third-party tools that track user behavior through cookies: Google Analytics 4 (GA4) and Mailerlite (for mailing lists).
+We collect the following automatically: Cookies to store user preferences, IP addresses, browser User Agents, and header information for anti-spam purposes (retained for six months).
+Account Information: Email addresses or connected wallets may be used to identify and authenticate users.
+
+Payment Information: Payments, including crypto or fiat transactions, may be processed via third-party platforms that may retain identifying details. We do not store your financial information on our servers.
+
+Decentralized Infrastructure & TEE Storage: Some RedPill components leverage Trusted Execution Environments (TEE) for secure computation. Sensitive user interactions with AI models processed within TEEs are encrypted and inaccessible to RedPill.
+
+Data in TEE-based AI Applications:
+
+Data in transmission: Prompts, inputs, and outputs exchanged with TEE-deployed models are end-to-end encrypted. RedPill cannot access raw content.
+Data in use: Computation occurs within the secure TEE, and RedPill does not access memory, CPU state, or runtime data.
+Data in storage: Any temporary or persistent data within the TEE is encrypted and isolated from RedPill infrastructure.
+LLM Prompt Privacy: When using LLMs via RedPill in TEE production mode, we do not collect or store any user prompt or request data. Your interactions remain confidential by design.
+3. Why RedPill Collects Data
+We collect minimal data to improve platform functionality. The purposes include:
+
+Delivering our Services (e.g., routing user requests to third-party LLM APIs, enabling token-based usage and blockchain-based settlement between service providers and consumers)
+Maintaining service integrity (e.g., detecting spam, abuse, or downtime)
+Improving the decentralized AI routing mechanism and node performance
+Communicating with users about critical updates, service changes, or community governance proposals
+Complying with legal obligations and preventing fraud
+4. Data Retention
+Most data is either anonymized, encrypted in TEEs, or ephemeral by design. Where data is retained:
+
+Account identifiers: Stored as long as needed for active sessions or governance rights.
+Wallet addresses: Retained for history and billing verification.
+IP logs: Kept for a maximum of 6 months for anti-spam and abuse prevention.
+Prompt and AI input/output data used in TEE production mode is not retained by RedPill.
+
+5. User Responsibilities
+You are responsible for ensuring that your use of RedPill services complies with local laws, and that any inputs to AI models do not infringe on the rights of others or violate ethical guidelines. If you suspect a security issue, please notify us at support@phala.network within 24 hours.
+
+6. Sharing Your Information
+We do not sell, lease, or trade your personal information.
+
+Information may be shared in the following cases:
+
+With your explicit consent
+With trusted service providers operating under contractual obligations (e.g., blockchain RPC nodes, TEE hardware providers)
+To comply with law enforcement or regulatory requirements
+During business reorganization or transfer, with notice
+7. Third-Party Services
+RedPill connects to external AI model APIs, blockchain infrastructure, and occasionally third-party UI layers. These are governed by their own terms. We do not guarantee the privacy or accuracy of outputs from third-party sources.
+
+8. Limitation of Liability
+RedPill disclaims liability for:
+
+Any damage resulting from AI-generated outputs
+Any loss caused by misuse of token or wallet-related tools
+Third-party content inaccuracies or outages
+User-generated data that causes legal or reputational issues
+9. Indemnification
+Users agree to indemnify, defend, and hold harmless RedPill, its affiliates, and its employees from any claims, damages, liabilities, or expenses arising from (but not limited to): (1) User's misuse of the Services, (2) Violation of any terms or third-party rights, (3) Any legal claims brought against RedPill due to user-generated content or business activities conducted through our platform.
+
+10. Dispute Resolution
+Users must first attempt to resolve disputes through good faith negotiations. If unresolved within thirty (30) days, parties agree to mediation with costs shared equally. If mediation fails, disputes will be resolved through binding arbitration administered by JAMS under California law. Users waive their right to a jury trial in any dispute with Redpill or its representatives.
+
+11. Force Majeure
+Redpill shall not be liable for any failure or delay in the performance of its obligations under this Privacy Policy due to causes beyond its reasonable control, including but not limited to acts of God, natural disasters, pandemics, governmental restrictions, cyber-attacks, telecommunications failures, or power outages. In such cases, performance obligations shall be suspended for the duration of the force majeure event.
+
+12. Policy Changes
+We may update this Privacy Policy. We will notify users of major changes via the website or your provided email address.
+
+13. Governing Law
+This Privacy Policy shall be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law principles.
+
+14. Contact
+If you have questions or requests related to this policy, contact: support@phala.network
+
+15. Changes to this Policy
+We may update this Privacy Policy periodically. We always indicate the date the last changes were published. If changes are significant, we will provide a more prominent notice (including, for certain services, email notification of Privacy Policy changes). Continued use of our Services after any updates to this Privacy Policy constitutes acceptance of the revised policy. If you do not agree to the changes, you should discontinue use of our Services.
+
