@@ -599,24 +599,24 @@ class ConversationController:
                 if source_filter.lower() not in item_source:
                     continue
             
-            # Date filter
+            # Date filter - use latest_ts to match Claude's behavior (show convs with recent activity)
             if date_threshold:
-                earliest_ts = item['meta'].get('earliest_ts', '')
-                if earliest_ts:
+                latest_ts = item['meta'].get('latest_ts', '')
+                if latest_ts:
                     try:
                         # Parse the timestamp (could be ISO format or Unix epoch)
-                        if isinstance(earliest_ts, str):
+                        if isinstance(latest_ts, str):
                             # Try ISO format first
                             try:
-                                item_date = datetime.fromisoformat(earliest_ts.replace('Z', '+00:00'))
+                                item_date = datetime.fromisoformat(latest_ts.replace('Z', '+00:00'))
                             except:
                                 # Try Unix epoch
                                 try:
-                                    item_date = datetime.fromtimestamp(float(earliest_ts), tz=timezone.utc)
+                                    item_date = datetime.fromtimestamp(float(latest_ts), tz=timezone.utc)
                                 except:
                                     continue  # Skip if can't parse
-                        elif isinstance(earliest_ts, (int, float)):
-                            item_date = datetime.fromtimestamp(earliest_ts, tz=timezone.utc)
+                        elif isinstance(latest_ts, (int, float)):
+                            item_date = datetime.fromtimestamp(latest_ts, tz=timezone.utc)
                         else:
                             continue  # Skip if unexpected type
                         
@@ -633,11 +633,11 @@ class ConversationController:
             
             filtered_items.append(item)
         
-        # Sort items
+        # Sort items by latest activity (latest_ts), not creation date
         if sort_order == 'newest':
-            filtered_items.sort(key=lambda x: x['meta'].get('earliest_ts', ''), reverse=True)
+            filtered_items.sort(key=lambda x: x['meta'].get('latest_ts', ''), reverse=True)
         elif sort_order == 'oldest':
-            filtered_items.sort(key=lambda x: x['meta'].get('earliest_ts', ''), reverse=False)
+            filtered_items.sort(key=lambda x: x['meta'].get('latest_ts', ''), reverse=False)
         # 'original' keeps the original order
         
         return filtered_items

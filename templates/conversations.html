@@ -252,10 +252,10 @@
 {% if conversations %}
     <div id="conversationList">
         {% for conversation in conversations %}
-            <div class="conversation-card" data-source="{{ conversation.meta.source }}" data-date="{{ conversation.meta.earliest_ts }}">
+            <div class="conversation-card" data-source="{{ conversation.meta.source }}" data-date="{{ conversation.meta.latest_ts }}">
                 <div class="conversation-header">
                     <h5 class="conversation-title">{{ conversation.meta.title }}</h5>
-                    <span class="conversation-date date-to-format">{{ conversation.meta.earliest_ts }}</span>
+                    <span class="conversation-date date-to-format">{{ conversation.meta.latest_ts }}</span>
                 </div>
                 <div class="conversation-preview">
                     {{ conversation.preview|safe }}
