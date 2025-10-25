@@ -46,7 +46,7 @@ class ConversationRepository(BaseRepository[Conversation]):
                 cs.preview
             FROM conversations c
             LEFT JOIN conversation_summaries cs ON c.id = cs.id
-            ORDER BY c.updated_at DESC
+            ORDER BY COALESCE(cs.latest_message_at, c.updated_at) DESC
             LIMIT :limit OFFSET :offset
         """)
         
