@@ -126,8 +126,7 @@ def init_routes(app):
     def export_conversation(doc_id):
         """Export a conversation as markdown"""
         if use_postgres:
-            from flask import jsonify
-            return jsonify({"error": "Export not yet implemented for PostgreSQL mode"}), 501
+            return postgres_controller.export_conversation(doc_id)
         else:
             return conversation_controller.export_conversation(doc_id)
     

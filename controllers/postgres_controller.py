@@ -290,6 +290,65 @@ class PostgresController:
     
     # ===== EXPORT ENDPOINTS =====
     
+    def export_conversation(self, doc_id: str) -> Any:
+        """
+        GET /export/<doc_id>
+        
+        Export conversation as markdown file.
+        """
+        from flask import Response
+        from datetime import datetime
+        from uuid import UUID
+        from db.repositories.unit_of_work import get_unit_of_work
+        
+        try:
+            # Try to parse as UUID for PostgreSQL
+            try:
+                conv_uuid = UUID(doc_id)
+                with get_unit_of_work() as uow:
+                    conversation = uow.conversations.get_by_id(conv_uuid)
+                    if not conversation:
+                        return "Conversation not found", 404
+                    
+                    # Get all messages for the conversation
+                    messages = uow.messages.get_by_conversation(conv_uuid)
+                    if not messages:
+                        return "No messages found in conversation", 404
+                    
+                    # Build markdown content
+                    title = conversation.title or "Untitled Conversation"
+                    markdown_content = f"# {title}\n\n"
+                    
+                    # Add date if available
+                    if conversation.created_at:
+                        date_str = conversation.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                        markdown_content += f"Date: {date_str}\n\n"
+                    
+                    # Add messages
+                    for msg in messages:
+                        role = msg.role.upper()
+                        content = msg.content
+                        
+                        markdown_content += f"**{role}:**\n\n{content}\n\n---\n\n"
+                    
+                    # Create filename
+                    safe_title = title.replace(" ", "_").replace("/", "_")
+                    filename = f"{safe_title}.md"
+                    
+                    # Create response with markdown file
+                    response = Response(markdown_content, mimetype="text/markdown")
+                    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+                    
+                    return response
+                    
+            except (ValueError, TypeError):
+                # If not a UUID, try fallback to legacy format
+                return "Invalid conversation ID format", 400
+        
+        except Exception as e:
+            logger.error(f"Export markdown failed: {e}")
+            return f"Export failed: {str(e)}", 500
+    
     def export_to_openwebui(self, doc_id: str) -> Dict[str, Any]:
         """
         POST /api/export/openwebui/<doc_id>
