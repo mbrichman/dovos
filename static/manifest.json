@@ -1,0 +1,37 @@
+{
+  "name": "DovOS Conversation Manager",
+  "short_name": "DovOS",
+  "description": "Manage and search through AI conversation history",
+  "start_url": "/conversations",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a365d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Conversations",
+      "url": "/conversations",
+      "description": "View all conversations"
+    },
+    {
+      "name": "Upload",
+      "url": "/upload",
+      "description": "Upload new conversations"
+    },
+    {
+      "name": "Stats",
+      "url": "/stats",
+      "description": "View statistics"
+    }
+  ]
+}
