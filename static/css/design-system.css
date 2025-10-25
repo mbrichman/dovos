@@ -711,11 +711,21 @@ body {
   
   .search-wrapper {
     flex-direction: column;
+    width: 100%;
+  }
+  
+  .search-input-group {
+    width: 100%;
   }
   
   .search-type-pills {
     width: 100%;
     overflow-x: auto;
+    flex-wrap: wrap;
+  }
+  
+  .pill {
+    flex: 0 0 auto;
   }
   
   .filters-grid {
