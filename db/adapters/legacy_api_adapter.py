@@ -240,7 +240,8 @@ class LegacyAPIAdapter:
             Dict in legacy ChromaDB format with documents, metadatas, distances
         """
         # Map search types to SearchService methods
-        if search_type == "fts" or keyword_search:
+        # Handle both "fts" and "keyword" for backward compatibility
+        if search_type in ("fts", "keyword") or keyword_search:
             results = self.search_service.search_fts_only(query_text, limit=n_results)
         elif search_type == "semantic":
             results = self.search_service.search_vector_only(query_text, limit=n_results)
