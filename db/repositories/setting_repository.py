@@ -32,12 +32,14 @@ class SettingRepository:
     def get_all_as_dict(self, category: Optional[str] = None) -> Dict[str, str]:
         """Get all settings as a dictionary."""
         settings = self.get_all(category)
-        return {setting.id: setting.value for setting in settings}
+        return {setting.id.strip(): setting.value for setting in settings if setting.id}
     
     def create_or_update(self, setting_id: str, value: str, 
                         description: Optional[str] = None, 
                         category: str = 'general') -> Setting:
         """Create or update a setting."""
+        # Trim whitespace from key to prevent issues
+        setting_id = setting_id.strip() if setting_id else setting_id
         setting = self.get(setting_id)
         
         if setting:

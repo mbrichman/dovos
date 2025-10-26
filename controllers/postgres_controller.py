@@ -876,9 +876,13 @@ class PostgresController:
         try:
             # Fetch all settings from database
             settings = self.adapter.get_all_settings()
+            print(f"DEBUG: Settings loaded: {settings}")
+            logger.info(f"Settings loaded: {settings}")
             return render_template('settings.html', settings=settings)
         except Exception as e:
             logger.error(f"Failed to load settings page: {e}")
+            import traceback
+            traceback.print_exc()
             return render_template('settings.html', settings={})
     
     def handle_settings(self, request_obj) -> Dict[str, Any]:
