@@ -33,6 +33,69 @@ class LegacyAPIAdapter:
     
     # ===== CONVERSATION METHODS =====
     
+    def get_conversations_summary(self, limit: int = 9999, offset: int = 0) -> Dict[str, Any]:
+        """
+        Get conversations with summary data only (optimized for list view).
+        Uses the conversation_summaries view instead of loading all messages.
+        
+        This is much faster than get_all_conversations() for displaying lists.
+        """
+        with get_unit_of_work() as uow:
+            # Use raw SQL to query the conversation_summaries view
+            query = text("""
+                SELECT 
+                    c.id,
+                    c.title,
+                    c.created_at,
+                    c.updated_at,
+                    cs.message_count,
+                    cs.earliest_message_at,
+                    cs.latest_message_at,
+                    cs.preview,
+                    -- Get source from first message metadata
+                    (SELECT m.metadata->>'source' 
+                     FROM messages m 
+                     WHERE m.conversation_id = c.id 
+                     ORDER BY m.created_at LIMIT 1) as source
+                FROM conversations c
+                LEFT JOIN conversation_summaries cs ON c.id = cs.id
+                ORDER BY COALESCE(cs.latest_message_at, c.updated_at) DESC
+                LIMIT :limit OFFSET :offset
+            """)
+            
+            result = uow.session.execute(query, {'limit': limit, 'offset': offset})
+            
+            documents = []
+            metadatas = []
+            ids = []
+            
+            for row in result:
+                # Use preview instead of building full document
+                # Don't include title in preview since it's shown separately in UI
+                preview = row.preview if row.preview else "No messages yet."
+                document = preview
+                
+                metadata = {
+                    "id": str(row.id),
+                    "title": row.title,
+                    "source": row.source or "unknown",
+                    "message_count": row.message_count or 0,
+                    "earliest_ts": row.earliest_message_at.isoformat() if row.earliest_message_at else row.created_at.isoformat(),
+                    "latest_ts": row.latest_message_at.isoformat() if row.latest_message_at else row.updated_at.isoformat(),
+                    "is_chunk": False,
+                    "conversation_id": str(row.id)
+                }
+                
+                documents.append(document)
+                metadatas.append(metadata)
+                ids.append(str(row.id))
+            
+            return {
+                "documents": documents,
+                "metadatas": metadatas,
+                "ids": ids
+            }
+    
     def get_all_conversations(self, include: List[str] = None, limit: int = 9999) -> Dict[str, Any]:
         """
         Get all conversations in legacy ChromaDB format.

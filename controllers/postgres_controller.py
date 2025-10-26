@@ -32,13 +32,11 @@ class PostgresController:
         """
         GET /api/conversations
         
-        Returns all conversations in the legacy format.
+        Returns all conversations in the legacy format (optimized with summaries).
         """
         try:
-            result = self.adapter.get_all_conversations(
-                include=["documents", "metadatas", "ids"],
-                limit=9999
-            )
+            # Use optimized summary method instead of loading all messages
+            result = self.adapter.get_conversations_summary(limit=9999)
             return result
         
         except Exception as e:
