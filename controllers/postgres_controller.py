@@ -318,6 +318,49 @@ class PostgresController:
                 "message": f"Failed to clear database: {str(e)}"
             }
     
+    def delete_conversation(self, doc_id: str) -> Dict[str, Any]:
+        """
+        DELETE /api/conversation/<doc_id>
+        
+        Delete a conversation and all its associated data (messages and embeddings).
+        """
+        try:
+            from uuid import UUID
+            from db.repositories.unit_of_work import get_unit_of_work
+            
+            # Parse UUID
+            try:
+                conv_uuid = UUID(doc_id)
+            except ValueError:
+                return {
+                    "success": False,
+                    "message": "Invalid conversation ID format"
+                }
+            
+            # Delete conversation with cascade
+            with get_unit_of_work() as uow:
+                deleted = uow.conversations.delete_conversation_with_cascade(conv_uuid)
+                
+                if deleted:
+                    uow.commit()
+                    logger.info(f"Successfully deleted conversation {doc_id}")
+                    return {
+                        "success": True,
+                        "message": "Conversation deleted successfully"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Conversation not found"
+                    }
+        
+        except Exception as e:
+            logger.error(f"Conversation deletion failed: {e}")
+            return {
+                "success": False,
+                "message": f"Failed to delete conversation: {str(e)}"
+            }
+    
     # ===== EXPORT ENDPOINTS =====
     
     def export_conversation(self, doc_id: str) -> Any:

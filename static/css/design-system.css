@@ -861,6 +861,18 @@ body {
   color: hsl(var(--muted-foreground));
 }
 
+.conversation-menu-item-danger {
+  color: hsl(var(--destructive)) !important;
+}
+
+.conversation-menu-item-danger:hover {
+  background: hsl(var(--destructive) / 0.1) !important;
+}
+
+.conversation-menu-item-danger svg {
+  color: hsl(var(--destructive));
+}
+
 .conversation-meta {
   display: flex;
   align-items: center;

@@ -171,3 +171,18 @@ class ConversationRepository(BaseRepository[Conversation]):
             'recent_conversations': recent_conversations,
             'avg_messages_per_conversation': round(total_messages / total_conversations, 2) if total_conversations > 0 else 0
         }
+    
+    def delete_conversation_with_cascade(self, conversation_id: UUID) -> bool:
+        """Delete a conversation and all its associated data (messages and embeddings).
+        
+        Returns True if deleted, False if not found.
+        """
+        conversation = self.get_by_id(conversation_id)
+        if not conversation:
+            return False
+        
+        # PostgreSQL will handle cascade deletion of messages and embeddings
+        # due to foreign key constraints defined in the schema
+        self.session.delete(conversation)
+        self.session.flush()
+        return True

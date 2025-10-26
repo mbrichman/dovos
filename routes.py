@@ -141,6 +141,19 @@ def init_routes(app):
             # Result from conversation_controller is already (response, status_code) tuple
             return conversation_controller.export_to_openwebui(doc_id)
     
+    @app.route("/api/conversation/<doc_id>", methods=["DELETE"])
+    def delete_conversation(doc_id):
+        """Delete a conversation and all its associated data"""
+        if use_postgres:
+            result = postgres_controller.delete_conversation(doc_id)
+            status_code = 200 if result.get('success') else 400
+            return jsonify(result), status_code
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Delete not available in legacy mode"
+            }), 501
+    
     @app.route("/api/export/openwebui/<doc_id>", methods=["POST"])
     def api_export_to_openwebui(doc_id):
         """API endpoint for exporting conversation to OpenWebUI"""
