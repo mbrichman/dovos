@@ -359,6 +359,8 @@ class PostgresController:
                             return 'claude'
                         elif 'chatgpt' in source_lower or 'gpt' in source_lower:
                             return 'chatgpt'
+                        elif 'openwebui' in source_lower or 'open-webui' in source_lower:
+                            return 'openwebui'
                     return source
             return 'unknown'
         except Exception as e:
@@ -620,6 +622,8 @@ class PostgresController:
                     messages = self._extract_chatgpt_messages(conv_data['mapping'])
                 elif 'chat_messages' in conv_data:  # Claude format
                     messages = self._extract_claude_messages(conv_data['chat_messages'])
+                elif 'chat' in conv_data and 'history' in conv_data.get('chat', {}) and 'messages' in conv_data['chat']['history']:  # OpenWebUI format
+                    messages = self._extract_openwebui_messages(conv_data['chat']['history']['messages'])
                 
                 # Skip if no valid messages
                 if not messages:
@@ -649,16 +653,20 @@ class PostgresController:
                 latest_ts = max(timestamps) if timestamps else None
                 
                 # If no message-level timestamps, fall back to conversation-level timestamps
-                # ChatGPT exports strip message timestamps, Claude uses ISO format
+                # ChatGPT exports strip message timestamps, Claude uses ISO format, OpenWebUI uses Unix epoch
                 if not earliest_ts:
                     if format_type.lower() == 'chatgpt':
                         earliest_ts = conv_data.get('create_time')
                     elif format_type.lower() == 'claude':
                         earliest_ts = conv_data.get('created_at')
+                    elif format_type.lower() == 'openwebui':
+                        earliest_ts = conv_data.get('created_at')
                 if not latest_ts:
                     if format_type.lower() == 'chatgpt':
                         latest_ts = conv_data.get('update_time') or conv_data.get('create_time')
                     elif format_type.lower() == 'claude':
+                        latest_ts = conv_data.get('updated_at') or conv_data.get('created_at')
+                    elif format_type.lower() == 'openwebui':
                         latest_ts = conv_data.get('updated_at') or conv_data.get('created_at')
                 
                 # Import in a single transaction
@@ -667,11 +675,14 @@ class PostgresController:
                     conv_kwargs = {'title': title}
                     
                     # Set original timestamps if available
-                    # ChatGPT uses Unix epoch (numeric), Claude uses ISO format (string)
+                    # ChatGPT/OpenWebUI use Unix epoch (numeric), Claude uses ISO format (string)
                     if earliest_ts:
                         try:
-                            if isinstance(earliest_ts, (int, float)):
-                                # ChatGPT format: Unix epoch
+                            if isinstance(earliest_ts, datetime):
+                                # Already a datetime object (from OpenWebUI extraction)
+                                conv_kwargs['created_at'] = earliest_ts
+                            elif isinstance(earliest_ts, (int, float)):
+                                # ChatGPT/OpenWebUI format: Unix epoch
                                 conv_kwargs['created_at'] = datetime.fromtimestamp(earliest_ts, tz=timezone.utc)
                             elif isinstance(earliest_ts, str):
                                 # Claude format: ISO string
@@ -680,8 +691,11 @@ class PostgresController:
                             pass  # Use default if conversion fails
                     if latest_ts:
                         try:
-                            if isinstance(latest_ts, (int, float)):
-                                # ChatGPT format: Unix epoch
+                            if isinstance(latest_ts, datetime):
+                                # Already a datetime object (from OpenWebUI extraction)
+                                conv_kwargs['updated_at'] = latest_ts
+                            elif isinstance(latest_ts, (int, float)):
+                                # ChatGPT/OpenWebUI format: Unix epoch
                                 conv_kwargs['updated_at'] = datetime.fromtimestamp(latest_ts, tz=timezone.utc)
                             elif isinstance(latest_ts, str):
                                 # Claude format: ISO string
@@ -703,6 +717,20 @@ class PostgresController:
                                 'original_conversation_id': conv_id or str(conversation.id)
                             }
                             
+                            # Add OpenWebUI-specific metadata
+                            if format_type.lower() == 'openwebui':
+                                openwebui_meta = {
+                                    'archived': conv_data.get('archived', False),
+                                    'pinned': conv_data.get('pinned', False),
+                                    'folder_id': conv_data.get('folder_id'),
+                                    'share_id': conv_data.get('share_id'),
+                                    'user_id': conv_data.get('user_id')
+                                }
+                                # Add model if present in the message
+                                if msg.get('model'):
+                                    openwebui_meta['model'] = msg['model']
+                                message_metadata['openwebui'] = {k: v for k, v in openwebui_meta.items() if v is not None}
+                            
                             # Build kwargs for message creation, including timestamp if available
                             msg_kwargs = {
                                 'conversation_id': conversation.id,
@@ -712,7 +740,7 @@ class PostgresController:
                             }
                             
                             # Add original message timestamp if available
-                            # ChatGPT uses Unix epoch (numeric), Claude uses ISO format (string)
+                            # ChatGPT/OpenWebUI use Unix epoch (numeric), Claude uses ISO format (string)
                             msg_ts = msg.get('created_at')
                             # Fall back to conversation timestamp if message timestamp is unavailable
                             if not msg_ts:
@@ -720,11 +748,16 @@ class PostgresController:
                                     msg_ts = conv_data.get('create_time')
                                 elif format_type.lower() == 'claude':
                                     msg_ts = conv_data.get('created_at')
+                                elif format_type.lower() == 'openwebui':
+                                    msg_ts = conv_data.get('created_at')
                             
                             if msg_ts:
                                 try:
-                                    if isinstance(msg_ts, (int, float)):
-                                        # ChatGPT format: Unix epoch
+                                    if isinstance(msg_ts, datetime):
+                                        # Already a datetime object (from OpenWebUI extraction)
+                                        msg_kwargs['created_at'] = msg_ts
+                                    elif isinstance(msg_ts, (int, float)):
+                                        # ChatGPT/OpenWebUI format: Unix epoch
                                         msg_kwargs['created_at'] = datetime.fromtimestamp(msg_ts, tz=timezone.utc)
                                     elif isinstance(msg_ts, str):
                                         # Claude format: ISO string
@@ -836,8 +869,94 @@ class PostgresController:
         
         return messages
     
+    def _epoch_to_dt(self, ts):
+        """Helper to convert epoch timestamp to datetime, handling ms vs s vs ns."""
+        try:
+            ts = int(ts)
+            # Detect nanoseconds (> 10^12)
+            if ts > 10**12:
+                ts = ts / 10**9
+            # Detect milliseconds (> 10^11)
+            elif ts > 10**11:
+                ts = ts / 1000.0
+            return datetime.fromtimestamp(ts, tz=timezone.utc)
+        except Exception as e:
+            logger.warning(f"Failed to convert timestamp {ts}: {e}, using current time")
+            return datetime.now(tz=timezone.utc)
+    
+    def _extract_openwebui_messages(self, messages_dict: Dict) -> List[Dict]:
+        """Extract and flatten messages from OpenWebUI format chronologically.
+        
+        OpenWebUI stores messages as a dict keyed by message ID with parent-child
+        relationships. This flattens them into a chronological list.
+        """
+        import json
+        
+        if not isinstance(messages_dict, dict) or not messages_dict:
+            return []
+
+        nodes = []
+        for mid, m in messages_dict.items():
+            if not isinstance(m, dict):
+                continue
+                
+            role = (m.get("role") or "").lower().strip() or "user"
+            content = m.get("content")
+            
+            # Handle content that might be a dict
+            if isinstance(content, dict):
+                content = content.get("text") or content.get("content") or json.dumps(content, ensure_ascii=False)
+            elif content is None:
+                content = ""
+            
+            # Get timestamp
+            ts = m.get("timestamp") or m.get("created_at")
+            created_at = self._epoch_to_dt(ts) if ts is not None else datetime.now(tz=timezone.utc)
+
+            # Extract model information
+            model = m.get("model")  # assistant messages
+            if not model:
+                models = m.get("models")  # user messages
+                if isinstance(models, list) and models:
+                    model = models[0]
+                elif isinstance(models, str):
+                    model = models
+
+            nodes.append({
+                "id": mid,
+                "parentId": m.get("parentId"),
+                "childrenIds": m.get("childrenIds") or [],
+                "role": role if role in {"user", "assistant", "system", "tool"} else "user",
+                "content": content,
+                "created_at": created_at,
+                "model": model
+            })
+
+        # Flatten: sort by created_at ascending; tie-break by parent presence (roots first), then id
+        nodes.sort(key=lambda n: (n["created_at"], 0 if not n.get("parentId") else 1, str(n["id"])))
+
+        # Convert to DovOS import format (list of messages)
+        flat = []
+        for n in nodes:
+            if not n["content"] or not n["content"].strip():
+                continue
+            
+            msg_dict = {
+                "role": n["role"],
+                "content": n["content"],
+                "created_at": n["created_at"]
+            }
+            
+            # Only add model if present
+            if n.get("model"):
+                msg_dict["model"] = n["model"]
+            
+            flat.append(msg_dict)
+        
+        return flat
+    
     def _detect_json_format(self, data):
-        """Detect whether JSON is ChatGPT or Claude format (copied from original)"""
+        """Detect whether JSON is ChatGPT, Claude, or OpenWebUI format"""
         # Ensure data is a list
         if isinstance(data, dict):
             conversations = data.get("conversations", [])
@@ -849,6 +968,20 @@ class PostgresController:
             
         # Check first conversation to determine format
         first_conv = conversations[0] if conversations else {}
+        
+        # OpenWebUI format has 'chat' with 'history.messages' as a dict
+        chat = first_conv.get("chat", {}) if isinstance(first_conv, dict) else {}
+        hist = chat.get("history", {}) if isinstance(chat, dict) else {}
+        msgs = hist.get("messages")
+        
+        if isinstance(msgs, dict) and msgs:
+            # Further sanity check: any message has keys id/role/content/timestamp
+            try:
+                any_msg = next(iter(msgs.values()))
+                if isinstance(any_msg, dict) and "role" in any_msg and "content" in any_msg and "timestamp" in any_msg:
+                    return conversations, "OpenWebUI"
+            except (StopIteration, TypeError):
+                pass
         
         # Claude format has 'uuid', 'name', and 'chat_messages'
         if (first_conv.get("uuid") and 

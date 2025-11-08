@@ -611,14 +611,21 @@ class ConversationController:
         """Format paginated conversation results for list view"""
         items = []
         for conv in conversations:
+            # Normalize source value - strip whitespace and handle None/empty
+            source = conv.get('source', 'unknown')
+            if source:
+                source = str(source).strip().lower()
+            else:
+                source = 'unknown'
+            
             item = {
                 'id': conv['id'],
                 'preview': conv['preview'],
                 'meta': {
                     'title': conv['title'],
-                    'source': conv['source'],
-                    'earliest_ts': conv['latest_ts'],
-                    'latest_ts': conv['latest_ts'],
+                    'source': source,
+                    'earliest_ts': conv.get('latest_ts', ''),
+                    'latest_ts': conv.get('latest_ts', ''),
                     'relevance_display': 'N/A'
                 }
             }

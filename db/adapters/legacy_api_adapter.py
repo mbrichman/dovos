@@ -182,11 +182,13 @@ class LegacyAPIAdapter:
                     if msg.role == 'user':
                         document_parts.append(f"**You said** *(on {timestamp_str})*:\n\n{msg.content}")
                     elif msg.role == 'assistant':
-                        # Use actual source name if available (ChatGPT, Claude, etc.)
+                        # Use actual source name if available (ChatGPT, Claude, OpenWebUI, etc.)
                         if source.lower() == 'chatgpt':
                             document_parts.append(f"**ChatGPT said** *(on {timestamp_str})*:\n\n{msg.content}")
                         elif source.lower() == 'claude':
                             document_parts.append(f"**Claude said** *(on {timestamp_str})*:\n\n{msg.content}")
+                        elif source.lower() == 'openwebui':
+                            document_parts.append(f"**OpenWebUI said** *(on {timestamp_str})*:\n\n{msg.content}")
                         else:
                             document_parts.append(f"**Assistant said** *(on {timestamp_str})*:\n\n{msg.content}")
                     elif msg.role == 'system':
@@ -262,11 +264,13 @@ class LegacyAPIAdapter:
                 if msg.role == 'user':
                     document_parts.append(f"**You said** *(on {timestamp_str})*:\n\n{msg.content}")
                 elif msg.role == 'assistant':
-                    # Use actual source name if available (ChatGPT, Claude, etc.)
+                    # Use actual source name if available (ChatGPT, Claude, OpenWebUI, etc.)
                     if source.lower() == 'chatgpt':
                         document_parts.append(f"**ChatGPT said** *(on {timestamp_str})*:\n\n{msg.content}")
                     elif source.lower() == 'claude':
                         document_parts.append(f"**Claude said** *(on {timestamp_str})*:\n\n{msg.content}")
+                    elif source.lower() == 'openwebui':
+                        document_parts.append(f"**OpenWebUI said** *(on {timestamp_str})*:\n\n{msg.content}")
                     else:
                         document_parts.append(f"**Assistant said** *(on {timestamp_str})*:\n\n{msg.content}")
                 elif msg.role == 'system':

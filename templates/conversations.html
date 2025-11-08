@@ -73,6 +73,7 @@
                     <option value="all" {% if source_filter == 'all' %}selected{% endif %}>All Sources</option>
                     <option value="chatgpt" {% if source_filter == 'chatgpt' %}selected{% endif %}>ChatGPT</option>
                     <option value="claude" {% if source_filter == 'claude' %}selected{% endif %}>Claude</option>
+                    <option value="openwebui" {% if source_filter == 'openwebui' %}selected{% endif %}>OpenWebUI</option>
                     <option value="docx" {% if source_filter == 'docx' %}selected{% endif %}>Word Documents</option>
                 </select>
             </div>
@@ -135,11 +136,14 @@
             </div>
         </div>
         <div class="conversation-meta">
-            {% if conversation.meta.source|lower == 'claude' %}
+            {% set source_clean = (conversation.meta.source|string|lower|trim) %}
+            {% if source_clean == 'claude' %}
                 <span class="badge badge-claude">Claude</span>
-            {% elif conversation.meta.source|lower == 'chatgpt' %}
+            {% elif source_clean == 'chatgpt' %}
                 <span class="badge badge-chatgpt">ChatGPT</span>
-            {% elif conversation.meta.source|lower == 'docx' %}
+            {% elif source_clean == 'openwebui' or source_clean == 'open-webui' or source_clean == 'open webui' %}
+                <span class="badge badge-openwebui">OpenWebUI</span>
+            {% elif source_clean == 'docx' %}
                 <span class="badge badge-word">Word</span>
             {% else %}
                 <span class="badge">{{ conversation.meta.source|capitalize }}</span>
@@ -441,10 +445,15 @@ function createConversationElement(conv) {
     div.className = 'conversation-item';
     div.onclick = () => window.location.href = `/view/${conv.id}`;
     
-    const badgeClass = conv.source.toLowerCase() === 'claude' ? 'badge-claude' : 
-                       conv.source.toLowerCase() === 'chatgpt' ? 'badge-chatgpt' :
-                       conv.source.toLowerCase() === 'docx' ? 'badge-word' : '';
-    const badgeText = conv.source.toLowerCase() === 'docx' ? 'Word' : 
+    const sourceLower = conv.source.toLowerCase().trim();
+    const badgeClass = sourceLower === 'claude' ? 'badge-claude' : 
+                       sourceLower === 'chatgpt' ? 'badge-chatgpt' :
+                       sourceLower === 'openwebui' || sourceLower === 'open-webui' ? 'badge-openwebui' :
+                       sourceLower === 'docx' ? 'badge-word' : '';
+    const badgeText = sourceLower === 'docx' ? 'Word' : 
+                     sourceLower === 'claude' ? 'Claude' :
+                     sourceLower === 'chatgpt' ? 'ChatGPT' :
+                     sourceLower === 'openwebui' || sourceLower === 'open-webui' ? 'OpenWebUI' :
                      conv.source.charAt(0).toUpperCase() + conv.source.slice(1);
     
     div.innerHTML = `

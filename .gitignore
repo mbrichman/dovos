@@ -84,6 +84,11 @@ extracted_attachments/
 data/
 scripts/archived/
 
+# Backups
+backups/
+*.sql
+*.sql.gz
+
 # Large data files
 Source Files/
 *.json
