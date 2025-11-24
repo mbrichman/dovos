@@ -277,6 +277,25 @@ def seed_test_corpus_fixture(uow):
 
 
 @pytest.fixture
+def search_service(uow):
+    """Provide SearchService instance with test database."""
+    from db.services.search_service import SearchService
+    return SearchService(uow)
+
+
+@pytest.fixture
+def conv_id(uow, seed_conversations):
+    """Provide a conversation ID with test messages for search service tests."""
+    from db.services.message_service import MessageService
+    
+    # Seed a conversation with messages
+    convs = seed_conversations(count=1, messages_per_conversation=5, with_embeddings=True)
+    conversation, messages = convs[0]
+    
+    return conversation.id
+
+
+@pytest.fixture
 def toggle_postgres_mode(monkeypatch):
     """
     Toggle USE_POSTGRES environment variable for side-by-side testing.

@@ -19,7 +19,8 @@ import logging
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db.database_setup import setup_database, get_database_url
+from db.database import create_tables
+from config import DATABASE_URL
 from db.services.message_service import MessageService
 from db.repositories.unit_of_work import get_unit_of_work
 from api.contracts.golden_responses import GOLDEN_RESPONSES

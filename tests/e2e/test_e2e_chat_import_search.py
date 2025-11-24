@@ -27,7 +27,7 @@ os.environ['USE_POSTGRES'] = 'true'
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db.database_setup import setup_database
+from db.database import create_tables
 from db.services.message_service import MessageService
 from db.services.search_service import SearchService, SearchConfig
 from db.workers.embedding_worker import EmbeddingWorker

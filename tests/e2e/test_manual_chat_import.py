@@ -18,7 +18,7 @@ os.environ['USE_POSTGRES'] = 'true'
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from db.database_setup import setup_database
+from db.database import create_tables
 from db.services.message_service import MessageService
 from db.services.search_service import SearchService
 from db.workers.embedding_worker import EmbeddingWorker
@@ -183,7 +183,7 @@ def run_manual_test():
     try:
         # Step 1: Setup database
         logger.info("📋 Step 1: Setting up database...")
-        setup_database()
+        create_tables()
         
         # Step 2: Import test chat
         logger.info("📋 Step 2: Importing test conversation...")

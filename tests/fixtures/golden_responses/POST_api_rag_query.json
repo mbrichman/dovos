@@ -1,5 +1,106 @@
 {
   "query": "test query",
-  "results": [],
+  "results": [
+    {
+      "content": "I need help with this query",
+      "distance": 0.4075821218615009,
+      "id": "82baa9b4-a659-4342-9d61-aebea455ce17",
+      "metadata": {
+        "conversation_id": "82baa9b4-a659-4342-9d61-aebea455ce17",
+        "earliest_ts": "2024-08-21T18:53:50.520814-05:00",
+        "id": "82baa9b4-a659-4342-9d61-aebea455ce17",
+        "latest_ts": "2024-08-21T18:53:50.520814-05:00",
+        "message_count": 1,
+        "message_id": "47969e99-1802-4d61-837c-b850c6dd928c",
+        "role": "user",
+        "source": "postgres",
+        "title": "Help with Query"
+      },
+      "preview": "I need help with this query",
+      "relevance": 0.5924178781384991,
+      "source": "postgres",
+      "title": "Help with Query"
+    },
+    {
+      "content": "Mixed results on the queries",
+      "distance": 0.4782554662747429,
+      "id": "143ff2fe-bbc4-4d01-978e-34c4ef0b0053",
+      "metadata": {
+        "conversation_id": "143ff2fe-bbc4-4d01-978e-34c4ef0b0053",
+        "earliest_ts": "2025-10-03T15:51:23.905630-05:00",
+        "id": "143ff2fe-bbc4-4d01-978e-34c4ef0b0053",
+        "latest_ts": "2025-10-03T15:51:23.905630-05:00",
+        "message_count": 1,
+        "message_id": "5a455ae4-4f2c-41fb-be81-f05ce6f001d6",
+        "role": "user",
+        "source": "postgres",
+        "title": "iManage search system redesign"
+      },
+      "preview": "Mixed results on the queries",
+      "relevance": 0.5217445337252571,
+      "source": "postgres",
+      "title": "iManage search system redesign"
+    },
+    {
+      "content": "Can you give me a simple practice test",
+      "distance": 0.4964220373756245,
+      "id": "d875b068-eaf3-47f6-aadc-5b8c0f59b7e9",
+      "metadata": {
+        "conversation_id": "d875b068-eaf3-47f6-aadc-5b8c0f59b7e9",
+        "earliest_ts": "2025-03-23T02:34:08.652178-05:00",
+        "id": "d875b068-eaf3-47f6-aadc-5b8c0f59b7e9",
+        "latest_ts": "2025-03-23T02:34:08.652178-05:00",
+        "message_count": 1,
+        "message_id": "da7d3e5b-3b87-4f3d-bae1-bbe5911e46ac",
+        "role": "user",
+        "source": "postgres",
+        "title": "Teas Test Clarification"
+      },
+      "preview": "Can you give me a simple practice test",
+      "relevance": 0.5035779626243755,
+      "source": "postgres",
+      "title": "Teas Test Clarification"
+    },
+    {
+      "content": "optimize this query",
+      "distance": 0.5144638751659087,
+      "id": "cd6d421a-dc80-4f46-aa7f-dc90949c5198",
+      "metadata": {
+        "conversation_id": "cd6d421a-dc80-4f46-aa7f-dc90949c5198",
+        "earliest_ts": "2024-06-11T12:14:12.548413-05:00",
+        "id": "cd6d421a-dc80-4f46-aa7f-dc90949c5198",
+        "latest_ts": "2024-06-11T12:14:12.548413-05:00",
+        "message_count": 1,
+        "message_id": "0dd314fc-84d7-4c13-8ccf-90729145f105",
+        "role": "user",
+        "source": "postgres",
+        "title": "Optimize Conversation Query"
+      },
+      "preview": "optimize this query",
+      "relevance": 0.48553612483409125,
+      "source": "postgres",
+      "title": "Optimize Conversation Query"
+    },
+    {
+      "content": "I don't know where to put that query call",
+      "distance": 0.5262637483353165,
+      "id": "48d60430-2d69-4083-a2fe-188ed6f613cc",
+      "metadata": {
+        "conversation_id": "48d60430-2d69-4083-a2fe-188ed6f613cc",
+        "earliest_ts": "2025-10-05T23:05:08.964566-05:00",
+        "id": "48d60430-2d69-4083-a2fe-188ed6f613cc",
+        "latest_ts": "2025-10-05T23:05:08.964566-05:00",
+        "message_count": 1,
+        "message_id": "e7647d88-1307-49dc-b34b-1bef77848a60",
+        "role": "user",
+        "source": "postgres",
+        "title": "RAG API service architecture"
+      },
+      "preview": "I don't know where to put that query call",
+      "relevance": 0.47373625166468347,
+      "source": "postgres",
+      "title": "RAG API service architecture"
+    }
+  ],
   "search_type": "semantic"
 }

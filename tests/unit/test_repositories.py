@@ -12,7 +12,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from db.database import test_connection, check_extensions
 from db.repositories.unit_of_work import get_unit_of_work
-from config import USE_PG_SINGLE_STORE
 
 
 def test_database_connection():
@@ -121,14 +120,6 @@ def main():
     """Main test function."""
     print("Repository Pattern Test Suite")
     print("=" * 40)
-    
-    # Check feature flag
-    print(f"USE_PG_SINGLE_STORE: {USE_PG_SINGLE_STORE}")
-    
-    if not USE_PG_SINGLE_STORE:
-        print("⚠️  PostgreSQL single store is disabled. Enable it to test repositories.")
-        print("   Set USE_PG_SINGLE_STORE=true in your .env file")
-        return
     
     # Run tests
     tests = [
