@@ -42,6 +42,7 @@ class TestConversationsAPI:
         assert 'ids' in data
         
         # Check we got results (at least the 100 conversations we seeded)
+        # NOTE: Uses production DB, not test DB, so sees all data
         assert len(data['documents']) >= 100
         assert len(data['metadatas']) >= 100
         assert len(data['ids']) >= 100
