@@ -83,22 +83,6 @@
     },
     {
       "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
-      "date": "2025-11-04T22:06:58.379507-06:00",
-      "metadata": {
-        "conversation_id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
-        "earliest_ts": "2025-11-04T22:06:58.379507-06:00",
-        "id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
-        "latest_ts": "2025-11-04T22:06:58.379507-06:00",
-        "message_count": 1,
-        "message_id": "edc3313f-1b9f-426d-aacf-084b1a00b6d8",
-        "role": "user",
-        "source": "claude",
-        "title": "Writing programs in assembly language"
-      },
-      "title": "Writing programs in assembly language"
-    },
-    {
-      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
       "date": "2025-11-04T20:38:38-06:00",
       "metadata": {
         "conversation_id": "5d98bb82-cd5e-4733-888d-d2a99ae43da8",
@@ -109,6 +93,22 @@
         "message_id": "e45e7aa2-8d6b-4f17-96b1-063693b6ff74",
         "role": "user",
         "source": "openwebui",
+        "title": "Writing programs in assembly language"
+      },
+      "title": "Writing programs in assembly language"
+    },
+    {
+      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
+      "date": "2025-11-04T22:06:58.379507-06:00",
+      "metadata": {
+        "conversation_id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
+        "earliest_ts": "2025-11-04T22:06:58.379507-06:00",
+        "id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
+        "latest_ts": "2025-11-04T22:06:58.379507-06:00",
+        "message_count": 1,
+        "message_id": "edc3313f-1b9f-426d-aacf-084b1a00b6d8",
+        "role": "user",
+        "source": "claude",
         "title": "Writing programs in assembly language"
       },
       "title": "Writing programs in assembly language"

@@ -469,7 +469,11 @@ class ContextualRetrievalService:
         if apply_recency_bonus and window.messages:
             # Use the matched message's creation time
             matched_msg = next(m for m in window.messages if m.is_primary_match)
-            age_days = (datetime.now(timezone.utc) - matched_msg.created_at).days
+            # Ensure created_at is timezone-aware for comparison
+            msg_created_at = matched_msg.created_at
+            if msg_created_at.tzinfo is None:
+                msg_created_at = msg_created_at.replace(tzinfo=timezone.utc)
+            age_days = (datetime.now(timezone.utc) - msg_created_at).days
             
             # Decay recency bonus over 90 days
             recency_bonus = 0.05 * math.exp(-age_days / 90)
