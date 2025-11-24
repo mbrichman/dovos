@@ -288,7 +288,7 @@ class TestSearchAPI:
             content='To enable SSH and VNC on your Raspberry Pi 5, you have several options...'
         )
         
-        uow.commit()
+        uow.session.flush()
         return conversation.id
     
     def test_api_search_returns_results(self, client, searchable_conversation):

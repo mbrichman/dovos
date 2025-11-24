@@ -50,7 +50,7 @@ def sample_conversation(uow):
         )
         messages.append(message)
     
-    uow.session.commit()
+    uow.session.flush()
     return conversation, messages
 
 
@@ -141,7 +141,7 @@ class TestBoundaryConditions:
         """Test window on conversation with only one message."""
         conversation = create_conversation(uow, title="Single Message")
         message = create_message(uow, conversation.id, role="user", content="Only message")
-        uow.session.commit()
+        uow.session.flush()
         
         window = contextual_service._get_context_window(
             conversation_id=conversation.id,
@@ -296,7 +296,7 @@ class TestDeduplicationAndMerging:
         
         msg1 = create_message(uow, conv1.id, role="user", content="Message 1")
         msg2 = create_message(uow, conv2.id, role="user", content="Message 2")
-        uow.session.commit()
+        uow.session.flush()
         
         window1 = contextual_service._get_context_window(
             conversation_id=conv1.id,
@@ -360,7 +360,7 @@ class TestWindowScoring:
         
         old_msg = create_message(uow, old_conv.id, content="Old message")
         new_msg = create_message(uow, new_conv.id, content="New message")
-        uow.session.commit()
+        uow.session.flush()
         
         old_window = contextual_service._get_context_window(
             conversation_id=old_conv.id,
@@ -556,7 +556,7 @@ class TestEndToEndRetrieval:
         # Add embeddings to messages for search
         for message in messages[:5]:
             create_message(uow, conversation.id, content=message.content, with_embedding=True)
-        uow.session.commit()
+        uow.session.flush()
         
         # Perform retrieval
         results = contextual_service.retrieve_with_context(

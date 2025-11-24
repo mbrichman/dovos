@@ -64,14 +64,14 @@
     {
       "content": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make request\nresponse = requests.post(\nf\"{BASE_URL}/customers/{CUSTOMER_ID}/libraries/{LIBRARY}/sync/documents/crawl\",\njson=payload,\nheaders={\n\"Content-Type\": \"application/json\",\n\"X-Auth-Token\": TOKEN\n}\n)\n# Check for errors\nif response.status_code != 200:\nprint(f\"\\n\u274c Error: {response.status_code}\")\nprint(f\"Response: {response.text}\")\nbreak\n# Parse response\ndata = response.json()\ndocs = data.get('data', [])\nall_docs.extend(docs)\nprint(f\"\u2705 Got {len(docs)} docs (Total: {len(all_docs)})\")\n# Check for more pages\ncursor = data.get('cursor')\nif not cursor:\nprint(f\"\\n\ud83c\udfc1 Complete: {len(all_docs)} documents\")\nbreak\npage += 1\nreturn all_docs\n# Main execution\nprint(\"\ud83d\ude80 Starting crawl of chicagoactive library...\\n\")\ntry:\ndocuments = crawl_library()\n# Save with timestamp\ntimestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\nfilename = f\"imanage_crawl_{timestamp}.json\"\nwith open(filename, 'w') as f:\njson.dump(documents, f, indent=2)\nprint(f\"\\n\ud83d\udcbe Saved to {filename}\")\nprint(f\"\ud83d\udcc8 File size: {len(json.dumps(documents)) / 1024 / 1024:.2f} MB\")\nprint(f\"\ud83d\udcca Total documents: {len(documents)}\")\n# Print sample doc structure\nif documents:\nprint(\"\\n\ud83d\udccb Sample document structure:\")\nprint(json.dumps(documents[0], indent=2)[:500] + \"...\")\nexcept Exception as e:\nprint(f\"\\n\u274c Error: {e}\")\nimport traceback\ntraceback.print_exc()\n```\nCommon issues:\n- Token expired? (try regenerating)\n- Library name wrong? (case sensitive: \"chicagoactive\" vs \"ChicagoActive\")\n- Permission issue? (did the god-mode permission actually get applied?)\n- Rate limiting?",
       "distance": 0.4846604023974499,
-      "id": "b694421d-d095-4f33-b317-bad7c884b5fa",
+      "id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
       "metadata": {
-        "conversation_id": "b694421d-d095-4f33-b317-bad7c884b5fa",
+        "conversation_id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
         "earliest_ts": "2025-10-03T21:30:03-05:00",
-        "id": "b694421d-d095-4f33-b317-bad7c884b5fa",
+        "id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
         "latest_ts": "2025-10-03T21:30:03-05:00",
         "message_count": 1,
-        "message_id": "e929c66c-adf9-41bc-b546-2467b18b90ac",
+        "message_id": "3b550b08-ac60-4f21-9ba7-dbed41788564",
         "role": "assistant",
         "source": "postgres",
         "title": "Imanage MCP server integration"
@@ -84,14 +84,14 @@
     {
       "content": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make request\nresponse = requests.post(\nf\"{BASE_URL}/customers/{CUSTOMER_ID}/libraries/{LIBRARY}/sync/documents/crawl\",\njson=payload,\nheaders={\n\"Content-Type\": \"application/json\",\n\"X-Auth-Token\": TOKEN\n}\n)\n# Check for errors\nif response.status_code != 200:\nprint(f\"\\n\u274c Error: {response.status_code}\")\nprint(f\"Response: {response.text}\")\nbreak\n# Parse response\ndata = response.json()\ndocs = data.get('data', [])\nall_docs.extend(docs)\nprint(f\"\u2705 Got {len(docs)} docs (Total: {len(all_docs)})\")\n# Check for more pages\ncursor = data.get('cursor')\nif not cursor:\nprint(f\"\\n\ud83c\udfc1 Complete: {len(all_docs)} documents\")\nbreak\npage += 1\nreturn all_docs\n# Main execution\nprint(\"\ud83d\ude80 Starting crawl of chicagoactive library...\\n\")\ntry:\ndocuments = crawl_library()\n# Save with timestamp\ntimestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\nfilename = f\"imanage_crawl_{timestamp}.json\"\nwith open(filename, 'w') as f:\njson.dump(documents, f, indent=2)\nprint(f\"\\n\ud83d\udcbe Saved to {filename}\")\nprint(f\"\ud83d\udcc8 File size: {len(json.dumps(documents)) / 1024 / 1024:.2f} MB\")\nprint(f\"\ud83d\udcca Total documents: {len(documents)}\")\n# Print sample doc structure\nif documents:\nprint(\"\\n\ud83d\udccb Sample document structure:\")\nprint(json.dumps(documents[0], indent=2)[:500] + \"...\")\nexcept Exception as e:\nprint(f\"\\n\u274c Error: {e}\")\nimport traceback\ntraceback.print_exc()\n```\nCommon issues:\n- Token expired? (try regenerating)\n- Library name wrong? (case sensitive: \"chicagoactive\" vs \"ChicagoActive\")\n- Permission issue? (did the god-mode permission actually get applied?)\n- Rate limiting?",
       "distance": 0.4846604023974499,
-      "id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
+      "id": "b694421d-d095-4f33-b317-bad7c884b5fa",
       "metadata": {
-        "conversation_id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
+        "conversation_id": "b694421d-d095-4f33-b317-bad7c884b5fa",
         "earliest_ts": "2025-10-03T21:30:03-05:00",
-        "id": "b2689afa-1fa0-4ccc-8467-ed5d139a64df",
+        "id": "b694421d-d095-4f33-b317-bad7c884b5fa",
         "latest_ts": "2025-10-03T21:30:03-05:00",
         "message_count": 1,
-        "message_id": "3b550b08-ac60-4f21-9ba7-dbed41788564",
+        "message_id": "e929c66c-adf9-41bc-b546-2467b18b90ac",
         "role": "assistant",
         "source": "postgres",
         "title": "Imanage MCP server integration"

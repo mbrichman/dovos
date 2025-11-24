@@ -77,7 +77,7 @@ def migration_source_data(db_session):
     )
     conversations.append(conv3)
     
-    db_session.commit()
+    db_session.flush()
     
     return {
         'conversations': conversations,

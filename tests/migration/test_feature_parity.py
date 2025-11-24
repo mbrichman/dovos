@@ -69,7 +69,7 @@ def feature_test_data(db_session):
     )
     conversations.append(conv3)
     
-    db_session.commit()
+    db_session.flush()
     
     return {
         'conversations': conversations,
@@ -137,7 +137,7 @@ class TestMarkdownExport:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Get messages
         messages = (db_session.query(Message)
@@ -347,7 +347,7 @@ Third line after blank"""
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Retrieve message
         messages = (db_session.query(Message)
@@ -374,7 +374,7 @@ class TestSettingsManagement:
             value="test_value"
         )
         db_session.add(setting)
-        db_session.commit()
+        db_session.flush()
         
         # Retrieve setting
         retrieved = db_session.query(Setting).filter_by(id="test_setting").first()
@@ -387,11 +387,11 @@ class TestSettingsManagement:
         # Create initial setting
         setting = Setting(id="updatable_setting", value="initial")
         db_session.add(setting)
-        db_session.commit()
+        db_session.flush()
         
         # Update setting
         setting.value = "updated"
-        db_session.commit()
+        db_session.flush()
         
         # Verify update
         retrieved = db_session.query(Setting).filter_by(id="updatable_setting").first()
@@ -407,7 +407,7 @@ class TestSettingsManagement:
         
         for setting in settings:
             db_session.add(setting)
-        db_session.commit()
+        db_session.flush()
         
         # Retrieve all
         all_settings = db_session.query(Setting).all()

@@ -40,13 +40,13 @@ class TestDataLossDetection:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Simulate data loss: delete one message
         messages = db_session.query(Message).filter_by(conversation_id=conv.id).all()
         original_count = len(messages)
         db_session.delete(messages[2])  # Delete middle message
-        db_session.commit()
+        db_session.flush()
         
         # Our test should detect this
         remaining_count = db_session.query(Message).filter_by(conversation_id=conv.id).count()
@@ -69,7 +69,7 @@ class TestDataLossDetection:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Get original counts
         message_count = db_session.query(Message).filter_by(conversation_id=conv.id).count()
@@ -85,7 +85,7 @@ class TestDataLossDetection:
             Message.conversation_id == conv.id
         ).all()
         db_session.delete(embeddings[0])
-        db_session.commit()
+        db_session.flush()
         
         # Verify mismatch is detected
         new_embedding_count = db_session.query(MessageEmbedding).join(Message).filter(
@@ -112,12 +112,12 @@ class TestCorruptionDetection:
             messages=[("user", original_content)],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Simulate corruption
         message = db_session.query(Message).filter_by(conversation_id=conv.id).first()
         message.content = "CORRUPTED"
-        db_session.commit()
+        db_session.flush()
         
         # Verify corruption is detected
         retrieved = db_session.query(Message).filter_by(conversation_id=conv.id).first()
@@ -134,7 +134,7 @@ class TestCorruptionDetection:
             messages=[("user", "Test")],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Get message
         message = db_session.query(Message).filter_by(conversation_id=conv.id).first()
@@ -142,7 +142,7 @@ class TestCorruptionDetection:
         
         # Break relationship by deleting conversation but not cascade
         db_session.query(Conversation).filter_by(id=conv.id).delete(synchronize_session=False)
-        db_session.commit()
+        db_session.flush()
         
         # Try to access orphaned message
         orphaned_message = db_session.query(Message).filter_by(id=message_id).first()
@@ -173,7 +173,7 @@ class TestSearchFailureDetection:
             messages=[("user", f"Message containing {unique_term}")],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Verify the term exists in database via SQL
         message = db_session.query(Message).filter(
@@ -206,7 +206,7 @@ class TestFeatureRegressionDetection:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Build markdown
         messages = db_session.query(Message).filter_by(conversation_id=conv.id).all()
@@ -230,7 +230,7 @@ class TestFeatureRegressionDetection:
                 messages=[("user", f"Message {i}")],
                 embedding_generator=embedding_gen
             )
-        db_session.commit()
+        db_session.flush()
         
         # Test broken pagination (no limit)
         all_results = db_session.query(Conversation).all()
@@ -258,7 +258,7 @@ class TestDataIntegrityValidation:
             messages=[("user", "Test")],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         message = db_session.query(Message).filter_by(conversation_id=conv.id).first()
         
@@ -273,7 +273,7 @@ class TestDataIntegrityValidation:
         db_session.add(duplicate_embedding)
         
         try:
-            db_session.commit()
+            db_session.flush()
             pytest.fail("Should have raised integrity error for duplicate embedding")
         except Exception as e:
             # Expected - our schema prevents this
@@ -294,7 +294,7 @@ class TestDataIntegrityValidation:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Get messages in created order
         messages = db_session.query(Message).filter_by(
@@ -305,7 +305,7 @@ class TestDataIntegrityValidation:
         first_ts = messages[0].created_at
         messages[0].created_at = messages[2].created_at
         messages[2].created_at = first_ts
-        db_session.commit()
+        db_session.flush()
         
         # Retrieve again
         reordered = db_session.query(Message).filter_by(

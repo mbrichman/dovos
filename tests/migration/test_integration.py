@@ -94,7 +94,7 @@ def integrated_system(db_session):
     )
     conversations.append(conv4)
     
-    db_session.commit()
+    db_session.flush()
     
     return {
         'conversations': conversations,
@@ -122,7 +122,7 @@ class TestCompleteImportWorkflow:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         # Step 2: Verify data is persisted
         assert db_session.query(Conversation).filter_by(id=conv.id).count() == 1
@@ -440,7 +440,7 @@ class TestDataConsistency:
             ],
             embedding_generator=embedding_gen
         )
-        db_session.commit()
+        db_session.flush()
         
         conv_id = conv.id
         
@@ -450,7 +450,7 @@ class TestDataConsistency:
         
         # Delete conversation
         db_session.query(Conversation).filter_by(id=conv_id).delete()
-        db_session.commit()
+        db_session.flush()
         
         # Verify cascade delete worked
         remaining_messages = db_session.query(Message).filter_by(conversation_id=conv_id).count()

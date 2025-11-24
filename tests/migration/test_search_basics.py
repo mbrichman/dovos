@@ -42,7 +42,7 @@ def seeded_search_data(db_session):
         embedding_generator=embedding_gen
     )
     
-    db_session.commit()
+    db_session.flush()
 
 
 @pytest.mark.migration
