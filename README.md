@@ -7,9 +7,10 @@ A chat conversation archive and search application with PostgreSQL full-text sea
 Dovos is a Flask-based web application designed to import, archive, and search through chat conversations from multiple sources (ChatGPT, Claude, etc.). It features:
 
 - **Full-Text Search**: PostgreSQL-backed FTS for fast, accurate conversation search
-- **RAG Integration**: Semantic search capabilities with ChromaDB vector storage
+- **Vector Search**: Semantic search with pgvector embeddings
+- **Hybrid Search**: Combined FTS and vector similarity ranking
 - **OpenWebUI Compatibility**: Export and integration with Open WebUI
-- **Multiple Database Support**: SQLite and PostgreSQL adapters with automatic backend selection
+- **PostgreSQL Backend**: Enterprise-grade database with proper ACID guarantees
 - **Chat Import**: Support for ChatGPT and Claude conversation formats
 - **Modern Web UI**: Flask-based interface with Jinja2 templates
 
@@ -18,7 +19,7 @@ Dovos is a Flask-based web application designed to import, archive, and search t
 ### Requirements
 
 - Python 3.8+
-- PostgreSQL 12+ (optional, falls back to SQLite)
+- PostgreSQL 12+ with pgvector extension
 
 ### Python Environment Setup
 
@@ -57,7 +58,7 @@ dovos/
 ├── data/                 # Application data (ignored by git)
 │   └── source/          # Source conversation files
 ├── db/                   # Database layer
-│   ├── adapters/        # SQLite & PostgreSQL adapters
+│   ├── adapters/        # Legacy API format adapter
 │   ├── models/          # SQLAlchemy models
 │   ├── repositories/    # Repository pattern implementations
 │   ├── services/        # Business logic services
@@ -76,9 +77,8 @@ dovos/
 │   ├── e2e/            # End-to-end tests
 │   └── fixtures/       # Test fixtures
 ├── app.py               # Flask application entry point
-├── config.py            # Application configuration
+├── config/              # Application configuration
 ├── routes.py            # Web routes
-├── rag_service.py       # RAG/ChromaDB service
 └── requirements.txt     # Python dependencies
 ```
 
@@ -147,10 +147,8 @@ See `docs/POSTGRESQL_SETUP.md` for detailed PostgreSQL setup instructions.
 
 ### Database Scripts
 
-- **Maintenance**: `scripts/database/db_maintenance.py` - General DB maintenance tasks
 - **Status Checks**: `scripts/database/simple_db_check.py` - Quick database health checks
 - **Data Verification**: `scripts/database/check_postgres_data.py` - Validate data integrity
-- **Flag Management**: `scripts/database/manage_postgres_flag.py` - Toggle PostgreSQL usage
 
 ### Migrations
 

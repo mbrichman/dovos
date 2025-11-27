@@ -1,199 +1,156 @@
-# PostgreSQL Backend Setup & Feature Flag
+# PostgreSQL Backend Setup
 
-This guide explains how to enable and use the new PostgreSQL backend for the chat application.
+This guide explains how to set up and use PostgreSQL as the database backend for the chat application.
 
 ## Quick Start
 
-### 1. Enable PostgreSQL Backend
+### 1. Configure Database Connection
 
-```bash
-# Option A: Use the management script (recommended)
-python manage_postgres_flag.py enable
+Set the `DATABASE_URL` environment variable in your `.env` file:
 
-# Option B: Set environment variable manually
-export USE_POSTGRES=true
+```env
+DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/dovos
 ```
 
 ### 2. Test the Setup
 
 ```bash
-# Run integration test to verify everything works
-python manage_postgres_flag.py test
-
-# Or run the tests manually
-python test_manual_chat_import.py
-python test_e2e_chat_import_search.py
+# Run integration tests to verify everything works
+python tests/e2e/manual_chat_import.py
+python tests/e2e/test_e2e_chat_import_search.py
 ```
 
 ### 3. Start Your Application
 
 ```bash
-# Your Flask app will now use PostgreSQL automatically
+# The Flask app uses PostgreSQL automatically
 python app.py
 ```
 
-## Feature Flag Control
+## Database Management
 
-The PostgreSQL backend is controlled by the `USE_POSTGRES` environment variable:
-
-| Value | Backend | Description |
-|-------|---------|-------------|
-| `true` | PostgreSQL | New backend with hybrid search, embeddings, etc. |
-| `false` | Legacy | Original ChromaDB/SQLite backend |
-| *unset* | Legacy | Default - uses original backend |
-
-## Management Commands
-
-### Check Current Status
+### Check Database Status
 ```bash
-python manage_postgres_flag.py status
+python scripts/database/simple_db_check.py
 ```
 
-### Enable PostgreSQL Backend
+### Verify Data
 ```bash
-python manage_postgres_flag.py enable
+python scripts/database/check_postgres_data.py
 ```
 
-### Disable PostgreSQL Backend  
+### Run Database Migrations
 ```bash
-python manage_postgres_flag.py disable
+# Apply all pending migrations
+alembic upgrade head
+
+# Create a new migration
+alembic revision --autogenerate -m "Description"
 ```
 
-### Run Integration Test
-```bash
-python manage_postgres_flag.py test
-```
+## Features
 
-## Manual Environment Setup
-
-### For Current Session Only
-```bash
-# Enable for this session
-export USE_POSTGRES=true
-
-# Disable for this session  
-export USE_POSTGRES=false
-
-# Check current value
-echo $USE_POSTGRES
-```
-
-### For Persistent Setup
-Add to your shell profile (`.zshrc`, `.bashrc`, etc.):
-
-```bash
-# Enable PostgreSQL backend permanently
-echo 'export USE_POSTGRES=true' >> ~/.zshrc
-source ~/.zshrc
-```
-
-## Features Comparison
-
-### PostgreSQL Backend (`USE_POSTGRES=true`)
-✅ **New Features:**
+### PostgreSQL Backend Features
+✅ **Search Capabilities:**
 - Hybrid semantic + full-text search
 - Vector similarity search with pgvector
-- Background embedding generation
-- Enterprise-grade PostgreSQL database
-- Atomic transactions with outbox pattern
-- Concurrent workers for embedding processing
 - Advanced search ranking and relevance
+- Full-text search with PostgreSQL FTS
 
-✅ **API Compatibility:**
-- 100% compatible with existing frontend
-- Same response formats as legacy system
-- All existing endpoints work identically
+✅ **Data Management:**
+- Enterprise-grade PostgreSQL database
+- Atomic transactions with proper isolation
+- Background embedding generation
+- Concurrent workers for embedding processing
 
-### Legacy Backend (`USE_POSTGRES=false`)
-✅ **Current Features:**
-- ChromaDB vector search
-- SQLite metadata storage
-- Full-text search
-- All existing functionality
+✅ **Architecture:**
+- Clean repository pattern with unit of work
+- Service layer for business logic
+- Outbox pattern for reliable async processing
+- Comprehensive test coverage
 
-⚠️ **Limitations:**
-- No hybrid search
-- No background embedding generation
-- SQLite limitations for concurrent access
-
-## Testing the Migration
+## Testing
 
 ### 1. Import and Search Test
 ```bash
 # This test imports a realistic chat conversation and tests all search methods
-python test_manual_chat_import.py
+python tests/e2e/manual_chat_import.py
 ```
 
 ### 2. Full Integration Test
 ```bash
 # This test runs comprehensive validation of the entire pipeline
-python test_e2e_chat_import_search.py
+python tests/e2e/test_e2e_chat_import_search.py
 ```
 
-### 3. API Compatibility Test
+### 3. Run All Tests
 ```bash
-# This test validates API endpoint compatibility
-python test_api_compatibility.py
+# Run the complete test suite
+pytest
+
+# Run with coverage report
+pytest --cov=. --cov-report=html
 ```
 
 ## Deployment Strategy
 
 ### Phase 1: Development Testing
-1. Enable PostgreSQL in development: `USE_POSTGRES=true`
+1. Set up PostgreSQL database connection
 2. Run all integration tests
 3. Validate search quality and performance
 4. Test with real data
 
 ### Phase 2: Staging Validation  
-1. Deploy with PostgreSQL enabled
+1. Deploy with PostgreSQL configured
 2. Import production data subset
 3. Run performance benchmarks
-4. Validate frontend compatibility
+4. Validate all functionality
 
-### Phase 3: Production Migration
+### Phase 3: Production Deployment
 1. Schedule maintenance window
-2. Switch to `USE_POSTGRES=true`
+2. Deploy application with PostgreSQL
 3. Monitor application metrics
-4. Keep rollback option ready (`USE_POSTGRES=false`)
+4. Verify all services are healthy
 
-### Phase 4: Full Migration
-1. After confirming stability
-2. Remove legacy backend code
-3. Update documentation
-4. Train team on new features
+### Phase 4: Post-Deployment
+1. Monitor performance and stability
+2. Optimize queries as needed
+3. Update team documentation
+4. Train team on PostgreSQL-specific features
 
 ## Troubleshooting
 
-### Check Feature Flag Status
+### Check Database Status
 ```bash
-python manage_postgres_flag.py status
+python scripts/database/simple_db_check.py
 ```
 
 ### Test Database Connection
 ```bash
 # Test if PostgreSQL is accessible
-python -c "from db.database_setup import setup_database; setup_database(); print('✅ PostgreSQL connection OK')"
+python -c "from db.database import test_connection; print('✅ PostgreSQL OK' if test_connection() else '❌ Connection failed')"
 ```
 
 ### Verify Search Functionality
 ```bash
 # Run quick search test
-python test_manual_chat_import.py
+python tests/e2e/manual_chat_import.py
 ```
 
-### Reset to Legacy Backend
+### Check Logs
 ```bash
-# If you need to rollback
-python manage_postgres_flag.py disable
-# Restart your application
+# View application logs for errors
+tail -f logs/app.log
 ```
 
-## Configuration Files
+## Configuration
 
-The feature flag is checked in these locations:
+Key configuration values are in `config/__init__.py`:
 
-- **`routes.py`** (line 18): `use_postgres = os.getenv('USE_POSTGRES', '').lower() == 'true'`
-- **Test files**: Automatically set `os.environ['USE_POSTGRES'] = 'true'`
+- **DATABASE_URL**: PostgreSQL connection string
+- **EMBEDDING_MODEL**: Model used for vector embeddings
+- **EMBEDDING_DIM**: Dimension of embedding vectors
+- **RAG settings**: Context window and retrieval parameters
 
 ## Support
 

@@ -1,14 +1,14 @@
-# PostgreSQL API Compatibility Layer
+# PostgreSQL API Architecture
 
-This document describes the complete API compatibility layer that enables the chat application to use the new PostgreSQL backend while maintaining 100% API compatibility with the existing frontend.
+This document describes the API architecture that provides compatibility with the original ChromaDB-based API format while using PostgreSQL as the backend.
 
 ## Overview
 
-The compatibility layer consists of three main components:
+The architecture consists of three main components:
 
-1. **LegacyAPIAdapter** - Translates between new PostgreSQL services and legacy API formats
+1. **LegacyAPIAdapter** - Translates between PostgreSQL services and ChromaDB-compatible API formats
 2. **PostgresController** - Provides Flask route handlers that use the adapter
-3. **Updated Routes** - Conditionally switches between legacy and PostgreSQL controllers
+3. **Routes** - Direct routing to PostgreSQL controllers
 
 ## Architecture
 
@@ -16,7 +16,7 @@ The compatibility layer consists of three main components:
 Frontend (unchanged)
        ↓
    Flask Routes (routes.py)
-       ↓ (feature flag: USE_POSTGRES=true)
+       ↓
 PostgresController 
        ↓
  LegacyAPIAdapter
@@ -26,12 +26,13 @@ SearchService + MessageService + Repositories
    PostgreSQL Database
 ```
 
-## Feature Flag
+## Backward Compatibility
 
-The system uses the `USE_POSTGRES` environment variable to control which backend to use:
+The LegacyAPIAdapter maintains API format compatibility with the original ChromaDB-based system, ensuring:
 
-- `USE_POSTGRES=true` → PostgreSQL backend with compatibility layer
-- `USE_POSTGRES=false` (or unset) → Legacy ChromaDB/SQLite backend
+- Existing API clients continue to work without modification
+- Response formats match the original ChromaDB format
+- All original endpoints remain functional
 
 ## API Endpoints Supported
 
@@ -113,9 +114,9 @@ Handles both UUID and legacy ID formats:
 
 ### Development Setup
 
-1. Set environment variable:
-```bash
-export USE_POSTGRES=true
+1. Configure database connection in `.env`:
+```env
+DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/dovos
 ```
 
 2. Start the Flask application:
@@ -123,34 +124,22 @@ export USE_POSTGRES=true
 python app.py
 ```
 
-3. All API calls will now use PostgreSQL backend transparently
+3. All API calls use PostgreSQL backend with ChromaDB-compatible format
 
 ### Testing
 
-Run the full compatibility test suite:
+Run the API compatibility test suite:
 
 ```bash
 # Setup test data and run all tests
-python test_api_compatibility.py
+python tests/integration/test_api_compatibility.py
 
-# Only setup test data (for manual testing)
-python test_api_compatibility.py --setup-only
+# Run all integration tests
+pytest tests/integration/
 
-# Test against different server
-python test_api_compatibility.py --base-url http://localhost:8000
+# Test specific endpoints
+pytest tests/integration/test_api_compatibility.py -k "test_get_conversations"
 ```
-
-### Switching Back to Legacy
-
-To revert to the original ChromaDB/SQLite backend:
-
-```bash
-export USE_POSTGRES=false
-# or
-unset USE_POSTGRES
-```
-
-Restart the application and it will use the legacy backend.
 
 ## Response Format Compliance
 
