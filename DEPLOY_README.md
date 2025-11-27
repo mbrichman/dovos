@@ -20,7 +20,7 @@ cd ~/dovos-deploy
 git clone --depth 1 git@github.com:mbrichman/dovos.git temp
 cp temp/build-from-github.sh .
 cp temp/Dockerfile.git.ssh .
-cp temp/docker-compose.yml .
+cp temp/docker-compose.git.ssh.yml .
 cp temp/.env.example .env
 rm -rf temp
 
@@ -31,7 +31,7 @@ nano .env
 ./build-from-github.sh
 
 # 5. Start services
-docker compose up -d
+docker compose -f docker-compose.git.ssh.yml up -d
 ```
 
 ## Option 2: Build with Custom Settings
@@ -112,13 +112,13 @@ ssh -T git@github.com  # Test connection
 
 ```bash
 # Check services
-docker compose ps
+docker compose -f docker-compose.git.ssh.yml ps
 
 # View logs
-docker compose logs -f
+docker compose -f docker-compose.git.ssh.yml logs -f
 
 # Check migrations ran
-docker compose logs dovos-rag | grep -i migration
+docker compose -f docker-compose.git.ssh.yml logs dovos-rag | grep -i migration
 
 # Test API
 curl http://localhost:5001/api/stats
@@ -149,7 +149,7 @@ To update to latest code:
 ./build-from-github.sh
 
 # Restart services
-docker compose up -d
+docker compose -f docker-compose.git.ssh.yml up -d
 ```
 
 ## Files Needed for Deployment
@@ -158,10 +158,10 @@ Minimal deployment requires only 4 files:
 
 ```
 dovos-deploy/
-├── build-from-github.sh      # Build script
-├── Dockerfile.git.ssh         # Dockerfile for GitHub
-├── docker-compose.yml         # Service configuration
-└── .env                       # Your settings
+├── build-from-github.sh         # Build script
+├── Dockerfile.git.ssh           # Dockerfile for GitHub
+├── docker-compose.git.ssh.yml   # Service configuration
+└── .env                         # Your settings
 ```
 
 All other code is cloned from GitHub during build!

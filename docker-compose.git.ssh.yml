@@ -2,13 +2,20 @@
 # This uses SSH keys for authentication
 #
 # Usage:
-#   DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose -f docker-compose.git.ssh.yml build
-#   docker compose -f docker-compose.git.ssh.yml up -d
+#   Option 1 - Build from GitHub:
+#     DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose -f docker-compose.git.ssh.yml build
+#     docker compose -f docker-compose.git.ssh.yml up -d
+#
+#   Option 2 - Use pre-built image (for deployments):
+#     Set IMAGE_NAME and IMAGE_TAG in .env, then:
+#     docker compose -f docker-compose.git.ssh.yml up -d
 #
 # Environment variables (set in .env):
 #   GITHUB_REPO - SSH GitHub repository URL (default: git@github.com:markrichman/dovos.git)
 #   GIT_BRANCH - Branch to checkout (default: main)
 #   SSH_KEY_PATH - Path to SSH key (default: ~/.ssh/id_ed25519 or ~/.ssh/id_rsa)
+#   IMAGE_NAME - Pre-built image name (optional, if not building from GitHub)
+#   IMAGE_TAG - Pre-built image tag (optional, defaults to latest)
 
 services:
   postgres:
@@ -34,6 +41,7 @@ services:
       - dovos-network
 
   dovos-rag:
+    image: ${IMAGE_NAME:-dovos-rag}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.git.ssh
