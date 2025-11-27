@@ -1,0 +1,86 @@
+# Docker Compose configuration for building from GitHub
+# This pulls code from GitHub instead of using local files
+#
+# Usage:
+#   docker compose -f docker-compose.git.yml up -d
+#   docker compose -f docker-compose.git.yml build --build-arg BRANCH=dockerize-application
+#
+# Environment variables (set in .env or pass via command line):
+#   GITHUB_REPO - GitHub repository URL (default: https://github.com/markrichman/dovos.git)
+#   GIT_BRANCH - Branch to checkout (default: main)
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: dovos-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-dovos}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dovos_password}
+      - POSTGRES_DB=${POSTGRES_DB:-dovos}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Note: init-scripts would need to be in the repo or mounted separately
+      # - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dovos} -d ${POSTGRES_DB:-dovos}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - dovos-network
+
+  dovos-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile.git
+      args:
+        GITHUB_REPO: ${GITHUB_REPO:-https://github.com/markrichman/dovos.git}
+        BRANCH: ${GIT_BRANCH:-main}
+    container_name: dovos-rag-api
+    ports:
+      - "5001:5001"
+    environment:
+      - USE_PG_SINGLE_STORE=${USE_PG_SINGLE_STORE:-true}
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-dovos}:${POSTGRES_PASSWORD:-dovos_password}@postgres:5432/${POSTGRES_DB:-dovos}
+      - PGAPPNAME=${PGAPPNAME:-dovos-api}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      - EMBEDDING_DIM=${EMBEDDING_DIM:-384}
+      - OPENWEBUI_URL=${OPENWEBUI_URL}
+      - OPENWEBUI_API_KEY=${OPENWEBUI_API_KEY}
+      - RAG_WINDOW_SIZE=${RAG_WINDOW_SIZE:-3}
+      - RAG_MAX_WINDOW_SIZE=${RAG_MAX_WINDOW_SIZE:-10}
+      - RAG_ADAPTIVE_WINDOWING=${RAG_ADAPTIVE_WINDOWING:-true}
+      - RAG_DEDUPLICATE_MESSAGES=${RAG_DEDUPLICATE_MESSAGES:-true}
+      - RAG_DEFAULT_TOP_K_WINDOWS=${RAG_DEFAULT_TOP_K_WINDOWS:-8}
+      - RAG_DEFAULT_MAX_TOKENS=${RAG_DEFAULT_MAX_TOKENS:-0}
+      - RAG_PROXIMITY_DECAY_LAMBDA=${RAG_PROXIMITY_DECAY_LAMBDA:-0.3}
+      - RAG_APPLY_RECENCY_BONUS=${RAG_APPLY_RECENCY_BONUS:-false}
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - dovos-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/api/stats', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    name: dovos_postgres_data
+
+networks:
+  dovos-network:
+    name: dovos_network
+    driver: bridge
