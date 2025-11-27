@@ -18,7 +18,6 @@ Dovos is a Flask-based web application designed to import, archive, and search t
 ### Requirements
 
 - Python 3.8+
-- Node.js 14+ / npm (for frontend dependencies)
 - PostgreSQL 12+ (optional, falls back to SQLite)
 
 ### Python Environment Setup
@@ -32,13 +31,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-```
-
-### Frontend Setup
-
-```bash
-# Install npm dependencies
-npm install
 ```
 
 ### Environment Variables
@@ -75,7 +67,6 @@ dovos/
 │   ├── services/        # Business logic services
 │   └── workers/         # Background workers (embedding, etc.)
 ├── docs/                 # Project documentation
-├── frontend/            # Frontend assets
 ├── models/              # Legacy models (being migrated)
 ├── scripts/             # Utility scripts
 │   ├── archived/       # Deprecated scripts (gitignored)
@@ -92,8 +83,7 @@ dovos/
 ├── config.py            # Application configuration
 ├── routes.py            # Web routes
 ├── rag_service.py       # RAG/ChromaDB service
-├── requirements.txt     # Python dependencies
-└── package.json         # Node.js dependencies
+└── requirements.txt     # Python dependencies
 ```
 
 ## Development Workflow
