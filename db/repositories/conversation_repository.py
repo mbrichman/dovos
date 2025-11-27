@@ -100,8 +100,19 @@ class ConversationRepository(BaseRepository[Conversation]):
         if not conversation:
             return None
         
-        # Sort messages by creation time
-        messages = sorted(conversation.messages, key=lambda m: m.created_at)
+        # Sort messages by creation time, then sequence (from metadata), then id
+        # This ensures deterministic ordering even with identical timestamps
+        def message_sort_key(m):
+            # Extract sequence from metadata if available, otherwise use 0
+            sequence = 0
+            if m.message_metadata and isinstance(m.message_metadata, dict):
+                try:
+                    sequence = int(m.message_metadata.get('sequence', 0))
+                except (ValueError, TypeError):
+                    sequence = 0
+            return (m.created_at, sequence, m.id)
+        
+        messages = sorted(conversation.messages, key=message_sort_key)
         
         # Build document content in legacy format
         document_lines = []

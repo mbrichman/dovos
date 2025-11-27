@@ -708,13 +708,14 @@ class PostgresController:
                     
                     # Add messages directly using repository instead of service
                     # to avoid nested transactions
-                    for msg in messages:
+                    for idx, msg in enumerate(messages):
                         if msg['content'].strip():  # Skip empty messages
                             # Store source and conversation info in message metadata
                             message_metadata = {
                                 'source': format_type.lower(),
                                 'conversation_title': title,
-                                'original_conversation_id': conv_id or str(conversation.id)
+                                'original_conversation_id': conv_id or str(conversation.id),
+                                'sequence': msg.get('sequence', idx)  # Preserve sequence if available
                             }
                             
                             # Add OpenWebUI-specific metadata
@@ -896,7 +897,8 @@ class PostgresController:
             return []
 
         nodes = []
-        for mid, m in messages_dict.items():
+        # Enumerate to preserve insertion order as sequence number (dict order matters)
+        for sequence, (mid, m) in enumerate(messages_dict.items()):
             if not isinstance(m, dict):
                 continue
                 
@@ -924,6 +926,7 @@ class PostgresController:
 
             nodes.append({
                 "id": mid,
+                "sequence": sequence,  # Track insertion order for deterministic sorting
                 "parentId": m.get("parentId"),
                 "childrenIds": m.get("childrenIds") or [],
                 "role": role if role in {"user", "assistant", "system", "tool"} else "user",
@@ -932,19 +935,23 @@ class PostgresController:
                 "model": model
             })
 
-        # Flatten: sort by created_at ascending; tie-break by parent presence (roots first), then id
-        nodes.sort(key=lambda n: (n["created_at"], 0 if not n.get("parentId") else 1, str(n["id"])))
+        # Flatten: sort by created_at ascending; tie-break by:
+        # 1. parent presence (roots first)
+        # 2. sequence number (insertion order, critical for identical timestamps)
+        # 3. id (for safety)
+        nodes.sort(key=lambda n: (n["created_at"], 0 if not n.get("parentId") else 1, n.get("sequence", 0), str(n["id"])))
 
         # Convert to DovOS import format (list of messages)
         flat = []
-        for n in nodes:
+        for idx, n in enumerate(nodes):
             if not n["content"] or not n["content"].strip():
                 continue
             
             msg_dict = {
                 "role": n["role"],
                 "content": n["content"],
-                "created_at": n["created_at"]
+                "created_at": n["created_at"],
+                "sequence": n.get("sequence", idx)  # Preserve sequence for deterministic ordering
             }
             
             # Only add model if present

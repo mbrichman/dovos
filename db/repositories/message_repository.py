@@ -28,10 +28,20 @@ class MessageRepository(BaseRepository[Message]):
     def get_by_conversation(self, conversation_id: UUID, 
                           limit: Optional[int] = None, 
                           offset: int = 0) -> List[Message]:
-        """Get all messages for a conversation, ordered by creation time."""
+        """Get all messages for a conversation, ordered by creation time with sequence tiebreaker."""
+        # Sort by: created_at, then sequence (from metadata if available), then id
+        # This ensures deterministic ordering even with identical timestamps
+        from sqlalchemy import func, cast, Integer, text
         query = self.session.query(Message)\
             .filter(Message.conversation_id == conversation_id)\
-            .order_by(Message.created_at)
+            .order_by(
+                Message.created_at,
+                func.coalesce(
+                    cast(text("metadata->>'sequence'"), Integer),
+                    0
+                ),
+                Message.id
+            )
         
         if offset > 0:
             query = query.offset(offset)
@@ -69,7 +79,7 @@ class MessageRepository(BaseRepository[Message]):
                 JOIN conversations c ON m.conversation_id = c.id
                 WHERE m.message_search @@ plainto_tsquery('english', :query)
                 AND m.conversation_id = :conversation_id
-                ORDER BY rank DESC, m.created_at DESC
+                ORDER BY rank DESC, m.created_at DESC, m.id DESC
                 LIMIT :limit
             """)
         else:
@@ -86,7 +96,7 @@ class MessageRepository(BaseRepository[Message]):
                 FROM messages m
                 JOIN conversations c ON m.conversation_id = c.id
                 WHERE m.message_search @@ plainto_tsquery('english', :query)
-                ORDER BY rank DESC, m.created_at DESC
+                ORDER BY rank DESC, m.created_at DESC, m.id DESC
                 LIMIT :limit
             """)
         
@@ -156,7 +166,7 @@ class MessageRepository(BaseRepository[Message]):
             FROM messages m
             JOIN conversations c ON m.conversation_id = c.id
             WHERE similarity(m.content, :query) > :threshold
-            ORDER BY similarity DESC, m.created_at DESC
+            ORDER BY similarity DESC, m.created_at DESC, m.id DESC
             LIMIT :limit
         """)
         
