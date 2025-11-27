@@ -1,8 +1,8 @@
 """
 PostgreSQL Controller
 
-This controller provides the same interface as ConversationController 
-but uses the PostgreSQL backend through the LegacyAPIAdapter.
+This controller provides Flask route handlers that use PostgreSQL backend
+through the APIFormatAdapter for ChromaDB-compatible response formatting.
 """
 
 import logging
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional, Tuple
 from flask import request
 
-from db.adapters.legacy_api_adapter import get_legacy_adapter
+from db.adapters.api_format_adapter import get_api_format_adapter
 from db.services.message_service import MessageService
 
 logger = logging.getLogger(__name__)
@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 class PostgresController:
     """
-    Controller that provides the same API interface as ConversationController
-    but backed by PostgreSQL through the LegacyAPIAdapter.
+    Controller that provides Flask route handlers using PostgreSQL backend
+    with ChromaDB-compatible response formatting via APIFormatAdapter.
     """
     
     def __init__(self):
-        self.adapter = get_legacy_adapter()
+        self.adapter = get_api_format_adapter()
         self.message_service = MessageService()
     
     # ===== CONVERSATION ENDPOINTS =====

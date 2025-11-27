@@ -1,9 +1,9 @@
 """
-Legacy API Adapter for PostgreSQL Backend
+API Format Adapter for PostgreSQL Backend
 
-This adapter provides the exact same interface as the legacy ChromaDB+SQLite 
-system while using the new PostgreSQL backend. It ensures 100% API compatibility
-during the migration.
+This adapter translates PostgreSQL data into ChromaDB-compatible API response formats.
+It maintains backward compatibility with existing API clients that expect ChromaDB-style
+responses (documents, metadatas, ids format) while using PostgreSQL internally.
 """
 
 import logging
@@ -19,12 +19,12 @@ from db.repositories.unit_of_work import get_unit_of_work
 logger = logging.getLogger(__name__)
 
 
-class LegacyAPIAdapter:
+class APIFormatAdapter:
     """
-    Adapter that implements the legacy ChromaDB API interface using PostgreSQL backend.
+    Adapter that translates PostgreSQL data into ChromaDB-compatible API formats.
     
-    This maintains 100% compatibility with existing API endpoints while using
-    the new SearchService, MessageService, and repository patterns.
+    This maintains backward compatibility with existing API clients while using
+    the PostgreSQL backend with SearchService, MessageService, and repository patterns.
     """
     
     def __init__(self):
@@ -144,10 +144,10 @@ class LegacyAPIAdapter:
     
     def get_all_conversations(self, include: List[str] = None, limit: int = 9999) -> Dict[str, Any]:
         """
-        Get all conversations in legacy ChromaDB format.
+        Get all conversations in ChromaDB-compatible format.
         
         Returns:
-            Dict with 'documents', 'metadatas', 'ids' arrays
+            Dict with 'documents', 'metadatas', 'ids' arrays (ChromaDB format)
         """
         include = include or ["documents", "metadatas", "ids"]
         
@@ -760,9 +760,14 @@ class LegacyAPIAdapter:
 # Global adapter instance
 _adapter = None
 
-def get_legacy_adapter() -> LegacyAPIAdapter:
-    """Get the global legacy adapter instance."""
+def get_api_format_adapter() -> APIFormatAdapter:
+    """Get the global API format adapter instance."""
     global _adapter
     if _adapter is None:
-        _adapter = LegacyAPIAdapter()
+        _adapter = APIFormatAdapter()
     return _adapter
+
+# Backward compatibility alias
+def get_legacy_adapter() -> APIFormatAdapter:
+    """Backward compatibility alias for get_api_format_adapter()."""
+    return get_api_format_adapter()

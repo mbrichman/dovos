@@ -33,12 +33,12 @@ def test_app_starts_without_use_postgres_flag():
             os.environ['USE_POSTGRES'] = old_env
 
 
-def test_legacy_api_adapter_uses_postgres(uow):
-    """Verify legacy_api_adapter uses PostgreSQL backend."""
-    from db.adapters.legacy_api_adapter import get_legacy_adapter
+def test_api_format_adapter_uses_postgres(uow):
+    """Verify API format adapter uses PostgreSQL backend."""
+    from db.adapters.api_format_adapter import get_api_format_adapter
     
     # Get adapter instance
-    adapter = get_legacy_adapter()
+    adapter = get_api_format_adapter()
     
     # Should return stats from PostgreSQL
     stats = adapter.get_stats()

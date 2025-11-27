@@ -86,6 +86,9 @@
     "This is a test message from the repository pattern.",
     "Testing concurrent embedding workers.",
     "This conversation is for testing the embedding worker.",
+    "This is a test message from the repository pattern.",
+    "Testing concurrent embedding workers.",
+    "This conversation is for testing the embedding worker.",
     "This is a test message for the outbox pattern.",
     "This is a test message from the repository pattern.",
     "No messages yet.",
@@ -3481,6 +3484,9 @@
     "what do you know about me"
   ],
   "ids": [
+    "492fe10c-d332-47f6-96ef-b160269f5d92",
+    "97378071-787a-4952-b258-61a3b4c29b8f",
+    "4be72989-f9d2-4911-8dc1-f431bd91fe8e",
     "523ab8b0-949c-4bc3-97a8-e2440404164d",
     "5be7e9b2-9c19-428a-bb91-61e30f0f957f",
     "0500fc25-5e6a-4750-9108-d77b64ecdec1",
@@ -6962,6 +6968,36 @@
     "3db6e49f-71b7-4a8e-91c8-a4933c92d586"
   ],
   "metadatas": [
+    {
+      "conversation_id": "492fe10c-d332-47f6-96ef-b160269f5d92",
+      "earliest_ts": "2025-11-27T04:16:35.614847-06:00",
+      "id": "492fe10c-d332-47f6-96ef-b160269f5d92",
+      "is_chunk": false,
+      "latest_ts": "2025-11-27T04:16:35.676731-06:00",
+      "message_count": 11,
+      "source": "unknown",
+      "title": "Concurrent Worker Test"
+    },
+    {
+      "conversation_id": "97378071-787a-4952-b258-61a3b4c29b8f",
+      "earliest_ts": "2025-11-27T04:16:24.278391-06:00",
+      "id": "97378071-787a-4952-b258-61a3b4c29b8f",
+      "is_chunk": false,
+      "latest_ts": "2025-11-27T04:16:24.367360-06:00",
+      "message_count": 6,
+      "source": "unknown",
+      "title": "Embedding Worker Test"
+    },
+    {
+      "conversation_id": "4be72989-f9d2-4911-8dc1-f431bd91fe8e",
+      "earliest_ts": "2025-11-27T04:12:53.400095-06:00",
+      "id": "4be72989-f9d2-4911-8dc1-f431bd91fe8e",
+      "is_chunk": false,
+      "latest_ts": "2025-11-27T04:12:53.400095-06:00",
+      "message_count": 1,
+      "source": "unknown",
+      "title": "Test Conversation from Repository"
+    },
     {
       "conversation_id": "523ab8b0-949c-4bc3-97a8-e2440404164d",
       "earliest_ts": "2025-11-27T04:12:24.279347-06:00",
