@@ -206,7 +206,16 @@ git revert <commit-hash>
 
 ## Execution Order
 
-1. Document current state (this file)
+### PHASE 0: TEST COVERAGE VALIDATION (NEW)
+**CRITICAL**: Ensure adequate test coverage before removal
+
+1. ✅ Verify current test baseline: 176/178 passing
+2. Identify coverage gaps for components being removed
+3. Add missing tests if needed
+4. Document what each test validates
+
+### PHASE 1-10: REMOVAL
+1. ✅ Document current state (this file)
 2. Remove ChromaDB storage directories
 3. Remove legacy model backups
 4. Remove feature flag from config
