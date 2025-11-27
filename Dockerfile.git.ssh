@@ -49,6 +49,10 @@ RUN apt-get update && apt-get install -y \
 # Copy code from git stage (SSH key is NOT copied to final image)
 COPY --from=git /app /app
 
+# Make entrypoint script executable
+RUN chmod +x /app/docker-entrypoint.sh && \
+    cp /app/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -63,5 +67,6 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Run the application
+# Use entrypoint to run migrations before starting app
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["python", "app.py"]

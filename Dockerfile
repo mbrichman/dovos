@@ -18,6 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Create logs directory
 RUN mkdir -p logs
 
@@ -29,5 +33,6 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Run the application
+# Use entrypoint to run migrations before starting app
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["python", "app.py"]
