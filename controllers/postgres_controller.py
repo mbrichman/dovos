@@ -12,6 +12,8 @@ from flask import request
 
 from db.adapters.api_format_adapter import get_api_format_adapter
 from db.services.message_service import MessageService
+from db.importers import detect_format
+from db.importers.registry import FORMAT_REGISTRY
 
 logger = logging.getLogger(__name__)
 
@@ -619,11 +621,11 @@ class PostgresController:
                 # Extract messages first
                 messages = []
                 if 'mapping' in conv_data:  # ChatGPT format
-                    messages = self._extract_chatgpt_messages(conv_data['mapping'])
+                    messages = FORMAT_REGISTRY['chatgpt'](conv_data['mapping'])
                 elif 'chat_messages' in conv_data:  # Claude format
-                    messages = self._extract_claude_messages(conv_data['chat_messages'])
+                    messages = FORMAT_REGISTRY['claude'](conv_data['chat_messages'])
                 elif 'chat' in conv_data and 'history' in conv_data.get('chat', {}) and 'messages' in conv_data['chat']['history']:  # OpenWebUI format
-                    messages = self._extract_openwebui_messages(conv_data['chat']['history']['messages'])
+                    messages = FORMAT_REGISTRY['openwebui'](conv_data['chat']['history']['messages'])
                 
                 # Skip if no valid messages
                 if not messages:
@@ -812,208 +814,23 @@ class PostgresController:
         logger.info(completion_msg)
         return f"Success: {completion_msg}"
     
-    def _extract_chatgpt_messages(self, mapping: Dict) -> List[Dict]:
-        """Extract messages from ChatGPT format, preserving timestamps."""
-        messages = []
-        
-        # Sort messages by create_time to maintain order, or by message id as fallback
-        ordered_nodes = sorted(mapping.items(), key=lambda x: x[1].get('create_time', 0))
-        
-        for node_id, node in ordered_nodes:
-            message = node.get('message')
-            if not message:
-                continue
-            
-            author = message.get('author', {})
-            role = author.get('role', 'unknown')
-            
-            # Skip non-conversation roles (system, tool, function, etc.)
-            # Only keep user and assistant messages
-            if role not in ('user', 'assistant'):
-                continue
-            
-            content_parts = message.get('content', {}).get('parts', [])
-            if content_parts and isinstance(content_parts[0], str):
-                content = content_parts[0]
-                
-                if content.strip():
-                    # Try to get timestamp from message, then from node
-                    created_at = message.get('create_time') or node.get('create_time')
-                    messages.append({
-                        'role': role,
-                        'content': content,
-                        'created_at': created_at  # Unix epoch timestamp or None
-                    })
-        
-        return messages
-    
-    def _extract_claude_messages(self, chat_messages: List) -> List[Dict]:
-        """Extract messages from Claude format, preserving timestamps."""
-        messages = []
-        
-        for msg in chat_messages:
-            role = 'user' if msg.get('sender') == 'human' else 'assistant'
-            content = msg.get('text', '')
-            
-            if content.strip():
-                msg_dict = {
-                    'role': role,
-                    'content': content
-                }
-                
-                # Preserve the original timestamp from Claude (ISO format string)
-                created_at = msg.get('created_at')
-                if created_at:
-                    msg_dict['created_at'] = created_at
-                
-                messages.append(msg_dict)
-        
-        return messages
-    
-    def _epoch_to_dt(self, ts):
-        """Helper to convert epoch timestamp to datetime, handling ms vs s vs ns."""
-        try:
-            ts = int(ts)
-            # Detect nanoseconds (> 10^12)
-            if ts > 10**12:
-                ts = ts / 10**9
-            # Detect milliseconds (> 10^11)
-            elif ts > 10**11:
-                ts = ts / 1000.0
-            return datetime.fromtimestamp(ts, tz=timezone.utc)
-        except Exception as e:
-            logger.warning(f"Failed to convert timestamp {ts}: {e}, using current time")
-            return datetime.now(tz=timezone.utc)
-    
-    def _extract_openwebui_messages(self, messages_dict: Dict) -> List[Dict]:
-        """Extract and flatten messages from OpenWebUI format chronologically.
-        
-        OpenWebUI stores messages as a dict keyed by message ID with parent-child
-        relationships. This flattens them into a chronological list.
-        """
-        import json
-        
-        if not isinstance(messages_dict, dict) or not messages_dict:
-            return []
-
-        nodes = []
-        # Enumerate to preserve insertion order as sequence number (dict order matters)
-        for sequence, (mid, m) in enumerate(messages_dict.items()):
-            if not isinstance(m, dict):
-                continue
-                
-            role = (m.get("role") or "").lower().strip() or "user"
-            content = m.get("content")
-            
-            # Handle content that might be a dict
-            if isinstance(content, dict):
-                content = content.get("text") or content.get("content") or json.dumps(content, ensure_ascii=False)
-            elif content is None:
-                content = ""
-            
-            # Get timestamp
-            ts = m.get("timestamp") or m.get("created_at")
-            created_at = self._epoch_to_dt(ts) if ts is not None else datetime.now(tz=timezone.utc)
-
-            # Extract model information
-            model = m.get("model")  # assistant messages
-            if not model:
-                models = m.get("models")  # user messages
-                if isinstance(models, list) and models:
-                    model = models[0]
-                elif isinstance(models, str):
-                    model = models
-
-            nodes.append({
-                "id": mid,
-                "sequence": sequence,  # Track insertion order for deterministic sorting
-                "parentId": m.get("parentId"),
-                "childrenIds": m.get("childrenIds") or [],
-                "role": role if role in {"user", "assistant", "system", "tool"} else "user",
-                "content": content,
-                "created_at": created_at,
-                "model": model
-            })
-
-        # Flatten: sort by created_at ascending; tie-break by:
-        # 1. parent presence (roots first)
-        # 2. sequence number (insertion order, critical for identical timestamps)
-        # 3. id (for safety)
-        nodes.sort(key=lambda n: (n["created_at"], 0 if not n.get("parentId") else 1, n.get("sequence", 0), str(n["id"])))
-
-        # Convert to DovOS import format (list of messages)
-        flat = []
-        for idx, n in enumerate(nodes):
-            if not n["content"] or not n["content"].strip():
-                continue
-            
-            msg_dict = {
-                "role": n["role"],
-                "content": n["content"],
-                "created_at": n["created_at"],
-                "sequence": n.get("sequence", idx)  # Preserve sequence for deterministic ordering
-            }
-            
-            # Only add model if present
-            if n.get("model"):
-                msg_dict["model"] = n["model"]
-            
-            flat.append(msg_dict)
-        
-        return flat
     
     def _detect_json_format(self, data):
-        """Detect whether JSON is ChatGPT, Claude, or OpenWebUI format"""
-        # Ensure data is a list
-        if isinstance(data, dict):
-            conversations = data.get("conversations", [])
-        else:
-            conversations = data if isinstance(data, list) else []
-            
-        if not conversations:
-            return [], "Unknown"
-            
-        # Check first conversation to determine format
-        first_conv = conversations[0] if conversations else {}
+        """Detect whether JSON is ChatGPT, Claude, or OpenWebUI format.
         
-        # OpenWebUI format has 'chat' with 'history.messages' as a dict
-        chat = first_conv.get("chat", {}) if isinstance(first_conv, dict) else {}
-        hist = chat.get("history", {}) if isinstance(chat, dict) else {}
-        msgs = hist.get("messages")
-        
-        if isinstance(msgs, dict) and msgs:
-            # Further sanity check: any message has keys id/role/content/timestamp
-            try:
-                any_msg = next(iter(msgs.values()))
-                if isinstance(any_msg, dict) and "role" in any_msg and "content" in any_msg and "timestamp" in any_msg:
-                    return conversations, "OpenWebUI"
-            except (StopIteration, TypeError):
-                pass
-        
-        # Claude format has 'uuid', 'name', and 'chat_messages'
-        if (first_conv.get("uuid") and 
-            first_conv.get("name") is not None and  # name can be empty string
-            "chat_messages" in first_conv):
-            return conversations, "Claude"
-            
-        # ChatGPT format has 'title', 'mapping', and timestamps as epoch
-        elif (first_conv.get("title") is not None and 
-              "mapping" in first_conv and
-              first_conv.get("create_time")):
-            return conversations, "ChatGPT"
-            
-        return conversations, "Unknown"
+        Delegates to the registry detect_format function.
+        """
+        return detect_format(data)
     
     def _import_docx_file(self, file_path: str, filename: str) -> str:
         """Import a Word document conversation into PostgreSQL. Returns message string."""
         from db.repositories.unit_of_work import get_unit_of_work
-        from utils.docx_parser import parse_docx_file
         from datetime import datetime
         import os
         
         try:
-            # Parse the DOCX file, passing original filename for title extraction
-            messages, timestamps, title = parse_docx_file(file_path, original_filename=filename)
+            # Extract messages using registry extractor
+            messages, title, timestamps = FORMAT_REGISTRY['docx'](file_path, filename)
             
             if not messages:
                 raise ValueError("No messages found in Word document")

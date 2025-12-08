@@ -216,7 +216,7 @@ class TestOpenWebUIMessageExtraction:
         When extracting OpenWebUI messages, the sequence numbers should match
         the insertion order from the JSON file.
         """
-        from controllers.postgres_controller import PostgresController
+        from db.importers.registry import FORMAT_REGISTRY
         
         # Create test OpenWebUI messages dict (preserves insertion order in Python 3.7+)
         messages_dict = {
@@ -246,8 +246,8 @@ class TestOpenWebUIMessageExtraction:
             },
         }
         
-        controller = PostgresController(None, None)
-        extracted = controller._extract_openwebui_messages(messages_dict)
+        # Use registry extractor
+        extracted = FORMAT_REGISTRY['openwebui'](messages_dict)
         
         # Verify messages are extracted with sequences
         assert len(extracted) == 3
@@ -263,7 +263,7 @@ class TestOpenWebUIMessageExtraction:
         Extracted messages should be sorted by (timestamp, sequence)
         to handle identical timestamps correctly.
         """
-        from controllers.postgres_controller import PostgresController
+        from db.importers.registry import FORMAT_REGISTRY
         
         # Create messages with identical timestamp
         messages_dict = {
@@ -290,8 +290,8 @@ class TestOpenWebUIMessageExtraction:
             },
         }
         
-        controller = PostgresController(None, None)
-        extracted = controller._extract_openwebui_messages(messages_dict)
+        # Use registry extractor
+        extracted = FORMAT_REGISTRY['openwebui'](messages_dict)
         
         # Verify messages maintain insertion order despite identical timestamps
         assert len(extracted) == 3
