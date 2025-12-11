@@ -1,12 +1,12 @@
 {
-  "document_count": 4423,
-  "conversation_count": 401,
-  "message_count": 45980,
+  "document_count": 9939,
+  "conversation_count": 433,
+  "message_count": 43399,
   "embedding_model": "sentence-transformers/paraphrase-MiniLM-L6-v2",
   "sources": {
-    "chatgpt": 177,
-    "claude": 63,
-    "openwebui": 62
+    "chatgpt": 127,
+    "claude": 115,
+    "openwebui": 44
   },
-  "indexed_documents": 1017
+  "indexed_documents": 8479
 }

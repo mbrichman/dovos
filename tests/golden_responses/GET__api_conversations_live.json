@@ -1,78 +1,358 @@
 {
   "documents": [
+    "API design principles",
+    "Cloud infrastructure setup",
+    "Data analysis workflows",
+    "Understanding machine learning basics",
+    "API design principles",
+    "Best practices for Python development",
+    "Understanding machine learning basics",
+    "API design principles",
+    "How to improve productivity",
+    "Security considerations in applications",
+    "Testing strategies and approaches",
+    "Data analysis workflows",
+    "Web development frameworks comparison",
+    "How to improve productivity",
+    "API design principles",
+    "Testing strategies and approaches",
+    "Web development frameworks comparison",
+    "How to improve productivity",
+    "Data analysis workflows",
+    "How to improve productivity",
+    "Database optimization techniques",
+    "How to improve productivity",
+    "Cloud infrastructure setup",
+    "Best practices for Python development",
+    "Web development frameworks comparison",
+    "How to improve productivity",
+    "Best practices for Python development",
+    "Database optimization techniques",
+    "Web development frameworks comparison",
+    "Database optimization techniques",
+    "Data analysis workflows",
+    "How to improve productivity",
+    "Understanding machine learning basics",
+    "Web development frameworks comparison",
+    "Understanding machine learning basics",
+    "Cloud infrastructure setup",
+    "Database optimization techniques",
+    "Database optimization techniques",
+    "Database optimization techniques",
     "Data analysis workflows",
     "API design principles",
     "Cloud infrastructure setup",
-    "Understanding machine learning basics",
-    "Cloud infrastructure setup",
-    "Cloud infrastructure setup",
-    "Web development frameworks comparison",
+    "Data analysis workflows",
+    "Data analysis workflows",
+    "Database optimization techniques",
     "How to improve productivity",
-    "How to improve productivity",
-    "API design principles"
+    "Database optimization techniques",
+    "Testing strategies and approaches",
+    "Cloud infrastructure setup",
+    "Testing strategies and approaches"
   ],
   "ids": [
-    "8c3cc0be-e004-4990-8d33-3945b5918e1f",
-    "2dc0ec81-d231-4b92-8923-94d63ecf1360",
-    "77dd7386-e5e5-4d18-8a3a-02b5bad96b02",
-    "711123c5-d2fd-45dc-83aa-c66f281f9761",
-    "04b8d7ae-5d22-40f2-aaea-4f5bb8f00c66",
-    "ae3c2f26-0136-4768-9ec6-9c4b7684ef88",
-    "bbeaf1bf-65a5-422d-b96c-fd6118c7ceb7",
-    "c92b2adc-9e54-42e0-ac2e-a36a79c00a51",
-    "a399f743-98da-4c8e-96ef-9c070c48a6e7",
-    "4e199655-c915-45f6-9bb5-2f5dccdb43cb"
+    "50225200-114b-4c73-b225-84099987a695",
+    "21b76c2d-eb22-4d5d-a174-dc3eb4906bfb",
+    "484abd64-8f80-4795-88f4-176a73c4484c",
+    "981ca5b7-a20c-4151-8c1b-d6052361a01e",
+    "8c77d367-31b8-4719-8de0-558b1ab04c3e",
+    "fe39a0b8-0eab-4b6a-99fb-f1f5f27a8ed8",
+    "2edb2396-2407-40f4-a9cc-347121000cf7",
+    "77d2cd5c-6953-4943-93f4-5a00833e804d",
+    "aa1d651b-5675-449b-b902-449cd7bea602",
+    "7334096e-5234-4355-8c45-bbf5571eaf3d",
+    "198c8302-aa0f-48a2-9c78-c9850a675d31",
+    "8e16c211-748c-4085-97f9-68ec9425fed3",
+    "921e746a-b0f7-409c-bd68-b8a200ee113e",
+    "d89ffed2-95ce-4492-b02d-68f494bbd6fe",
+    "9c1e8555-dd46-4429-9df9-0e39a4f8308e",
+    "a1b30b6c-839a-4832-b86c-97ade200306a",
+    "deac16a3-d9dd-49c2-81c0-0d3330a0fc1c",
+    "1ad2ecc3-5611-4b3c-91f9-f8bde2a3edd6",
+    "d020220d-8356-4e82-8d8c-9e089c61d932",
+    "9194df78-6915-43b2-bbb2-3af78356d4ca",
+    "3db2475e-f579-4bd9-8657-8ffabee2eccc",
+    "2a1e4ad4-aef4-4807-8fb5-b602bdd42b92",
+    "4610fd56-3669-45d1-80e9-46b2fb7809be",
+    "7134662a-8561-4c8e-a7ae-8010791c1527",
+    "b4fde1bc-e9fe-48fa-8081-f2d28a63988e",
+    "446797b8-557b-4708-8487-a9e4eee814c0",
+    "616f0ff4-2368-4c58-8410-857af9da6667",
+    "f8707c65-4698-4115-acd3-00dd2badcba9",
+    "4021cf2b-7f4d-49fb-bdcd-5c93cc955786",
+    "929b3b0e-692e-42ad-b42d-75c5a86e8ada",
+    "04fb5fbf-721a-41b9-8d6e-e1a27157ec80",
+    "7d31b49a-a869-48a7-b51a-5605edccf94b",
+    "8aa15f09-d298-4569-a960-df3ee0a24a6c",
+    "add9cd54-631a-45e2-88d1-9e4ce2de980f",
+    "6cbc924a-2575-40e7-94ea-17582b6599f6",
+    "662d067f-17c0-48a5-85dd-63fb161d8679",
+    "39190336-31f5-4713-965b-c39cb953c67b",
+    "471d568f-fc9d-4f61-99cb-da53a45d9220",
+    "215f9076-a525-4684-9c76-91416796c2e2",
+    "66cd7a36-5e07-4973-94c2-6f7b17d6e5ec",
+    "e364a54f-8f67-4d53-9a7f-367f6d191136",
+    "cd13464d-2a8f-4c97-b963-7f6c7359abfa",
+    "feecef99-d8bb-44be-bc1c-71c173a1d930",
+    "cd598617-aaa7-4da1-8a72-f39e15253ea3",
+    "f15f7ec4-101c-4ecc-985d-e684fc860984",
+    "56874aa3-059b-46d9-962e-787fa138afcc",
+    "d17d3521-e149-4cf2-a7da-aab20bf977f4",
+    "9314330c-25ec-4811-af95-3c2b8f8f6ef2",
+    "162e7301-f2c0-4dc5-8c8c-cf66c904557f",
+    "3e9edef8-cdc5-4bdf-99d0-e6f8bf7edd7d"
   ],
   "metadatas": [
     {
+      "source": "chatgpt",
+      "date": "2025-11-27T04:35:40.869360Z",
+      "message_count": 5
+    },
+    {
       "source": "openwebui",
-      "date": "2025-10-26T04:12:11.418793Z",
-      "message_count": 16
+      "date": "2025-11-06T04:35:40.869577Z",
+      "message_count": 2
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-23T04:35:40.869589Z",
+      "message_count": 9
     },
     {
       "source": "claude",
-      "date": "2025-12-09T04:12:11.419293Z",
+      "date": "2025-11-07T04:35:40.869600Z",
       "message_count": 14
     },
     {
+      "source": "chatgpt",
+      "date": "2025-12-04T04:35:40.869608Z",
+      "message_count": 9
+    },
+    {
       "source": "openwebui",
-      "date": "2025-10-16T04:12:11.419304Z",
+      "date": "2025-11-24T04:35:40.869615Z",
+      "message_count": 18
+    },
+    {
+      "source": "claude",
+      "date": "2025-12-01T04:35:40.869622Z",
+      "message_count": 2
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-08T04:35:40.869628Z",
+      "message_count": 15
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-13T04:35:40.869635Z",
+      "message_count": 10
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-30T04:35:40.869642Z",
+      "message_count": 17
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-16T04:35:40.869648Z",
       "message_count": 15
     },
     {
       "source": "claude",
-      "date": "2025-12-07T04:12:11.419312Z",
-      "message_count": 12
+      "date": "2025-11-06T04:35:40.869655Z",
+      "message_count": 20
+    },
+    {
+      "source": "claude",
+      "date": "2025-10-18T04:35:40.869661Z",
+      "message_count": 11
     },
     {
       "source": "openwebui",
-      "date": "2025-12-03T04:12:11.419320Z",
-      "message_count": 19
-    },
-    {
-      "source": "chatgpt",
-      "date": "2025-10-25T04:12:11.419327Z",
-      "message_count": 9
-    },
-    {
-      "source": "chatgpt",
-      "date": "2025-10-18T04:12:11.419334Z",
-      "message_count": 13
-    },
-    {
-      "source": "openwebui",
-      "date": "2025-12-10T04:12:11.419340Z",
-      "message_count": 12
-    },
-    {
-      "source": "openwebui",
-      "date": "2025-10-14T04:12:11.419347Z",
+      "date": "2025-12-04T04:35:40.869668Z",
       "message_count": 19
     },
     {
       "source": "claude",
-      "date": "2025-12-05T04:12:11.419353Z",
+      "date": "2025-11-04T04:35:40.869674Z",
+      "message_count": 16
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-15T04:35:40.869681Z",
+      "message_count": 17
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-07T04:35:40.869687Z",
+      "message_count": 15
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-09T04:35:40.869693Z",
+      "message_count": 3
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-19T04:35:40.869699Z",
+      "message_count": 12
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-04T04:35:40.869706Z",
+      "message_count": 20
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-22T04:35:40.869712Z",
+      "message_count": 6
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-26T04:35:40.869718Z",
+      "message_count": 3
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-23T04:35:40.869724Z",
+      "message_count": 6
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-10T04:35:40.869731Z",
+      "message_count": 3
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-02T04:35:40.869737Z",
+      "message_count": 11
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-26T04:35:40.869743Z",
+      "message_count": 16
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-19T04:35:40.869750Z",
+      "message_count": 4
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-26T04:35:40.869756Z",
+      "message_count": 18
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-20T04:35:40.869762Z",
+      "message_count": 10
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-30T04:35:40.869768Z",
       "message_count": 7
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-12T04:35:40.869775Z",
+      "message_count": 12
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-19T04:35:40.869781Z",
+      "message_count": 8
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-21T04:35:40.869788Z",
+      "message_count": 18
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-01T04:35:40.869794Z",
+      "message_count": 13
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-10T04:35:40.869801Z",
+      "message_count": 6
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-07T04:35:40.869807Z",
+      "message_count": 7
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-12-06T04:35:40.869813Z",
+      "message_count": 14
+    },
+    {
+      "source": "claude",
+      "date": "2025-11-29T04:35:40.869820Z",
+      "message_count": 18
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-04T04:35:40.869826Z",
+      "message_count": 9
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-25T04:35:40.869832Z",
+      "message_count": 20
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-13T04:35:40.869838Z",
+      "message_count": 14
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-11-16T04:35:40.869845Z",
+      "message_count": 5
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-24T04:35:40.869851Z",
+      "message_count": 14
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-23T04:35:40.869857Z",
+      "message_count": 7
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-15T04:35:40.869863Z",
+      "message_count": 5
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-11T04:35:40.869869Z",
+      "message_count": 5
+    },
+    {
+      "source": "claude",
+      "date": "2025-10-25T04:35:40.869875Z",
+      "message_count": 17
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-11-19T04:35:40.869882Z",
+      "message_count": 4
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-12-06T04:35:40.869888Z",
+      "message_count": 3
+    },
+    {
+      "source": "claude",
+      "date": "2025-12-11T04:35:40.869894Z",
+      "message_count": 13
     }
   ]
 }

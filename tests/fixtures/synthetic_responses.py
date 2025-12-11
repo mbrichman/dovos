@@ -160,6 +160,17 @@ def generate_stats_response() -> Dict[str, Any]:
     }
 
 
+def generate_collection_count_response() -> Dict[str, Any]:
+    """
+    Generate synthetic GET /api/collection/count response.
+    
+    Returns document count in the collection.
+    """
+    return {
+        "count": random.randint(100, 10000)
+    }
+
+
 def generate_live_api_snapshots() -> Dict[str, Any]:
     """
     Generate synthetic live_api_snapshots.json content.
@@ -199,6 +210,11 @@ def generate_live_api_snapshots() -> Dict[str, Any]:
             "status_code": 200,
             "captured_at": datetime.utcnow().isoformat(),
             "data": generate_stats_response()
+        },
+        "GET /api/collection/count": {
+            "status_code": 200,
+            "captured_at": datetime.utcnow().isoformat(),
+            "data": generate_collection_count_response()
         }
     }
 
@@ -232,3 +248,8 @@ def create_synthetic_rag_health() -> Dict[str, Any]:
 def create_synthetic_stats() -> Dict[str, Any]:
     """Factory for synthetic stats response."""
     return generate_stats_response()
+
+
+def create_synthetic_collection_count() -> Dict[str, Any]:
+    """Factory for synthetic collection count response."""
+    return generate_collection_count_response()

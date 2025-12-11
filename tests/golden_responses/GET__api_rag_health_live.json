@@ -1,8 +1,8 @@
 {
   "status": "healthy",
-  "document_count": 8616,
-  "embedding_model": "sentence-transformers/paraphrase-MiniLM-L6-v2",
+  "document_count": 4942,
+  "embedding_model": "all-MiniLM-L6-v2",
   "collection_name": "chat_history",
-  "uptime_seconds": 51987,
-  "last_update": "2025-12-04T04:12:11.419452Z"
+  "uptime_seconds": 66310,
+  "last_update": "2025-12-05T04:35:40.872494Z"
 }

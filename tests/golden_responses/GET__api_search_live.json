@@ -2,56 +2,106 @@
   "query": "python",
   "results": [
     {
-      "id": "735b7644-ce32-4264-bc4c-9d82cf7098e7",
+      "id": "d30b6b6d-2c47-4ab7-b23a-0e516116079b",
       "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
-      "score": 0.656,
+      "score": 0.829,
       "metadata": {
-        "source": "claude",
-        "date": "2025-10-14T04:12:11.419388Z"
+        "source": "chatgpt",
+        "date": "2025-10-23T04:35:40.871408Z"
       },
       "rank": 1
     },
     {
-      "id": "938a25a7-cc87-4d5c-9746-8d9136aa8380",
+      "id": "daf0f91e-2511-46f5-839b-0eaef10d3f55",
       "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
-      "score": 0.661,
+      "score": 0.91,
       "metadata": {
         "source": "chatgpt",
-        "date": "2025-10-16T04:12:11.419397Z"
+        "date": "2025-11-14T04:35:40.871419Z"
       },
       "rank": 2
     },
     {
-      "id": "81193cac-d0e0-48c6-bd9f-8b8686cde7d4",
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "score": 0.746,
+      "id": "431c9970-eb3e-4dc1-ad97-9b6f0e945540",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.701,
       "metadata": {
-        "source": "chatgpt",
-        "date": "2025-11-15T04:12:11.419404Z"
+        "source": "claude",
+        "date": "2025-11-11T04:35:40.871427Z"
       },
       "rank": 3
     },
     {
-      "id": "cdbaff23-2342-45f5-b661-0c042f28b64c",
-      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
-      "score": 0.777,
+      "id": "1b7cd4d0-d723-4815-b58b-aebac295f546",
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.97,
       "metadata": {
-        "source": "claude",
-        "date": "2025-11-01T04:12:11.419411Z"
+        "source": "chatgpt",
+        "date": "2025-11-26T04:35:40.871434Z"
       },
       "rank": 4
     },
     {
-      "id": "97878a70-932c-4d29-83fd-6082ee578b6b",
-      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
-      "score": 0.908,
+      "id": "cb105f7c-1277-4bc6-9d96-49d50bd21a6e",
+      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
+      "score": 0.927,
       "metadata": {
-        "source": "claude",
-        "date": "2025-11-26T04:12:11.419418Z"
+        "source": "chatgpt",
+        "date": "2025-11-18T04:35:40.871441Z"
       },
       "rank": 5
+    },
+    {
+      "id": "2fdf52b4-f126-4e54-8053-3a640e2ae3ea",
+      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
+      "score": 0.758,
+      "metadata": {
+        "source": "claude",
+        "date": "2025-10-27T04:35:40.871448Z"
+      },
+      "rank": 6
+    },
+    {
+      "id": "dcdfbccc-b2ad-4e11-b8c9-f43014ab86f0",
+      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
+      "score": 0.806,
+      "metadata": {
+        "source": "openwebui",
+        "date": "2025-11-30T04:35:40.871454Z"
+      },
+      "rank": 7
+    },
+    {
+      "id": "4a4420f9-b0e9-472f-b6ee-048936ab70d8",
+      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
+      "score": 0.776,
+      "metadata": {
+        "source": "chatgpt",
+        "date": "2025-11-06T04:35:40.871461Z"
+      },
+      "rank": 8
+    },
+    {
+      "id": "1d753b86-4485-404b-bfb8-125ca189a330",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.838,
+      "metadata": {
+        "source": "openwebui",
+        "date": "2025-10-18T04:35:40.871467Z"
+      },
+      "rank": 9
+    },
+    {
+      "id": "586733d5-d612-49f8-8c9b-6d71bd0c10d3",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.672,
+      "metadata": {
+        "source": "chatgpt",
+        "date": "2025-10-27T04:35:40.871473Z"
+      },
+      "rank": 10
     }
   ],
-  "result_count": 5,
+  "result_count": 10,
   "search_type": "full_text"
 }

@@ -2,51 +2,96 @@
   "query": "How to use Python?",
   "results": [
     {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "score": 0.744,
-      "source_id": "174039f2-8fe1-44b0-a437-0c2d2e17079f",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.991,
+      "source_id": "f3545514-8431-4f61-8f3b-be614e6db826",
       "metadata": {
-        "model": "neural-chat",
-        "chunk": 4
+        "model": "mistral-7b",
+        "chunk": 2
       }
     },
     {
       "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
-      "score": 0.722,
-      "source_id": "88de8bf2-0dc7-4b63-9388-c1b55871053e",
+      "score": 0.797,
+      "source_id": "78e4b24f-1af0-4939-b516-bf4462d54748",
       "metadata": {
-        "model": "mistral-7b",
-        "chunk": 4
-      }
-    },
-    {
-      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
-      "score": 0.8,
-      "source_id": "914d89dc-4486-4632-89cc-968179d0e85d",
-      "metadata": {
-        "model": "neural-chat",
+        "model": "claude-3-opus",
         "chunk": 1
       }
     },
     {
-      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
-      "score": 0.94,
-      "source_id": "4563e7f3-2c07-47db-bb97-e495329582e9",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.819,
+      "source_id": "73f2bee5-8fe0-48a0-9ae9-72159a87a6ed",
       "metadata": {
-        "model": "claude-3-opus",
+        "model": "neural-chat",
+        "chunk": 5
+      }
+    },
+    {
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.678,
+      "source_id": "d913c90c-4e24-4f03-bc26-ae4d2a183b12",
+      "metadata": {
+        "model": "neural-chat",
         "chunk": 4
       }
     },
     {
-      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
-      "score": 0.889,
-      "source_id": "3cc2f7e8-eb74-4d70-95a5-4639671fe36a",
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.814,
+      "source_id": "1cf6ae50-7b2a-4584-a684-b34543178e38",
+      "metadata": {
+        "model": "mistral-7b",
+        "chunk": 1
+      }
+    },
+    {
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.9,
+      "source_id": "0a1f7542-9ffe-4c33-8329-a7cfe8934dfe",
+      "metadata": {
+        "model": "neural-chat",
+        "chunk": 5
+      }
+    },
+    {
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.837,
+      "source_id": "69c29c40-0b71-4b9e-a72d-e2aa34bdc885",
+      "metadata": {
+        "model": "gpt-4",
+        "chunk": 5
+      }
+    },
+    {
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.696,
+      "source_id": "795fd9fd-3251-4153-ba60-2e3b1f9c2ee1",
       "metadata": {
         "model": "claude-3-opus",
-        "chunk": 5
+        "chunk": 1
+      }
+    },
+    {
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.667,
+      "source_id": "451cd7e1-a6e1-4845-a042-e2ee11c0d6fa",
+      "metadata": {
+        "model": "mistral-7b",
+        "chunk": 1
+      }
+    },
+    {
+      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
+      "score": 0.844,
+      "source_id": "d652a084-a0f7-47da-af00-482e8b4fb7f4",
+      "metadata": {
+        "model": "mistral-7b",
+        "chunk": 2
       }
     }
   ],
-  "result_count": 5,
+  "result_count": 10,
   "search_type": "semantic"
 }
