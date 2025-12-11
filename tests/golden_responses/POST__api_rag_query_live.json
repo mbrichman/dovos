@@ -1,6 +1,52 @@
 {
-  "error": "(psycopg.OperationalError) connection failed: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\nMultiple connection attempts failed. All failures were:\n- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at \"::1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
-  "query": "How do I use Python for web scraping?",
-  "results": [],
+  "query": "How to use Python?",
+  "results": [
+    {
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.744,
+      "source_id": "174039f2-8fe1-44b0-a437-0c2d2e17079f",
+      "metadata": {
+        "model": "neural-chat",
+        "chunk": 4
+      }
+    },
+    {
+      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
+      "score": 0.722,
+      "source_id": "88de8bf2-0dc7-4b63-9388-c1b55871053e",
+      "metadata": {
+        "model": "mistral-7b",
+        "chunk": 4
+      }
+    },
+    {
+      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
+      "score": 0.8,
+      "source_id": "914d89dc-4486-4632-89cc-968179d0e85d",
+      "metadata": {
+        "model": "neural-chat",
+        "chunk": 1
+      }
+    },
+    {
+      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
+      "score": 0.94,
+      "source_id": "4563e7f3-2c07-47db-bb97-e495329582e9",
+      "metadata": {
+        "model": "claude-3-opus",
+        "chunk": 4
+      }
+    },
+    {
+      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
+      "score": 0.889,
+      "source_id": "3cc2f7e8-eb74-4d70-95a5-4639671fe36a",
+      "metadata": {
+        "model": "claude-3-opus",
+        "chunk": 5
+      }
+    }
+  ],
+  "result_count": 5,
   "search_type": "semantic"
 }

@@ -1,4 +1,8 @@
 {
-  "error": "(psycopg.OperationalError) connection failed: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\nMultiple connection attempts failed. All failures were:\n- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at \"::1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
-  "status": "error"
+  "status": "healthy",
+  "document_count": 8616,
+  "embedding_model": "sentence-transformers/paraphrase-MiniLM-L6-v2",
+  "collection_name": "chat_history",
+  "uptime_seconds": 51987,
+  "last_update": "2025-12-04T04:12:11.419452Z"
 }

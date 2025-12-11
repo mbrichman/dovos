@@ -2,164 +2,56 @@
   "query": "python",
   "results": [
     {
-      "content": "Let's python it up",
-      "date": "2025-04-09T00:44:06.149729-05:00",
+      "id": "735b7644-ce32-4264-bc4c-9d82cf7098e7",
+      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
+      "score": 0.656,
       "metadata": {
-        "conversation_id": "1e335525-754d-430b-b654-11b35d697f84",
-        "earliest_ts": "2025-04-09T00:44:06.149729-05:00",
-        "id": "1e335525-754d-430b-b654-11b35d697f84",
-        "latest_ts": "2025-04-09T00:44:06.149729-05:00",
-        "message_count": 1,
-        "message_id": "3c68d692-aebc-4d7d-a72f-4afe6ca34814",
-        "role": "user",
-        "source": "chatgpt",
-        "title": "AI Chat Search"
-      },
-      "title": "AI Chat Search"
-    },
-    {
-      "content": "How do I run a python script",
-      "date": "2025-03-04T12:15:35.393452-06:00",
-      "metadata": {
-        "conversation_id": "097bf57c-d555-4adc-b90d-f9e6551eb25d",
-        "earliest_ts": "2025-03-04T12:15:35.393452-06:00",
-        "id": "097bf57c-d555-4adc-b90d-f9e6551eb25d",
-        "latest_ts": "2025-03-04T12:15:35.393452-06:00",
-        "message_count": 1,
-        "message_id": "8cdc85ef-d30a-42b8-9434-fefef2f29243",
-        "role": "user",
-        "source": "chatgpt",
-        "title": "Install Python on M3"
-      },
-      "title": "Install Python on M3"
-    },
-    {
-      "content": "Give me the whole python file now",
-      "date": "2025-04-16T21:38:44.927895-05:00",
-      "metadata": {
-        "conversation_id": "1e335525-754d-430b-b654-11b35d697f84",
-        "earliest_ts": "2025-04-16T21:38:44.927895-05:00",
-        "id": "1e335525-754d-430b-b654-11b35d697f84",
-        "latest_ts": "2025-04-16T21:38:44.927895-05:00",
-        "message_count": 1,
-        "message_id": "f39a6aa8-07f0-4efa-b78c-efdc39dffda2",
-        "role": "user",
-        "source": "chatgpt",
-        "title": "AI Chat Search"
-      },
-      "title": "AI Chat Search"
-    },
-    {
-      "content": "python suck. ruby is much easier",
-      "date": "2025-10-24T01:08:38.530980-05:00",
-      "metadata": {
-        "conversation_id": "f42242ce-d929-4fb1-8e1c-45c944383c6c",
-        "earliest_ts": "2025-10-24T01:08:38.530980-05:00",
-        "id": "f42242ce-d929-4fb1-8e1c-45c944383c6c",
-        "latest_ts": "2025-10-24T01:08:38.530980-05:00",
-        "message_count": 1,
-        "message_id": "a78af1c1-df0a-4e2e-92d2-a9e27cfa2def",
-        "role": "user",
         "source": "claude",
-        "title": "Sed command modification for chromadb import"
+        "date": "2025-10-14T04:12:11.419388Z"
       },
-      "title": "Sed command modification for chromadb import"
+      "rank": 1
     },
     {
-      "content": "How do I run in python shell",
-      "date": "2025-04-20T19:19:15.782059-05:00",
+      "id": "938a25a7-cc87-4d5c-9746-8d9136aa8380",
+      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "score": 0.661,
       "metadata": {
-        "conversation_id": "1e335525-754d-430b-b654-11b35d697f84",
-        "earliest_ts": "2025-04-20T19:19:15.782059-05:00",
-        "id": "1e335525-754d-430b-b654-11b35d697f84",
-        "latest_ts": "2025-04-20T19:19:15.782059-05:00",
-        "message_count": 1,
-        "message_id": "c53ea74a-de43-4d76-9c36-0012dae43f3b",
-        "role": "user",
         "source": "chatgpt",
-        "title": "AI Chat Search"
+        "date": "2025-10-16T04:12:11.419397Z"
       },
-      "title": "AI Chat Search"
+      "rank": 2
     },
     {
-      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
-      "date": "2025-11-04T22:06:58.379507-06:00",
+      "id": "81193cac-d0e0-48c6-bd9f-8b8686cde7d4",
+      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
+      "score": 0.746,
       "metadata": {
-        "conversation_id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
-        "earliest_ts": "2025-11-04T22:06:58.379507-06:00",
-        "id": "526645af-79cc-4f33-9cd5-2eba5c4554b7",
-        "latest_ts": "2025-11-04T22:06:58.379507-06:00",
-        "message_count": 1,
-        "message_id": "edc3313f-1b9f-426d-aacf-084b1a00b6d8",
-        "role": "user",
+        "source": "chatgpt",
+        "date": "2025-11-15T04:12:11.419404Z"
+      },
+      "rank": 3
+    },
+    {
+      "id": "cdbaff23-2342-45f5-b661-0c042f28b64c",
+      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
+      "score": 0.777,
+      "metadata": {
         "source": "claude",
-        "title": "Writing programs in assembly language"
+        "date": "2025-11-01T04:12:11.419411Z"
       },
-      "title": "Writing programs in assembly language"
+      "rank": 4
     },
     {
-      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
-      "date": "2025-11-04T20:38:38-06:00",
+      "id": "97878a70-932c-4d29-83fd-6082ee578b6b",
+      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
+      "score": 0.908,
       "metadata": {
-        "conversation_id": "5d98bb82-cd5e-4733-888d-d2a99ae43da8",
-        "earliest_ts": "2025-11-04T20:38:38-06:00",
-        "id": "5d98bb82-cd5e-4733-888d-d2a99ae43da8",
-        "latest_ts": "2025-11-04T20:38:38-06:00",
-        "message_count": 1,
-        "message_id": "e45e7aa2-8d6b-4f17-96b1-063693b6ff74",
-        "role": "user",
-        "source": "openwebui",
-        "title": "Writing programs in assembly language"
-      },
-      "title": "Writing programs in assembly language"
-    },
-    {
-      "content": "I think about this in programming too. Python vs Ruby.",
-      "date": "2025-10-18T18:12:43.812863-05:00",
-      "metadata": {
-        "conversation_id": "4ee9186b-eaf8-4190-b345-5fb6be9f5eea",
-        "earliest_ts": "2025-10-18T18:12:43.812863-05:00",
-        "id": "4ee9186b-eaf8-4190-b345-5fb6be9f5eea",
-        "latest_ts": "2025-10-18T18:12:43.812863-05:00",
-        "message_count": 1,
-        "message_id": "404e0368-eb62-4b70-8c07-76519d8257b2",
-        "role": "user",
         "source": "claude",
-        "title": "Exploring identity and idempotency"
+        "date": "2025-11-26T04:12:11.419418Z"
       },
-      "title": "Exploring identity and idempotency"
-    },
-    {
-      "content": "Python and javascript",
-      "date": "2025-10-04T17:03:36-05:00",
-      "metadata": {
-        "conversation_id": "1c0fa617-4859-499f-969c-f84e9c137a01",
-        "earliest_ts": "2025-10-04T17:03:36-05:00",
-        "id": "1c0fa617-4859-499f-969c-f84e9c137a01",
-        "latest_ts": "2025-10-04T17:03:36-05:00",
-        "message_count": 1,
-        "message_id": "0408ec50-4abc-4dcd-bfcf-e7179515c5f0",
-        "role": "user",
-        "source": "openwebui",
-        "title": "\ud83d\udcbb Sovereign AI Models"
-      },
-      "title": "\ud83d\udcbb Sovereign AI Models"
-    },
-    {
-      "content": "I mean AI writing python is just fucking stupid",
-      "date": "2025-11-05T02:08:45.264861-06:00",
-      "metadata": {
-        "conversation_id": "c7cf5770-1d64-4f72-b627-7699cb8ca70f",
-        "earliest_ts": "2025-11-05T02:08:45.264861-06:00",
-        "id": "c7cf5770-1d64-4f72-b627-7699cb8ca70f",
-        "latest_ts": "2025-11-05T02:08:45.264861-06:00",
-        "message_count": 1,
-        "message_id": "921bf191-d441-49d2-94ae-c3a6ffa50e0e",
-        "role": "user",
-        "source": "claude",
-        "title": "HTTP protocol on circuit boards"
-      },
-      "title": "HTTP protocol on circuit boards"
+      "rank": 5
     }
-  ]
+  ],
+  "result_count": 5,
+  "search_type": "full_text"
 }

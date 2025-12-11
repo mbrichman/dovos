@@ -1,6 +1,78 @@
 {
-  "documents": [],
-  "error": "(psycopg.OperationalError) connection failed: connection to server at \"127.0.0.1\", port 5432 failed: could not receive data from server: Connection refused\nMultiple connection attempts failed. All failures were:\n- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at \"::1\", port 5432 failed: could not receive data from server: Connection refused\n- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at \"127.0.0.1\", port 5432 failed: could not receive data from server: Connection refused\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
-  "ids": [],
-  "metadatas": []
+  "documents": [
+    "Data analysis workflows",
+    "API design principles",
+    "Cloud infrastructure setup",
+    "Understanding machine learning basics",
+    "Cloud infrastructure setup",
+    "Cloud infrastructure setup",
+    "Web development frameworks comparison",
+    "How to improve productivity",
+    "How to improve productivity",
+    "API design principles"
+  ],
+  "ids": [
+    "8c3cc0be-e004-4990-8d33-3945b5918e1f",
+    "2dc0ec81-d231-4b92-8923-94d63ecf1360",
+    "77dd7386-e5e5-4d18-8a3a-02b5bad96b02",
+    "711123c5-d2fd-45dc-83aa-c66f281f9761",
+    "04b8d7ae-5d22-40f2-aaea-4f5bb8f00c66",
+    "ae3c2f26-0136-4768-9ec6-9c4b7684ef88",
+    "bbeaf1bf-65a5-422d-b96c-fd6118c7ceb7",
+    "c92b2adc-9e54-42e0-ac2e-a36a79c00a51",
+    "a399f743-98da-4c8e-96ef-9c070c48a6e7",
+    "4e199655-c915-45f6-9bb5-2f5dccdb43cb"
+  ],
+  "metadatas": [
+    {
+      "source": "openwebui",
+      "date": "2025-10-26T04:12:11.418793Z",
+      "message_count": 16
+    },
+    {
+      "source": "claude",
+      "date": "2025-12-09T04:12:11.419293Z",
+      "message_count": 14
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-16T04:12:11.419304Z",
+      "message_count": 15
+    },
+    {
+      "source": "claude",
+      "date": "2025-12-07T04:12:11.419312Z",
+      "message_count": 12
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-03T04:12:11.419320Z",
+      "message_count": 19
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-25T04:12:11.419327Z",
+      "message_count": 9
+    },
+    {
+      "source": "chatgpt",
+      "date": "2025-10-18T04:12:11.419334Z",
+      "message_count": 13
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-12-10T04:12:11.419340Z",
+      "message_count": 12
+    },
+    {
+      "source": "openwebui",
+      "date": "2025-10-14T04:12:11.419347Z",
+      "message_count": 19
+    },
+    {
+      "source": "claude",
+      "date": "2025-12-05T04:12:11.419353Z",
+      "message_count": 7
+    }
+  ]
 }
