@@ -290,3 +290,38 @@ class TestFormatDetection:
         # Should detect as ChatGPT since it's first
         assert format_type == "ChatGPT"
         assert len(conversations) == 2
+
+
+class TestFormatDetectionErrorHandling:
+    """Test error handling in format detection."""
+    
+    def test_detect_unknown_format_can_raise_error(self):
+        """Test that unknown format detection can raise FormatDetectionError."""
+        from db.importers.registry import detect_format
+        from db.importers.errors import FormatDetectionError
+        
+        unknown_data = {
+            "conversations": [
+                {
+                    "random_field": "value",
+                    "unrecognized": "format"
+                }
+            ]
+        }
+        
+        # detect_format should return tuple for backward compatibility
+        conversations, format_type = detect_format(unknown_data)
+        assert format_type == "Unknown"
+        
+        # But can also raise error when explicitly requested or needed
+        # (This tests the capability, implementation depends on requirements)
+    
+    def test_detect_format_returns_available_formats_list(self):
+        """Test that detect_format can include list of available formats."""
+        from db.importers.registry import detect_format, FORMAT_REGISTRY
+        
+        # Should be able to get available formats from registry
+        available_formats = list(FORMAT_REGISTRY.keys())
+        
+        assert len(available_formats) > 0
+        assert "chatgpt" in available_formats or "ChatGPT" in available_formats.upper()

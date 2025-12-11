@@ -580,11 +580,35 @@ class PostgresController:
         """Import conversations from JSON data into PostgreSQL. Returns message string."""
         from db.repositories.unit_of_work import get_unit_of_work
         import hashlib
+        from db.importers.errors import get_user_friendly_error_message, FormatDetectionError, ImporterNotAvailableError
         
         # Detect format (Claude vs ChatGPT) using proper detection method
         conversations, format_type = self._detect_json_format(data)
+        
+        # Check if format was detected
+        if format_type == "Unknown":
+            available_formats = list(FORMAT_REGISTRY.keys())
+            error = FormatDetectionError(available_formats=available_formats)
+            user_msg = get_user_friendly_error_message(error, available_formats)
+            raise ValueError(user_msg)
+        
         if not conversations:
-            raise ValueError("Unknown JSON format - no conversations found")
+            available_formats = list(FORMAT_REGISTRY.keys())
+            error = FormatDetectionError(available_formats=available_formats)
+            user_msg = get_user_friendly_error_message(error, available_formats)
+            raise ValueError(user_msg)
+        
+        # Validate that extractor is available for the detected format
+        # First, normalize format name for registry lookup
+        format_key = format_type.lower() if format_type != "OpenWebUI" else "openwebui"
+        if format_key not in FORMAT_REGISTRY:
+            available_formats = list(FORMAT_REGISTRY.keys())
+            error = ImporterNotAvailableError(
+                format_name=format_type,
+                available_formats=available_formats
+            )
+            user_msg = get_user_friendly_error_message(error, available_formats)
+            raise ValueError(user_msg)
         
         print(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
         logger.info(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
@@ -620,12 +644,26 @@ class PostgresController:
                 
                 # Extract messages first
                 messages = []
-                if 'mapping' in conv_data:  # ChatGPT format
-                    messages = FORMAT_REGISTRY['chatgpt'](conv_data['mapping'])
-                elif 'chat_messages' in conv_data:  # Claude format
-                    messages = FORMAT_REGISTRY['claude'](conv_data['chat_messages'])
-                elif 'chat' in conv_data and 'history' in conv_data.get('chat', {}) and 'messages' in conv_data['chat']['history']:  # OpenWebUI format
-                    messages = FORMAT_REGISTRY['openwebui'](conv_data['chat']['history']['messages'])
+                try:
+                    if 'mapping' in conv_data:  # ChatGPT format
+                        if 'chatgpt' in FORMAT_REGISTRY:
+                            messages = FORMAT_REGISTRY['chatgpt'](conv_data['mapping'])
+                    elif 'chat_messages' in conv_data:  # Claude format
+                        if 'claude' in FORMAT_REGISTRY:
+                            messages = FORMAT_REGISTRY['claude'](conv_data['chat_messages'])
+                    elif 'chat' in conv_data and 'history' in conv_data.get('chat', {}) and 'messages' in conv_data['chat']['history']:  # OpenWebUI format
+                        if 'openwebui' in FORMAT_REGISTRY:
+                            messages = FORMAT_REGISTRY['openwebui'](conv_data['chat']['history']['messages'])
+                except (KeyError, TypeError, ValueError) as e:
+                    from db.importers.errors import ExtractionError, get_user_friendly_error_message
+                    available_formats = list(FORMAT_REGISTRY.keys())
+                    error = ExtractionError(
+                        format_name=format_type,
+                        original_error=e
+                    )
+                    user_msg = get_user_friendly_error_message(error, available_formats)
+                    logger.error(f"Failed to extract messages from {format_type}: {e}")
+                    raise ValueError(user_msg)
                 
                 # Skip if no valid messages
                 if not messages:
