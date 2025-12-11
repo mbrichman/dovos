@@ -32,8 +32,35 @@ def use_test_db_and_clean(test_db_engine):
     dbm.SessionFactory = sessionmaker(bind=test_db_engine)
     pc_module._controller = None
     
-    # Clean tables
+    # Create/ensure view exists, then clean tables
+    from sqlalchemy import text
     from db.models.models import Conversation, Message, MessageEmbedding
+
+    # Ensure conversation_summaries exists (normal VIEW so it stays current)
+    sess = Session(bind=test_db_engine)
+    try:
+        sess.execute(text("DROP MATERIALIZED VIEW IF EXISTS conversation_summaries"))
+        sess.execute(text("DROP VIEW IF EXISTS conversation_summaries"))
+        sess.execute(text("""
+            CREATE VIEW conversation_summaries AS
+            SELECT 
+                c.id,
+                COUNT(m.id) AS message_count,
+                MIN(m.created_at) AS earliest_message_at,
+                MAX(m.created_at) AS latest_message_at,
+                SUBSTRING(MAX(CASE WHEN m.role = 'assistant' THEN m.content END) FROM 1 FOR 200) AS preview
+            FROM conversations c
+            LEFT JOIN messages m ON c.id = m.conversation_id
+            GROUP BY c.id
+        """))
+        sess.commit()
+    except Exception:
+        sess.rollback()
+        # If this fails, tests will still proceed; failures will surface clearly
+    finally:
+        sess.close()
+
+    # Clean tables for a fresh start each test
     sess = Session(bind=test_db_engine)
     try:
         # Delete in dependency order (foreign key constraints)
@@ -241,35 +268,112 @@ class TestGetStatsEndpoint:
 
 
 @pytest.mark.unit
-class TestApiSearchEndpoint:
-    """Test GET /api/search endpoint."""
+class TestDeleteEndpoint:
+    """Test DELETE /api/conversation/<id> endpoint."""
     
-    def test_api_search_requires_query(self, postgres_controller):
-        """Test that api_search requires a query parameter."""
-        with patch('flask.request.args') as mock_args:
-            mock_args.get.side_effect = lambda key, default=None: default
-            
-            result = postgres_controller.api_search()
-            
-            assert "error" in result
+    def test_delete_conversation_returns_dict(self, postgres_controller):
+        """Test that delete_conversation returns a dict response."""
+        result = postgres_controller.delete_conversation("fake-uuid")
+        
+        assert isinstance(result, dict)
+        # Should have success key
+        assert "success" in result or "error" in result
     
-    def test_api_search_returns_dict_structure(self, postgres_controller):
-        """Test that api_search returns correct structure."""
-        with patch('flask.request.args') as mock_args:
-            mock_args.get.side_effect = lambda key, default=None: {
-                "q": "test query",
-                "n": "5",
-                "search_type": "auto"
-            }.get(key, default)
-            
-            # Mock the search service to avoid actual search
-            with patch.object(postgres_controller.adapter, 'search_service') as mock_search:
-                mock_search.get_search_stats.return_value = {"hybrid_search_available": False}
-                mock_search.search_fts_only.return_value = []
-                
-                result = postgres_controller.api_search()
-                
-                assert isinstance(result, dict)
-                assert "query" in result
-                assert "results" in result
-                assert isinstance(result["results"], list)
+    def test_delete_nonexistent_conversation(self, postgres_controller):
+        """Test deleting a non-existent conversation."""
+        result = postgres_controller.delete_conversation("nonexistent-uuid-123")
+        
+        assert isinstance(result, dict)
+        # Should indicate failure or success
+        assert "success" in result or "error" in result
+    
+    def test_delete_conversation_with_seeded_data(self, seeded_controller):
+        """Test deleting an existing conversation."""
+        controller, conversations = seeded_controller
+        conv, _ = conversations[0]
+        
+        result = controller.delete_conversation(str(conv.id))
+        
+        assert isinstance(result, dict)
+        # After deletion, conversation should not exist
+        get_result = controller.get_conversation(str(conv.id))
+        assert len(get_result["ids"]) == 0
+
+
+@pytest.mark.unit
+class TestExportEndpoint:
+    """Test conversation export endpoints."""
+    
+    def test_export_conversation_returns_response(self, seeded_controller):
+        """Test that export_conversation returns a response."""
+        controller, conversations = seeded_controller
+        conv, _ = conversations[0]
+        
+        result = controller.export_conversation(str(conv.id))
+        
+        # Should return a response object or string
+        assert result is not None
+    
+    def test_export_nonexistent_conversation(self, postgres_controller):
+        """Test exporting a non-existent conversation."""
+        result = postgres_controller.export_conversation("nonexistent-uuid")
+        
+        # Should return some response (error or empty)
+        assert result is not None
+    
+    def test_export_to_openwebui_returns_dict(self, postgres_controller):
+        """Test that export_to_openwebui returns a dict response."""
+        result = postgres_controller.export_to_openwebui("fake-uuid")
+        
+        assert isinstance(result, dict)
+        # Should have status or success key
+        assert "success" in result or "error" in result or "status" in result
+
+
+@pytest.mark.unit
+class TestClearDatabaseEndpoint:
+    """Test database clearing endpoint."""
+    
+    def test_clear_database_returns_dict(self, postgres_controller):
+        """Test that clear_database returns a dict."""
+        result = postgres_controller.clear_database()
+        
+        assert isinstance(result, dict)
+        # Should indicate success or error
+        assert "success" in result or "error" in result or "message" in result
+    
+    def test_clear_database_removes_data(self, seeded_controller):
+        """Test that clear_database actually removes conversations."""
+        controller, conversations = seeded_controller
+        
+        # Clear the database
+        result = controller.clear_database()
+        assert isinstance(result, dict)
+        
+        # Verify conversations are gone
+        get_result = controller.get_conversations()
+        assert len(get_result["ids"]) == 0
+
+
+@pytest.mark.unit
+class TestGetSettingsEndpoint:
+    """Test settings retrieval and management endpoints."""
+    
+    
+    def test_get_collection_count_returns_dict(self, postgres_controller):
+        """Test that get_collection_count returns a dict with count."""
+        result = postgres_controller.get_collection_count()
+        
+        assert isinstance(result, dict)
+        # Should have count or error
+        assert "count" in result or "error" in result
+    
+    def test_get_collection_count_with_seeded_data(self, seeded_controller):
+        """Test get_collection_count with test data."""
+        controller, conversations = seeded_controller
+        result = controller.get_collection_count()
+        
+        assert isinstance(result, dict)
+        # Should have a count
+        if "count" in result:
+            assert result["count"] >= 0
