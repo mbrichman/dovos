@@ -1,15 +1,20 @@
 {
   "documents": [
-    "Understanding machine learning basics"
+    "**System** *(on 2025-12-11 05:27:03)*:\n\nTesting concurrent embedding workers.\n\n---\n\n**You said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 1 for concurrent processing testing.\n\n---\n\n**Assistant said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 2 for concurrent processing testing.\n\n---\n\n**You said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 3 for concurrent processing testing.\n\n---\n\n**Assistant said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 4 for concurrent processing testing.\n\n---\n\n**You said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 5 for concurrent processing testing.\n\n---\n\n**Assistant said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 6 for concurrent processing testing.\n\n---\n\n**You said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 7 for concurrent processing testing.\n\n---\n\n**Assistant said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 8 for concurrent processing testing.\n\n---\n\n**You said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 9 for concurrent processing testing.\n\n---\n\n**Assistant said** *(on 2025-12-11 05:27:03)*:\n\nThis is test message number 10 for concurrent processing testing."
   ],
   "ids": [
-    "fec1b447-bc46-45e0-ab20-3a26bbe22b18"
+    "99bee21a-1fe4-4487-a74b-1b717ee10fa1"
   ],
   "metadatas": [
     {
-      "date": "2024-12-23T12:00:00Z",
-      "message_count": 2,
-      "source": "claude"
+      "conversation_id": "99bee21a-1fe4-4487-a74b-1b717ee10fa1",
+      "earliest_ts": "2025-12-11T05:27:03.616816-06:00",
+      "id": "99bee21a-1fe4-4487-a74b-1b717ee10fa1",
+      "is_chunk": false,
+      "latest_ts": "2025-12-11T05:27:03.725688-06:00",
+      "message_count": 11,
+      "source": "unknown",
+      "title": "Concurrent Worker Test"
     }
   ]
 }

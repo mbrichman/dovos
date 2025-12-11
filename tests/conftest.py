@@ -295,6 +295,56 @@ def conv_id(uow, seed_conversations):
     return conversation.id
 
 
+@pytest.fixture(scope="function")
+def client_postgres_test(test_db_url, test_db_engine):
+    """
+    Flask test client that uses the test database.
+    
+    This fixture patches the global database connection in db.database
+    and resets the postgres controller singleton BEFORE creating the app.
+    This ensures all database operations within the app use test_db_engine.
+    
+    Important: Setup and teardown must be careful to restore state properly.
+    """
+    # We need to patch db.database.engine and db.database.SessionFactory
+    # BEFORE creating the app and importing the controller
+    import db.database
+    import controllers.postgres_controller as pc_module
+    from importlib import reload
+    
+    # Save originals
+    original_engine = db.database.engine
+    original_session_factory = db.database.SessionFactory
+    original_controller = pc_module._controller
+    
+    try:
+        # Patch the database module FIRST, before any imports
+        db.database.engine = test_db_engine
+        db.database.SessionFactory = sessionmaker(bind=test_db_engine)
+        pc_module._controller = None  # Force singleton recreation
+        
+        # Now create the app which will use the patched database
+        app = create_app(database_url=test_db_url)
+        app.config.update({
+            "TESTING": True,
+            "USE_PG_SINGLE_STORE": True
+        })
+        
+        with app.app_context():
+            from db.database import create_tables
+            create_tables(database_url=test_db_url)
+        
+        yield app.test_client()
+    finally:
+        # Carefully restore original state in reverse order
+        import db.database
+        import controllers.postgres_controller as pc_module
+        
+        db.database.engine = original_engine
+        db.database.SessionFactory = original_session_factory
+        pc_module._controller = original_controller
+
+
 # Removed: toggle_postgres_mode fixture (obsolete - PostgreSQL is now the only backend)
 # Removed: both_backends fixture (obsolete - no dual-backend support)
 

@@ -79,11 +79,26 @@ def check_extensions() -> dict:
     return extensions
 
 
-def create_tables():
-    """Create all tables defined in the ORM models."""
+def create_tables(database_url=None):
+    """Create all tables defined in the ORM models.
+    
+    Args:
+        database_url: Optional database URL. If provided, uses a separate engine for this operation.
+    """
     try:
         from db.models.models import Base
-        Base.metadata.create_all(engine)
+        # Use provided URL or the global engine
+        if database_url:
+            temp_engine = create_engine(
+                database_url,
+                poolclass=NullPool,
+                connect_args={"application_name": PGAPPNAME},
+                echo=False
+            )
+            Base.metadata.create_all(temp_engine)
+            temp_engine.dispose()
+        else:
+            Base.metadata.create_all(engine)
         logger.info("All tables created successfully")
     except Exception as e:
         logger.error(f"Failed to create tables: {e}")

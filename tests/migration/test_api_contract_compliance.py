@@ -81,6 +81,59 @@ def seeded_postgres_data(uow):
     }
 
 
+@pytest.fixture
+def seeded_postgres_data_committed(test_db_engine):
+    """
+    Seed PostgreSQL with test data that is committed (not rolled back).
+    
+    This fixture creates a fresh session without transaction rollback,
+    so data persists for HTTP client tests. It cleans up after itself.
+    
+    Returns conversation IDs for testing.
+    """
+    from sqlalchemy.orm import Session
+    from db.repositories.unit_of_work import UnitOfWork
+    from db.models.models import Conversation
+    
+    # Create a fresh session that won't be rolled back
+    session = Session(bind=test_db_engine)
+    uow = UnitOfWork(session=session)
+    
+    conversations = []
+    conv_ids = []
+    
+    try:
+        # Create 3 test conversations
+        for i in range(3):
+            conv, messages = seed_conversation_with_messages(
+                uow,
+                title=f"Test Conversation {i+1}",
+                message_count=4,
+                with_embeddings=True,
+                created_days_ago=i
+            )
+            conversations.append((conv, messages))
+            conv_ids.append(str(conv.id))
+        
+        # Commit the changes
+        uow.commit()
+        
+        yield {
+            "conversations": conversations,
+            "conv_ids": conv_ids
+        }
+    finally:
+        # Clean up: delete the conversations we created
+        try:
+            for conv_id in conv_ids:
+                session.query(Conversation).filter(Conversation.id == conv_id).delete()
+            session.commit()
+        except Exception:
+            session.rollback()
+        finally:
+            session.close()
+
+
 def assert_json_structure_matches(response1: Dict[str, Any], response2: Dict[str, Any], path: str = "root"):
     """
     Recursively assert two JSON structures match in shape.
@@ -189,11 +242,10 @@ class TestConversationEndpoints:
         # Save golden response
         save_golden_response(data_pg, "GET_api_conversations")
     
-    @pytest.mark.skip(reason="TODO: Flask app uses production DB, seed uses test DB - Priority 5 architecture fix needed")
     def test_get_conversation_by_id_structure(
         self,
-        client_postgres,
-        seeded_postgres_data
+        client_postgres_test,
+        seeded_postgres_data_committed
     ):
         """
         GET /api/conversation/<id> returns correct structure.
@@ -206,9 +258,9 @@ class TestConversationEndpoints:
         }
         """
         # Get a conversation ID
-        conv_id = seeded_postgres_data["conv_ids"][0]
+        conv_id = seeded_postgres_data_committed["conv_ids"][0]
         
-        response = client_postgres.get(f"/api/conversation/{conv_id}")
+        response = client_postgres_test.get(f"/api/conversation/{conv_id}")
         assert response.status_code == 200
         
         data = response.get_json()

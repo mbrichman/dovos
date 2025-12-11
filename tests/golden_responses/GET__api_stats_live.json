@@ -1,12 +1,6 @@
 {
-  "conversation_count": 372,
-  "document_count": 8010,
-  "embedding_model": "sentence-transformers/paraphrase-MiniLM-L6-v2",
-  "indexed_documents": 6660,
-  "message_count": 44000,
-  "sources": {
-    "chatgpt": 17,
-    "claude": 166,
-    "openwebui": 163
-  }
+  "collection_name": "chat_history",
+  "document_count": 4704,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "status": "healthy"
 }

@@ -4,8 +4,12 @@ from flask_cors import CORS
 from config import SECRET_KEY
 from routes import init_routes
 
-def create_app():
-    """Application factory pattern for better testing and configuration"""
+def create_app(database_url=None):
+    """Application factory pattern for better testing and configuration.
+    
+    Args:
+        database_url: Optional database URL override. If not provided, uses config default.
+    """
     app = Flask(__name__)
     app.config["SECRET_KEY"] = SECRET_KEY
     
@@ -16,7 +20,7 @@ def create_app():
     print("🚀 Initializing PostgreSQL database")
     from db.database import create_tables
     try:
-        create_tables()
+        create_tables(database_url=database_url)
     except Exception as e:
         print(f"⚠️ Database table creation warning: {e}")
     

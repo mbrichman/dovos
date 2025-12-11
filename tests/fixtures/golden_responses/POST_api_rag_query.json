@@ -2,6 +2,66 @@
   "query": "test query",
   "results": [
     {
+      "content": "small query with no payload",
+      "distance": 0.6148136441354006,
+      "id": "41c55db1-5221-447f-ba4b-34074bb91ff6",
+      "metadata": {
+        "conversation_id": "41c55db1-5221-447f-ba4b-34074bb91ff6",
+        "earliest_ts": "2025-10-07T15:19:58-05:00",
+        "id": "41c55db1-5221-447f-ba4b-34074bb91ff6",
+        "latest_ts": "2025-10-07T15:19:58-05:00",
+        "message_count": 1,
+        "message_id": "2b04af04-2882-4dc5-bb06-aa575a8f563a",
+        "role": "user",
+        "source": "postgres",
+        "title": "\ud83d\udc4b Initial Greeting Exchange"
+      },
+      "preview": "small query with no payload",
+      "relevance": 0.3851863558645994,
+      "source": "postgres",
+      "title": "\ud83d\udc4b Initial Greeting Exchange"
+    },
+    {
+      "content": "So how does the \u2018break down the problem\u2019 work. Just giving the LLM the original query and then a sophisticated prompt on how to break it down?",
+      "distance": 0.63323291239429,
+      "id": "844e2a2d-bb65-4334-85db-35a67649f2a4",
+      "metadata": {
+        "conversation_id": "844e2a2d-bb65-4334-85db-35a67649f2a4",
+        "earliest_ts": "2025-10-07T12:15:51-05:00",
+        "id": "844e2a2d-bb65-4334-85db-35a67649f2a4",
+        "latest_ts": "2025-10-07T12:15:51-05:00",
+        "message_count": 1,
+        "message_id": "e25766b8-956c-4f07-809e-bdbf8f10d7f8",
+        "role": "user",
+        "source": "postgres",
+        "title": "\ud83e\udd14 AI Reasoning Explained"
+      },
+      "preview": "So how does the \u2018break down the problem\u2019 work. Just giving the LLM the original query and then a sophisticated prompt on how to break it down?",
+      "relevance": 0.36676708760571,
+      "source": "postgres",
+      "title": "\ud83e\udd14 AI Reasoning Explained"
+    },
+    {
+      "content": "Do a first pass search yourself",
+      "distance": 0.6910231958974113,
+      "id": "572e09b4-1af0-43f6-8a19-495803a9ed67",
+      "metadata": {
+        "conversation_id": "572e09b4-1af0-43f6-8a19-495803a9ed67",
+        "earliest_ts": "2025-09-26T00:08:45-05:00",
+        "id": "572e09b4-1af0-43f6-8a19-495803a9ed67",
+        "latest_ts": "2025-09-26T00:08:45-05:00",
+        "message_count": 1,
+        "message_id": "85c30691-e297-4eb2-b9d0-a87f8be2fb98",
+        "role": "user",
+        "source": "postgres",
+        "title": "\ud83d\udd0d Deep Research MCP"
+      },
+      "preview": "Do a first pass search yourself",
+      "relevance": 0.30897680410258865,
+      "source": "postgres",
+      "title": "\ud83d\udd0d Deep Research MCP"
+    },
+    {
       "content": "I converted the sever to C to compare:\nTest \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 ASM (req/s) \u00a0 \u00a0 \u00a0 C (req/s)\u00a0 \u00a0 \u00a0 Difference\n---- \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 ----------- \u00a0 \u00a0 \u00a0 ---------\u00a0 \u00a0 \u00a0 ----------\nsmall_concurrent \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 7908.48 \u00a0 \u00a0 \u00a0 \u00a0 7467.35 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 +5.9%\nmedium_concurrent\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 1652.27 \u00a0 \u00a0 \u00a0 \u00a0 1552.89 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 +6.4%\nsmall_seq\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 5367.41 \u00a0 \u00a0 \u00a0 \u00a0 4830.35\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 +11.1%\nmedium_seq \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 2559.45 \u00a0 \u00a0 \u00a0 \u00a0 2441.25 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 +4.8%\nlarge_seq\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 1107.91 \u00a0 \u00a0 \u00a0 \u00a0 1153.94 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 -4.0%\nlarge_concurrent \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 1291.05 \u00a0 \u00a0 \u00a0 \u00a0 1340.21 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 -3.7%",
       "distance": 0.6960761754535455,
       "id": "440d4241-b63b-4656-ae2c-954f8dbe8d0f",
@@ -40,66 +100,6 @@
       "relevance": 0.2972391602086025,
       "source": "postgres",
       "title": "Asymptomatic Tourette's comedy skit"
-    },
-    {
-      "content": "Into what is the question",
-      "distance": 0.7187062380770202,
-      "id": "6d922120-6a24-433c-b5eb-3c2fedead5cd",
-      "metadata": {
-        "conversation_id": "6d922120-6a24-433c-b5eb-3c2fedead5cd",
-        "earliest_ts": "2025-11-01T22:59:29-05:00",
-        "id": "6d922120-6a24-433c-b5eb-3c2fedead5cd",
-        "latest_ts": "2025-11-01T22:59:29-05:00",
-        "message_count": 1,
-        "message_id": "9ad83ce4-1d75-4ce2-b639-ec3f8d2d3a17",
-        "role": "user",
-        "source": "postgres",
-        "title": "\ud83d\udc94 Emotional Shitshow Day"
-      },
-      "preview": "Into what is the question",
-      "relevance": 0.28129376192297983,
-      "source": "postgres",
-      "title": "\ud83d\udc94 Emotional Shitshow Day"
-    },
-    {
-      "content": "I\u2019ve already refactored and added tests.",
-      "distance": 0.7225033325694792,
-      "id": "5f9cd9bb-3f59-4f3c-81b0-3963184aaaaa",
-      "metadata": {
-        "conversation_id": "5f9cd9bb-3f59-4f3c-81b0-3963184aaaaa",
-        "earliest_ts": "2025-11-23T02:54:24.265293-06:00",
-        "id": "5f9cd9bb-3f59-4f3c-81b0-3963184aaaaa",
-        "latest_ts": "2025-11-23T02:54:24.265293-06:00",
-        "message_count": 1,
-        "message_id": "793ef957-69b9-436f-b559-fd3664ba6937",
-        "role": "user",
-        "source": "postgres",
-        "title": "DovOS alternatives and competitive landscape"
-      },
-      "preview": "I\u2019ve already refactored and added tests.",
-      "relevance": 0.2774966674305208,
-      "source": "postgres",
-      "title": "DovOS alternatives and competitive landscape"
-    },
-    {
-      "content": "The question is more how than if",
-      "distance": 0.7411443833109339,
-      "id": "f18a7dc0-8b33-44c0-9286-9d9085526718",
-      "metadata": {
-        "conversation_id": "f18a7dc0-8b33-44c0-9286-9d9085526718",
-        "earliest_ts": "2025-11-17T16:32:29.185223-06:00",
-        "id": "f18a7dc0-8b33-44c0-9286-9d9085526718",
-        "latest_ts": "2025-11-17T16:32:29.185223-06:00",
-        "message_count": 1,
-        "message_id": "945721f2-137a-4176-b718-519fd6f18dbc",
-        "role": "user",
-        "source": "postgres",
-        "title": "Instagram thirst trap fatigue"
-      },
-      "preview": "The question is more how than if",
-      "relevance": 0.2588556166890661,
-      "source": "postgres",
-      "title": "Instagram thirst trap fatigue"
     }
   ],
   "search_type": "semantic"

@@ -1,96 +1,105 @@
 {
-  "query": "How to use Python?",
-  "result_count": 10,
+  "query": "How do I use Python for web scraping?",
   "results": [
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "content": "Python and javascript",
+      "distance": 0.4537766089971843,
+      "id": "742dc63d-8a8f-468b-889e-0a273bab5391",
       "metadata": {
-        "chunk": 4,
-        "model": "neural-chat"
+        "conversation_id": "742dc63d-8a8f-468b-889e-0a273bab5391",
+        "earliest_ts": "2025-10-04T17:03:36-05:00",
+        "id": "742dc63d-8a8f-468b-889e-0a273bab5391",
+        "latest_ts": "2025-10-04T17:03:36-05:00",
+        "message_count": 1,
+        "message_id": "9d831678-2dfa-4e35-b28c-528e3240ac45",
+        "role": "user",
+        "source": "postgres",
+        "title": "\ud83d\udcbb Sovereign AI Models"
       },
-      "score": 0.667,
-      "source_id": "736ae2e9-1bdf-46a7-9815-e81e9f3679d1"
+      "preview": "Python and javascript",
+      "relevance": 0.5462233910028157,
+      "source": "postgres",
+      "title": "\ud83d\udcbb Sovereign AI Models"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "content": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make request\nresponse = requests.post(\nf\"{BASE_URL}/customers/{CUSTOMER_ID}/libraries/{LIBRARY}/sync/documents/crawl\",\njson=payload,\nheaders={\n\"Content-Type\": \"application/json\",\n\"X-Auth-Token\": TOKEN\n}\n)\n# Check for errors\nif response.status_code != 200:\nprint(f\"\\n\u274c Error: {response.status_code}\")\nprint(f\"Response: {response.text}\")\nbreak\n# Parse response\ndata = response.json()\ndocs = data.get('data', [])\nall_docs.extend(docs)\nprint(f\"\u2705 Got {len(docs)} docs (Total: {len(all_docs)})\")\n# Check for more pages\ncursor = data.get('cursor')\nif not cursor:\nprint(f\"\\n\ud83c\udfc1 Complete: {len(all_docs)} documents\")\nbreak\npage += 1\nreturn all_docs\n# Main execution\nprint(\"\ud83d\ude80 Starting crawl of chicagoactive library...\\n\")\ntry:\ndocuments = crawl_library()\n# Save with timestamp\ntimestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\nfilename = f\"imanage_crawl_{timestamp}.json\"\nwith open(filename, 'w') as f:\njson.dump(documents, f, indent=2)\nprint(f\"\\n\ud83d\udcbe Saved to {filename}\")\nprint(f\"\ud83d\udcc8 File size: {len(json.dumps(documents)) / 1024 / 1024:.2f} MB\")\nprint(f\"\ud83d\udcca Total documents: {len(documents)}\")\n# Print sample doc structure\nif documents:\nprint(\"\\n\ud83d\udccb Sample document structure:\")\nprint(json.dumps(documents[0], indent=2)[:500] + \"...\")\nexcept Exception as e:\nprint(f\"\\n\u274c Error: {e}\")\nimport traceback\ntraceback.print_exc()\n```\nCommon issues:\n- Token expired? (try regenerating)\n- Library name wrong? (case sensitive: \"chicagoactive\" vs \"ChicagoActive\")\n- Permission issue? (did the god-mode permission actually get applied?)\n- Rate limiting?",
+      "distance": 0.4846604023974499,
+      "id": "f5f4b9fb-4e27-48c8-ac4c-e8c8fd19b7ad",
       "metadata": {
-        "chunk": 5,
-        "model": "claude-3-opus"
+        "conversation_id": "f5f4b9fb-4e27-48c8-ac4c-e8c8fd19b7ad",
+        "earliest_ts": "2025-10-03T21:30:03-05:00",
+        "id": "f5f4b9fb-4e27-48c8-ac4c-e8c8fd19b7ad",
+        "latest_ts": "2025-10-03T21:30:03-05:00",
+        "message_count": 1,
+        "message_id": "f5d6232d-3e2e-4fd4-9811-2d17d1d8ada6",
+        "role": "assistant",
+        "source": "postgres",
+        "title": "Imanage MCP server integration"
       },
-      "score": 0.736,
-      "source_id": "c949cc8c-1651-4a39-9bcb-d6070021185a"
+      "preview": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make ...",
+      "relevance": 0.5153395976025501,
+      "source": "postgres",
+      "title": "Imanage MCP server integration"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "content": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make request\nresponse = requests.post(\nf\"{BASE_URL}/customers/{CUSTOMER_ID}/libraries/{LIBRARY}/sync/documents/crawl\",\njson=payload,\nheaders={\n\"Content-Type\": \"application/json\",\n\"X-Auth-Token\": TOKEN\n}\n)\n# Check for errors\nif response.status_code != 200:\nprint(f\"\\n\u274c Error: {response.status_code}\")\nprint(f\"Response: {response.text}\")\nbreak\n# Parse response\ndata = response.json()\ndocs = data.get('data', [])\nall_docs.extend(docs)\nprint(f\"\u2705 Got {len(docs)} docs (Total: {len(all_docs)})\")\n# Check for more pages\ncursor = data.get('cursor')\nif not cursor:\nprint(f\"\\n\ud83c\udfc1 Complete: {len(all_docs)} documents\")\nbreak\npage += 1\nreturn all_docs\n# Main execution\nprint(\"\ud83d\ude80 Starting crawl of chicagoactive library...\\n\")\ntry:\ndocuments = crawl_library()\n# Save with timestamp\ntimestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\nfilename = f\"imanage_crawl_{timestamp}.json\"\nwith open(filename, 'w') as f:\njson.dump(documents, f, indent=2)\nprint(f\"\\n\ud83d\udcbe Saved to {filename}\")\nprint(f\"\ud83d\udcc8 File size: {len(json.dumps(documents)) / 1024 / 1024:.2f} MB\")\nprint(f\"\ud83d\udcca Total documents: {len(documents)}\")\n# Print sample doc structure\nif documents:\nprint(\"\\n\ud83d\udccb Sample document structure:\")\nprint(json.dumps(documents[0], indent=2)[:500] + \"...\")\nexcept Exception as e:\nprint(f\"\\n\u274c Error: {e}\")\nimport traceback\ntraceback.print_exc()\n```\nCommon issues:\n- Token expired? (try regenerating)\n- Library name wrong? (case sensitive: \"chicagoactive\" vs \"ChicagoActive\")\n- Permission issue? (did the god-mode permission actually get applied?)\n- Rate limiting?",
+      "distance": 0.4846604023974499,
+      "id": "2f03b8d5-98ce-471b-8063-5af317574782",
       "metadata": {
-        "chunk": 1,
-        "model": "mistral-7b"
+        "conversation_id": "2f03b8d5-98ce-471b-8063-5af317574782",
+        "earliest_ts": "2025-10-03T21:30:03-05:00",
+        "id": "2f03b8d5-98ce-471b-8063-5af317574782",
+        "latest_ts": "2025-10-03T21:30:03-05:00",
+        "message_count": 1,
+        "message_id": "491608ad-a85f-492d-9e4e-21296bb3cc91",
+        "role": "assistant",
+        "source": "postgres",
+        "title": "Imanage MCP server integration"
       },
-      "score": 0.831,
-      "source_id": "a04282e5-67d2-4b24-8d2d-f842033bc36d"
+      "preview": "```python\n# 1_crawl_all.py\nimport requests\nimport json\nfrom datetime import datetime\n# HARDCODED CONFIG\nTOKEN = \"H1qQ0oLO-NUfbWp41TLqsGs6rRW6vMMUQzim-cPtjV0\"\nCUSTOMER_ID = \"188\"\nLIBRARY = \"chicagoactive\"\nBASE_URL = \"https://cloudimanage.com/work/api/v2\"\ndef crawl_library():\n\"\"\"Crawl entire library using pagination.\"\"\"\nall_docs = []\ncursor = None\npage = 1\nwhile True:\nprint(f\"\ud83d\udce5 Page {page}...\", end=\" \")\n# Build request payload\npayload = {\"limit\": 1000}\nif cursor:\npayload[\"cursor\"] = cursor\n# Make ...",
+      "relevance": 0.5153395976025501,
+      "source": "postgres",
+      "title": "Imanage MCP server integration"
     },
     {
-      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
+      "content": " Good question - you're looking at a multi-part system here. Let me break down what you'd need to replicate:\n1. **Search API integration**\n   - I use Brave Search API\n   - OpenWebUI supports web search through various backends - you'd need to configure one (Brave, SearXNG, Google, etc.)\n   - SearXNG is popular in the self-hosted community since it's privacy-focused and aggregates multiple engines\n2. **Web fetching/scraping**\n   - I have a separate `web_fetch` tool that retrieves full page content\n   - For OpenWebUI, you'd need something like:\n     - Jina AI's Reader API (turns any URL into LLM-friendly markdown)\n     - Firecrawl\n     - Custom Python tool using BeautifulSoup/Trafilatura\n     - Browser-based scraping via Playwright/Selenium\n3. **Tool/function calling**\n   - OpenWebUI supports function calling/tools\n   - You'd need to create custom tools or use existing plugins/integrations\n   - The LLM needs to support function calling (Claude does, GPT-4 does, many local models now do via proper formatting)\n- Enable web search in settings\n- Configure your search backend (SearXNG is cleanest for self-hosted)\n- This gives you basic search capability\n- Create a Python function/tool that:\n  - Takes a URL\n  - Fetches and cleans the content\n  - Returns markdown or clean text\n- Register it as a tool in OpenWebUI\n- The LLM can then call it when needed\n- Set up SearXNG instance\n- Create two separate tools:\n  - `web_search(query)` - returns ranked results with snippets\n  - `web_fetch(url)` - returns full page content\n- Configure your model's system prompt to use them intelligently (basically, give it similar instructions to what I have)\nYou'd need to either:\n1. Rely on the LLM's judgment (works decently with Claude/GPT-4, more hit-or-miss with local models)\n2. Build explicit logic into your tools (e.g., always fetch top 3 results, or fetch if snippet < X tokens)\n3. Use a RAG-style approach where you automatically fetch and chunk all results, then semantic search over them\nSince you're running LiteLLM + OpenWebUI, I'd probably suggest:\n- SearXNG for search (privacy + multi-engine)\n- Jina AI Reader or custom Trafilatura-based tool for fetching\n- Let Claude/your primary model handle the judgment calls on when to fetch\nWant me to search for current OpenWebUI documentation on their tool/function calling system? Or are you already familiar with how that works and more interested in the architectural decisions?",
+      "distance": 0.4853949581634952,
+      "id": "01993413-8759-403a-9d76-ed43dcf26cd7",
       "metadata": {
-        "chunk": 2,
-        "model": "claude-3-opus"
+        "conversation_id": "01993413-8759-403a-9d76-ed43dcf26cd7",
+        "earliest_ts": "2025-11-18T01:38:46.832782-06:00",
+        "id": "01993413-8759-403a-9d76-ed43dcf26cd7",
+        "latest_ts": "2025-11-18T01:38:46.832782-06:00",
+        "message_count": 1,
+        "message_id": "56d2899c-9016-4c4d-9767-e41c725a5ae3",
+        "role": "assistant",
+        "source": "postgres",
+        "title": "How the internet search tool works"
       },
-      "score": 0.973,
-      "source_id": "6f3e598d-a28f-48b2-953b-8c523213b9e1"
+      "preview": " Good question - you're looking at a multi-part system here. Let me break down what you'd need to replicate:\n1. **Search API integration**\n   - I use Brave Search API\n   - OpenWebUI supports web search through various backends - you'd need to configure one (Brave, SearXNG, Google, etc.)\n   - SearXNG is popular in the self-hosted community since it's privacy-focused and aggregates multiple engines\n2. **Web fetching/scraping**\n   - I have a separate `web_fetch` tool that retrieves full page conten...",
+      "relevance": 0.5146050418365048,
+      "source": "postgres",
+      "title": "How the internet search tool works"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
+      "content": " Ah, you want the real deal. Here's a bare-metal HTTP server in Python:\n```python\nimport socket\ns = socket.socket()\ns.bind(('', 8000))\ns.listen()\nprint(\"Server running on port 8000\")\nwhile True:\n    conn, addr = s.accept()\n    request = conn.recv(1024).decode()\n    path = request.split()[1] if request else '/'\n    try:\n        if path == '/': path = '/index.html'\n        with open('public' + path, 'rb') as f:\n            content = f.read()\n        response = b'HTTP/1.1 200 OK\\r\\n\\r\\n' + content\n    except:\n        response = b'HTTP/1.1 404 Not Found\\r\\n\\r\\n404 Not Found'\n    conn.sendall(response)\n    conn.close()\n```\nThat's 18 lines. It:\n- Binds to port 8000\n- Parses the request path\n- Serves files from `public/` folder\n- Returns 200 for success, 404 for missing files\n- Handles the `/` \u2192 `/index.html` convention\nLimitations: no MIME types, no keep-alive, crashes on malformed requests. But it works.\nWant me to add MIME types or make it more robust?",
+      "distance": 0.5180321878098805,
+      "id": "bc264420-558c-4642-bef2-7cf5e8912a5b",
       "metadata": {
-        "chunk": 2,
-        "model": "neural-chat"
+        "conversation_id": "bc264420-558c-4642-bef2-7cf5e8912a5b",
+        "earliest_ts": "2025-11-19T16:54:34.671555-06:00",
+        "id": "bc264420-558c-4642-bef2-7cf5e8912a5b",
+        "latest_ts": "2025-11-19T16:54:34.671555-06:00",
+        "message_count": 1,
+        "message_id": "1c9952e3-4b65-45a8-bef5-8096fe92ca21",
+        "role": "assistant",
+        "source": "postgres",
+        "title": "Minimal HTTP server with static file serving"
       },
-      "score": 0.839,
-      "source_id": "8818f769-f8a8-4116-a1fd-2851e009323e"
-    },
-    {
-      "content": "There's quite a bit to cover here. First, let's establish the fundamentals, then we can explore more advanced concepts.",
-      "metadata": {
-        "chunk": 1,
-        "model": "gpt-4"
-      },
-      "score": 0.689,
-      "source_id": "8f38f6ec-399e-40be-9d4d-3ccaa3d37953"
-    },
-    {
-      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
-      "metadata": {
-        "chunk": 4,
-        "model": "claude-3-opus"
-      },
-      "score": 0.985,
-      "source_id": "b67115a3-fba3-4682-841c-fda08fdfc55d"
-    },
-    {
-      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
-      "metadata": {
-        "chunk": 4,
-        "model": "gpt-4"
-      },
-      "score": 0.81,
-      "source_id": "b54602ab-0037-4350-bb57-d0b49bfee0c2"
-    },
-    {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "metadata": {
-        "chunk": 2,
-        "model": "gpt-4"
-      },
-      "score": 0.727,
-      "source_id": "4015d925-4cd9-44dd-a46f-43687e5b07e4"
-    },
-    {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "metadata": {
-        "chunk": 2,
-        "model": "neural-chat"
-      },
-      "score": 0.655,
-      "source_id": "60093ab1-29b5-42d1-8ce6-2bafee3e46cf"
+      "preview": " Ah, you want the real deal. Here's a bare-metal HTTP server in Python:\n```python\nimport socket\ns = socket.socket()\ns.bind(('', 8000))\ns.listen()\nprint(\"Server running on port 8000\")\nwhile True:\n    conn, addr = s.accept()\n    request = conn.recv(1024).decode()\n    path = request.split()[1] if request else '/'\n    try:\n        if path == '/': path = '/index.html'\n        with open('public' + path, 'rb') as f:\n            content = f.read()\n        response = b'HTTP/1.1 200 OK\\r\\n\\r\\n' + content\n...",
+      "relevance": 0.4819678121901195,
+      "source": "postgres",
+      "title": "Minimal HTTP server with static file serving"
     }
   ],
   "search_type": "semantic"

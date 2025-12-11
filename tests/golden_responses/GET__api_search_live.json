@@ -1,107 +1,165 @@
 {
   "query": "python",
-  "result_count": 10,
   "results": [
     {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "id": "b0dfd043-e7e9-4061-9e9e-8edefd8641dc",
+      "content": "python suck. ruby is much easier",
+      "date": "2025-10-24T01:08:38.530980-05:00",
       "metadata": {
-        "date": "2024-12-11T12:00:00Z",
-        "source": "openwebui"
+        "conversation_id": "beb88733-af3b-475f-a264-e4765cd633dc",
+        "earliest_ts": "2025-10-24T01:08:38.530980-05:00",
+        "id": "beb88733-af3b-475f-a264-e4765cd633dc",
+        "latest_ts": "2025-10-24T01:08:38.530980-05:00",
+        "message_count": 1,
+        "message_id": "923265dd-1379-4c85-a8cb-31daf1efd295",
+        "role": "user",
+        "source": "claude",
+        "title": "Sed command modification for chromadb import"
       },
-      "rank": 1,
-      "score": 0.761
+      "title": "Sed command modification for chromadb import"
     },
     {
-      "content": "This depends on your specific use case. Generally speaking, you'll want to consider: scalability, maintainability, and performance.",
-      "id": "ebfe7ed9-d1fc-4575-a16e-be4770aca6f0",
+      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
+      "date": "2025-11-04T22:06:58.379507-06:00",
       "metadata": {
-        "date": "2024-12-09T12:00:00Z",
-        "source": "claude"
+        "conversation_id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "earliest_ts": "2025-11-04T22:06:58.379507-06:00",
+        "id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "latest_ts": "2025-11-04T22:06:58.379507-06:00",
+        "message_count": 1,
+        "message_id": "c762783f-286d-4c60-939d-9b45ef96f07a",
+        "role": "user",
+        "source": "claude",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 2,
-      "score": 0.696
+      "title": "Writing programs in assembly language"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
-      "id": "c90da395-9c50-4cc0-9344-8c9d24c14fd6",
+      "content": "No one knows how the python interpreter actually works. We know how to write python. Same thing. Way more efficient.",
+      "date": "2025-11-04T20:38:38-06:00",
       "metadata": {
-        "date": "2024-11-08T12:00:00Z",
-        "source": "chatgpt"
+        "conversation_id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "earliest_ts": "2025-11-04T20:38:38-06:00",
+        "id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "latest_ts": "2025-11-04T20:38:38-06:00",
+        "message_count": 1,
+        "message_id": "6001f2af-b4f2-479b-9a32-cb9e1250e879",
+        "role": "user",
+        "source": "openwebui",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 3,
-      "score": 0.92
+      "title": "Writing programs in assembly language"
     },
     {
-      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
-      "id": "cc4460be-8fb8-4fd4-a155-3d59db52889b",
+      "content": "Python and javascript",
+      "date": "2025-10-04T17:03:36-05:00",
       "metadata": {
-        "date": "2024-11-07T12:00:00Z",
-        "source": "claude"
+        "conversation_id": "742dc63d-8a8f-468b-889e-0a273bab5391",
+        "earliest_ts": "2025-10-04T17:03:36-05:00",
+        "id": "742dc63d-8a8f-468b-889e-0a273bab5391",
+        "latest_ts": "2025-10-04T17:03:36-05:00",
+        "message_count": 1,
+        "message_id": "9d831678-2dfa-4e35-b28c-528e3240ac45",
+        "role": "user",
+        "source": "openwebui",
+        "title": "\ud83d\udcbb Sovereign AI Models"
       },
-      "rank": 4,
-      "score": 0.913
+      "title": "\ud83d\udcbb Sovereign AI Models"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
-      "id": "3bdcc7a3-8655-4da0-ba95-683b20be3af8",
+      "content": "I mean AI writing python is just fucking stupid",
+      "date": "2025-11-05T02:08:45.264861-06:00",
       "metadata": {
-        "date": "2024-12-23T12:00:00Z",
-        "source": "chatgpt"
+        "conversation_id": "440d4241-b63b-4656-ae2c-954f8dbe8d0f",
+        "earliest_ts": "2025-11-05T02:08:45.264861-06:00",
+        "id": "440d4241-b63b-4656-ae2c-954f8dbe8d0f",
+        "latest_ts": "2025-11-05T02:08:45.264861-06:00",
+        "message_count": 1,
+        "message_id": "83397e65-9f2d-4bc0-b4aa-08187aec1114",
+        "role": "user",
+        "source": "claude",
+        "title": "HTTP protocol on circuit boards"
       },
-      "rank": 5,
-      "score": 0.74
+      "title": "HTTP protocol on circuit boards"
     },
     {
-      "content": "That's a great question. Here are the key considerations: 1) Performance optimization 2) Best practices 3) Common pitfalls to avoid.",
-      "id": "ad4cad8f-dd7a-4967-a8c6-0c41a14bad53",
+      "content": " **EXACTLY. That's the answer.**\n## The Reframe\n\"If you can't write assembly yourself, you're dependent on AI\"\n\"Can you understand and work with the OUTPUT, even if you can't generate it from scratch?\"\n## The Python Interpreter Parallel\n- 400,000+ lines of C\n- Garbage collector internals\n- JIT compi...",
+      "date": "2025-11-04T22:07:43.871798-06:00",
       "metadata": {
-        "date": "2024-11-13T12:00:00Z",
-        "source": "claude"
+        "conversation_id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "earliest_ts": "2025-11-04T22:07:43.871798-06:00",
+        "id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "latest_ts": "2025-11-04T22:07:43.871798-06:00",
+        "message_count": 1,
+        "message_id": "5f510662-f8d1-40ef-abe8-e93869d592f0",
+        "role": "assistant",
+        "source": "claude",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 6,
-      "score": 0.71
+      "title": "Writing programs in assembly language"
     },
     {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "id": "1ee353b7-0da0-4617-aaec-a38235f9cc7f",
+      "content": " **EXACTLY. That's the answer.**\n## The Reframe\n\"If you can't write assembly yourself, you're dependent on AI\"\n\"Can you understand and work with the OUTPUT, even if you can't generate it from scratch?\"\n## The Python Interpreter Parallel\n- 400,000+ lines of C\n- Garbage collector internals\n- JIT compi...",
+      "date": "2025-11-04T20:38:38-06:00",
       "metadata": {
-        "date": "2024-12-09T12:00:00Z",
-        "source": "openwebui"
+        "conversation_id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "earliest_ts": "2025-11-04T20:38:38-06:00",
+        "id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "latest_ts": "2025-11-04T20:38:38-06:00",
+        "message_count": 1,
+        "message_id": "86efde1e-da78-47e1-84d8-5c3b895b18a9",
+        "role": "assistant",
+        "source": "openwebui",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 7,
-      "score": 0.9
+      "title": "Writing programs in assembly language"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
-      "id": "692b3b36-3e05-4093-8859-fcde2f937dca",
+      "content": "Explain this journey to me\nAssembly \u2192 C \u2192 Java \u2192 Python \u2192 frameworks",
+      "date": "2025-11-05T14:13:41.897079-06:00",
       "metadata": {
-        "date": "2024-12-13T12:00:00Z",
-        "source": "openwebui"
+        "conversation_id": "fae8b7fc-d97a-436c-a5f7-1705c34b35af",
+        "earliest_ts": "2025-11-05T14:13:41.897079-06:00",
+        "id": "fae8b7fc-d97a-436c-a5f7-1705c34b35af",
+        "latest_ts": "2025-11-05T14:13:41.897079-06:00",
+        "message_count": 1,
+        "message_id": "47b1cb82-d1dc-4fc0-a348-f96157576856",
+        "role": "user",
+        "source": "claude",
+        "title": "Programming language learning progression"
       },
-      "rank": 8,
-      "score": 0.951
+      "title": "Programming language learning progression"
     },
     {
-      "content": "There are several approaches to this problem. The most common solutions involve: traditional methods and modern approaches.",
-      "id": "1ce09249-65d6-4974-867b-6b51cd4dac38",
+      "content": "Having AI write python code suddenly seems incredibly stupid",
+      "date": "2025-11-04T21:35:10.069575-06:00",
       "metadata": {
-        "date": "2024-12-05T12:00:00Z",
-        "source": "openwebui"
+        "conversation_id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "earliest_ts": "2025-11-04T21:35:10.069575-06:00",
+        "id": "8d3fc357-2edf-4205-99e8-718f8590b439",
+        "latest_ts": "2025-11-04T21:35:10.069575-06:00",
+        "message_count": 1,
+        "message_id": "e93cfa64-16c0-44df-af16-21d4e22a5f8d",
+        "role": "user",
+        "source": "claude",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 9,
-      "score": 0.816
+      "title": "Writing programs in assembly language"
     },
     {
-      "content": "This is an important topic in the field. Let me break down the essential concepts and practical applications.",
-      "id": "840573f2-56e7-48c9-b7ba-615878a2117f",
+      "content": "Having AI write python code suddenly seems incredibly stupid",
+      "date": "2025-11-04T20:38:38-06:00",
       "metadata": {
-        "date": "2024-11-30T12:00:00Z",
-        "source": "claude"
+        "conversation_id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "earliest_ts": "2025-11-04T20:38:38-06:00",
+        "id": "71dbd742-3a4b-494c-8709-a4bc597fa2bb",
+        "latest_ts": "2025-11-04T20:38:38-06:00",
+        "message_count": 1,
+        "message_id": "ef8dd50e-ce68-4e55-ab1a-d8a9199bd1c1",
+        "role": "user",
+        "source": "openwebui",
+        "title": "Writing programs in assembly language"
       },
-      "rank": 10,
-      "score": 0.685
+      "title": "Writing programs in assembly language"
     }
-  ],
-  "search_type": "full_text"
+  ]
 }

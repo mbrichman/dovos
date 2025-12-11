@@ -1,0 +1,20 @@
+{
+  "documents": [
+    "**You said** *(on 2025-12-11 05:27:21)*:\n\nCan you explain this concept?\n\n---\n\n**Assistant said** *(on 2025-12-11 05:29:21)*:\n\nLet me help you understand the error...\n\n---\n\n**You said** *(on 2025-12-11 05:31:21)*:\n\nCan you help me debug this error?\n\n---\n\n**Assistant said** *(on 2025-12-11 05:33:21)*:\n\nThis is how it works under the hood..."
+  ],
+  "ids": [
+    "8c24e529-a2e5-4c82-b4dd-a4caae0639e1"
+  ],
+  "metadatas": [
+    {
+      "conversation_id": "8c24e529-a2e5-4c82-b4dd-a4caae0639e1",
+      "earliest_ts": "2025-12-11T05:27:21.384688+00:00",
+      "id": "8c24e529-a2e5-4c82-b4dd-a4caae0639e1",
+      "is_chunk": false,
+      "latest_ts": "2025-12-11T05:33:21.384688+00:00",
+      "message_count": 4,
+      "source": "unknown",
+      "title": "Test Conversation 1"
+    }
+  ]
+}

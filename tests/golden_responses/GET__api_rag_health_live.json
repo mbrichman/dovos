@@ -1,8 +1,6 @@
 {
   "collection_name": "chat_history",
-  "document_count": 9820,
+  "document_count": 4704,
   "embedding_model": "all-MiniLM-L6-v2",
-  "last_update": "2024-12-27T12:00:00Z",
-  "status": "healthy",
-  "uptime_seconds": 38987
+  "status": "healthy"
 }
