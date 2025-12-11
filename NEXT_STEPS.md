@@ -1,65 +1,31 @@
 # Next Steps for Dovos Test Suite
 
-**Last Updated:** 2025-11-27  
-**Current Status:** Test restoration complete (176/178 passing, 98.9%)  
-**Ready for:** Enhancement work
+**Last Updated:** 2025-12-11  
+**Current Status:** Priority 5 complete; all tests passing (376 passed, 1 skipped)  
+**Ready for:** Enhancement 1 - Controller Unit Tests
 
 ---
 
-## Immediate Priority (Optional)
+## Completed Work
 
-### Priority 5: Fix Flask App/Test DB Split
-**Status:** 1 test currently skipped due to this issue  
-**Effort:** 2-3 hours  
-**Impact:** Un-skip 1 test, enable exact `==` assertions instead of `>=`
+### ✅ Priority 5: Fix Flask App/Test DB Split
+Status: COMPLETE  
+Completed: 2025-12-11  
+Impact: Un-skipped 1 test, enabled exact `==` assertions, eliminated test/production DB confusion
 
-#### Problem
-- Flask app routes connect to production database
-- Test fixtures seed test database
-- Session-scoped Flask app fixture can't be overridden by function-scoped test DB
-- Result: HTTP requests via Flask client query production DB instead of test DB
-
-#### Solution
-Modify Flask app factory to accept database URL parameter:
-
-**File:** `app.py` or Flask app initialization
-```python
-def create_app(database_url=None):
-    app = Flask(__name__)
-    
-    # Use provided database URL or default to production
-    if database_url:
-        app.config['DATABASE_URL'] = database_url
-    
-    # Initialize controllers with app-specific database connection
-    return app
-```
-
-**File:** `tests/conftest.py`
-```python
-@pytest.fixture(scope='function')
-def client(test_db_url):
-    """Flask test client using test database."""
-    app = create_app(database_url=test_db_url)
-    with app.test_client() as client:
-        yield client
-```
-
-#### Tests to Un-skip
-- `tests/migration/test_api_contract_compliance.py::test_get_conversation_by_id_structure`
-
-#### Files Modified
-- `app.py` or Flask factory
-- `tests/conftest.py` (update client fixture)
-- `tests/migration/test_api_contract_compliance.py` (remove skip marker)
+Summary:
+- Updated `create_app(database_url)` and `create_tables(database_url)`
+- Added `client_postgres_test` fixture and `seeded_postgres_data_committed` (with cleanup)
+- Removed skip from `test_get_conversation_by_id_structure`; test now passes
 
 ---
 
-## Future Enhancements
+## Active Enhancements
 
 ### Enhancement 1: Add Controller Unit Tests
-**Priority:** Medium  
+**Priority:** High  
 **Effort:** 1-2 weeks  
+**Status:** Plan created (2025-12-11); ready to implement  
 **Current Coverage:** 0%
 
 #### Files to Test
