@@ -79,9 +79,16 @@ def extract_messages(conversation_data: Optional[Dict], **kwargs) -> List[Dict]:
         if not isinstance(content, str):
             content = str(content)
         
-        # Skip empty or whitespace-only messages
-        if not content or not content.strip():
+        # Determine if the message contains file attachments
+        has_files = bool(m.get("files")) and isinstance(m.get("files"), list) and len(m.get("files")) > 0
+        
+        # Skip empty or whitespace-only messages UNLESS they have attachments
+        if (not content or not content.strip()) and not has_files:
             continue
+        
+        # Use a placeholder content for attachment-only messages so they are persisted
+        if (not content or not content.strip()) and has_files:
+            content = "[Attachment]"
         
         # Extract timestamp (try timestamp field first, then created_at)
         ts = m.get("timestamp") or m.get("created_at")

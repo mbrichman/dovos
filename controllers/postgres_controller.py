@@ -923,18 +923,31 @@ def extract_openwebui_attachments(message: Dict[str, Any]) -> List[Dict[str, Any
         if not isinstance(file_data, dict):
             continue
         
-        file_name = file_data.get('name') or file_data.get('filename', 'unknown')
+        file_name = file_data.get('name') or file_data.get('filename')
         file_type = file_data.get('type') or file_data.get('mime_type', '')
         
-        # Determine if it's an image based on file extension or MIME type
-        is_image = (
-            file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg')) or
-            'image' in file_type.lower()
-        )
+        # Determine if it's an image based on file type or data URL
+        url = file_data.get('url', '')
+        is_image = 'image' in file_type.lower() or (url and url.startswith('data:image/'))
+        
+        # If filename is None, infer from file type
+        if not file_name:
+            if is_image:
+                # Try to get extension from data URL or default to jpg
+                if url.startswith('data:image/'):
+                    mime = url.split(';')[0].split('/')[-1]  # e.g., 'jpeg', 'png'
+                    file_name = f'image.{mime}'
+                else:
+                    file_name = 'image.jpg'
+            else:
+                file_name = 'attachment'
+        
+        # Also check filename extension for image detection
+        if file_name and file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg')):
+            is_image = True
         
         # Check if content is available
         # OpenWebUI stores images as data URLs in 'url' field
-        url = file_data.get('url', '')
         content = file_data.get('content') or file_data.get('data')
         
         # Data URLs contain base64-encoded image data that we can render
