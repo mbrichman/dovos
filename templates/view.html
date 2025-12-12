@@ -1259,6 +1259,7 @@ View Conversation
 <!-- Prism.js for syntax highlighting - Load BEFORE our initialization -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-ruby.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
@@ -1285,15 +1286,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 2) Message content: upgrade plain <pre><code> blocks to Prism (default python)
-    document.querySelectorAll('.message-content pre code').forEach(function(code){
-        const hasLang = Array.from(code.classList).some(c => c.startsWith('language-'));
-        if (!hasLang) {
-            code.classList.add('language-python');
-            if (code.parentElement) code.parentElement.classList.add('language-python');
-            console.log('Upgraded message code block to language-python');
-        }
-    });
+    // 2) Message content: Code blocks with language markers will be highlighted automatically
+    //    No default language assignment - let unmarked blocks remain plain text
     
     // Run Prism highlighting
     console.log('Running Prism.highlightAll()...');

@@ -364,9 +364,10 @@ class ConversationFormatService:
         messages = []
         for msg in db_messages:
             # Convert markdown content to HTML
+            # Note: Using fenced_code without codehilite to preserve language markers for Prism.js
             html_content = markdown.markdown(
                 msg.content,
-                extensions=["extra", "tables", "fenced_code", "codehilite", "nl2br"]
+                extensions=["extra", "tables", "fenced_code", "nl2br"]
             )
             
             msg_dict = {
