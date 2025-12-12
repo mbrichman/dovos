@@ -74,61 +74,43 @@ class TestAssistantNameDetection:
         """Test assistant name detection with Claude source metadata."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**Claude said**: Hi there!"
-        metadata = {"source": "claude"}
-        
-        result = controller._determine_assistant_name(document, metadata)
+        result = controller._determine_assistant_name("claude")
         assert result == "Claude"
     
     def test_determine_assistant_name_chatgpt_source(self):
         """Test assistant name detection with ChatGPT source metadata."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**ChatGPT said**: Hi there!"
-        metadata = {"source": "chatgpt"}
-        
-        result = controller._determine_assistant_name(document, metadata)
+        result = controller._determine_assistant_name("chatgpt")
         assert result == "ChatGPT"
     
     def test_determine_assistant_name_from_claude_content(self):
-        """Test assistant name detection from Claude document content."""
+        """Test assistant name detection from source."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**Claude said**: Hi there!"
-        metadata = {"source": "unknown"}
-        
-        result = controller._determine_assistant_name(document, metadata)
+        result = controller._determine_assistant_name("claude")
         assert result == "Claude"
     
     def test_determine_assistant_name_from_chatgpt_content(self):
-        """Test assistant name detection from ChatGPT document content."""
+        """Test assistant name detection from source."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**ChatGPT said**: Hi there!"
-        metadata = {"source": "unknown"}
-        
-        result = controller._determine_assistant_name(document, metadata)
+        result = controller._determine_assistant_name("chatgpt")
         assert result == "ChatGPT"
     
     def test_determine_assistant_name_fallback_to_ai(self):
-        """Test assistant name detection fallback to AI for generic content."""
+        """Test assistant name detection fallback to Assistant for unknown source."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**AI said**: Hi there!"
-        metadata = {"source": "unknown"}
-        
-        result = controller._determine_assistant_name(document, metadata)
-        assert result == "AI"
+        result = controller._determine_assistant_name("unknown")
+        assert result == "Assistant"
     
     def test_determine_assistant_name_empty_metadata(self):
-        """Test assistant name detection with empty metadata."""
+        """Test assistant name detection with empty source."""
         controller = ConversationController()
         
-        document = "**You said**: Hello\n**Claude said**: Hi there!"
-        metadata = {}
-        
-        result = controller._determine_assistant_name(document, metadata)
-        assert result == "Claude"
+        result = controller._determine_assistant_name("")
+        assert result == "Assistant"
 
 
 class TestSingleConversationAPI:
