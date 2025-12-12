@@ -1,0 +1,56 @@
+[
+  {
+    "title": "ChatGPT o1 Reasoning Example",
+    "create_time": 1704067200,
+    "update_time": 1704067260,
+    "mapping": {
+      "node1": {
+        "id": "node1",
+        "message": {
+          "id": "msg1",
+          "author": {"role": "user"},
+          "create_time": 1704067200,
+          "content": {
+            "content_type": "text",
+            "parts": ["Solve this math problem: What is the sum of all prime numbers less than 100?"]
+          }
+        },
+        "parent": null,
+        "children": ["node2"]
+      },
+      "node2": {
+        "id": "node2",
+        "message": {
+          "id": "msg2",
+          "author": {"role": "assistant"},
+          "create_time": 1704067230,
+          "content": {
+            "content_type": "thoughts",
+            "thoughts": [
+              {
+                "summary": "Identifying prime numbers under 100",
+                "content": "I need to find all prime numbers less than 100. I'll use the Sieve of Eratosthenes mentally: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97. Now I need to sum them."
+              }
+            ]
+          }
+        },
+        "parent": "node1",
+        "children": ["node3"]
+      },
+      "node3": {
+        "id": "node3",
+        "message": {
+          "id": "msg3",
+          "author": {"role": "assistant"},
+          "create_time": 1704067240,
+          "content": {
+            "content_type": "text",
+            "parts": ["The sum of all prime numbers less than 100 is 1,060.\n\nHere are the primes: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97."]
+          }
+        },
+        "parent": "node2",
+        "children": []
+      }
+    }
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "test-owui-001",
+    "title": "OpenWebUI Image Analysis",
+    "created_at": 1704067200,
+    "updated_at": 1704067300,
+    "chat": {
+      "history": {
+        "messages": {
+          "msg1": {
+            "id": "msg1",
+            "parentId": null,
+            "childrenIds": ["msg2"],
+            "role": "user",
+            "content": "What's in this image?",
+            "timestamp": 1704067200,
+            "models": ["gpt-4"],
+            "files": [
+              {
+                "type": "image",
+                "name": "diagram.png",
+                "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg"
+              }
+            ]
+          },
+          "msg2": {
+            "id": "msg2",
+            "parentId": "msg1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "I can see a diagram that appears to show a system architecture with multiple components connected together. The image contains boxes representing different services or modules, with arrows indicating data flow between them.",
+            "model": "gpt-4",
+            "timestamp": 1704067250
+          }
+        }
+      }
+    }
+  }
+]
