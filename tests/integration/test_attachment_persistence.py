@@ -11,7 +11,6 @@ This test verifies that:
 import json
 import pytest
 from pathlib import Path
-from sqlalchemy import text
 
 from db.services.import_service import ConversationImportService
 from db.repositories.unit_of_work import get_unit_of_work
@@ -21,15 +20,6 @@ from db.repositories.unit_of_work import get_unit_of_work
 def import_service():
     """Fixture providing import service instance."""
     return ConversationImportService()
-
-@pytest.fixture(autouse=True)
-def _reset_db():
-    """Clear conversations and messages before each test to avoid duplicate-skips."""
-    with get_unit_of_work() as uow:
-        # Use SQLAlchemy text to avoid dialect issues
-        uow.session.execute(text('DELETE FROM messages'))
-        uow.session.execute(text('DELETE FROM conversations'))
-        uow.commit()
 
 
 @pytest.fixture

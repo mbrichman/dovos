@@ -587,12 +587,14 @@ class TestConversationFormatService:
             Mock(
                 role='user',
                 content='Hello **world**',
-                created_at=datetime(2025, 1, 1, 12, 0, 0)
+                created_at=datetime(2025, 1, 1, 12, 0, 0),
+                message_metadata=None
             ),
             Mock(
                 role='assistant',
                 content='# Heading\n\nResponse',
-                created_at=datetime(2025, 1, 1, 12, 0, 5)
+                created_at=datetime(2025, 1, 1, 12, 0, 5),
+                message_metadata=None
             )
         ]
         
@@ -611,7 +613,8 @@ class TestConversationFormatService:
             Mock(
                 role='user',
                 content='```python\nprint("hello")\n```',
-                created_at=datetime(2025, 1, 1, 12, 0, 0)
+                created_at=datetime(2025, 1, 1, 12, 0, 0),
+                message_metadata=None
             )
         ]
         
@@ -627,7 +630,8 @@ class TestConversationFormatService:
             Mock(
                 role='user',
                 content='Test',
-                created_at=None
+                created_at=None,
+                message_metadata=None
             )
         ]
         

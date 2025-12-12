@@ -173,10 +173,10 @@ class TestOpenWebUIAttachmentImport:
             att = attachments[0]
             assert att['file_name'] == 'diagram.png'
             assert att['type'] == 'image'
-            assert att['available'] is False  # Data URLs not extracted
-            assert att['metadata']['has_data_url'] is True
-            # Should not store the actual base64 data
-            assert att['metadata']['url'] is None
+            assert att['available'] is True  # Data URLs are now stored for rendering
+            assert att['metadata']['data_url']  # Data URL is stored in metadata
+            # extracted_content contains the data URL for rendering
+            assert att['extracted_content'].startswith('data:image/')
 
 
 class TestAttachmentRendering:
