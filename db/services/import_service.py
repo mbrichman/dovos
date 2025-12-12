@@ -378,6 +378,10 @@ class ConversationImportService:
                         'sequence': msg.get('sequence', idx)  # Preserve sequence if available
                     }
                     
+                    # Preserve attachments if present in the message
+                    if msg.get('attachments'):
+                        message_metadata['attachments'] = msg['attachments']
+                    
                     # Add OpenWebUI-specific metadata
                     if format_type.lower() == 'openwebui':
                         openwebui_meta = {
