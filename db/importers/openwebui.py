@@ -134,6 +134,16 @@ def extract_messages(conversation_data: Optional[Dict], **kwargs) -> List[Dict]:
         if node.get("model"):
             msg_dict["model"] = node["model"]
         
+        # Extract attachments from the original message data
+        # Need to get back to the original message dict
+        msg_id = node["id"]
+        original_msg = conversation_data.get(msg_id, {})
+        if original_msg:
+            from controllers.postgres_controller import extract_openwebui_attachments
+            attachments = extract_openwebui_attachments(original_msg)
+            if attachments:
+                msg_dict["attachments"] = attachments
+        
         messages.append(msg_dict)
     
     return messages

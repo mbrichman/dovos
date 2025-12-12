@@ -14,7 +14,7 @@ def extract_messages(conversation_data: Optional[List], **kwargs) -> List[Dict]:
     
     Args:
         conversation_data: Claude conversation with list of chat_messages
-                          Each message has: sender, text, created_at (optional)
+                          Each message has: sender, text, created_at (optional), attachments, files
         **kwargs: Additional options (for extensibility)
         
     Returns:
@@ -22,6 +22,7 @@ def extract_messages(conversation_data: Optional[List], **kwargs) -> List[Dict]:
         - role: 'user' or 'assistant' (human sender -> user, others -> assistant)
         - content: message text
         - created_at: ISO timestamp string (optional)
+        - attachments: List of attachment dicts (if present)
     """
     # Handle None or non-list input
     if conversation_data is None or not isinstance(conversation_data, list):
@@ -59,6 +60,12 @@ def extract_messages(conversation_data: Optional[List], **kwargs) -> List[Dict]:
         created_at = msg_data.get('created_at')
         if created_at:
             msg_dict['created_at'] = created_at
+        
+        # Extract attachments if present
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(msg_data)
+        if attachments:
+            msg_dict['attachments'] = attachments
         
         messages.append(msg_dict)
     

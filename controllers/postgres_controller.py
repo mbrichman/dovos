@@ -899,6 +899,66 @@ def extract_chatgpt_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]
     return attachments
 
 
+def extract_openwebui_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Extract attachments from an OpenWebUI message.
+    
+    OpenWebUI messages can have a 'files' array with file metadata.
+    Files may include images (as data URLs), documents, and other attachments.
+    
+    Args:
+        message: OpenWebUI message dict with optional 'files' field
+        
+    Returns:
+        List of normalized attachment dicts
+    """
+    attachments = []
+    
+    # Process files array if present
+    files = message.get('files', [])
+    if not files:
+        return attachments
+    
+    for file_data in files:
+        if not isinstance(file_data, dict):
+            continue
+        
+        file_name = file_data.get('name') or file_data.get('filename', 'unknown')
+        file_type = file_data.get('type') or file_data.get('mime_type', '')
+        
+        # Determine if it's an image based on file extension or MIME type
+        is_image = (
+            file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg')) or
+            'image' in file_type.lower()
+        )
+        
+        # Check if content is available
+        # OpenWebUI stores images as data URLs in 'url' field
+        url = file_data.get('url', '')
+        content = file_data.get('content') or file_data.get('data')
+        
+        # Data URLs are not really "available" for display - they're inline base64
+        # We mark them as unavailable since we can't extract/show the base64
+        has_data_url = url and url.startswith('data:')
+        has_content = bool(content)
+        
+        attachments.append({
+            'type': 'image' if is_image else 'file',
+            'file_name': file_name,
+            'file_size': file_data.get('size'),
+            'file_type': file_type,
+            'extracted_content': content,  # Only text content, not data URLs
+            'available': has_content,  # Available only if we have extractable text content
+            'metadata': {
+                'has_data_url': has_data_url,
+                'url': url if not has_data_url else None,  # Don't store huge base64 strings
+                'collection_name': file_data.get('collection_name')
+            }
+        })
+    
+    return attachments
+
+
 def normalize_attachment(attachment: Dict[str, Any]) -> Dict[str, Any]:
     """
     Normalize an attachment dict to ensure all required fields are present.

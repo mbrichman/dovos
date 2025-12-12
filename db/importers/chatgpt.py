@@ -52,17 +52,30 @@ def extract_messages(conversation_data: Dict, **kwargs) -> List[Dict]:
         if role not in ('user', 'assistant'):
             continue
         
+        # Extract attachments first to check if this is a reasoning-only message
+        from controllers.postgres_controller import extract_chatgpt_attachments
+        attachments = extract_chatgpt_attachments(message)
+        
         # Extract content from parts
         content_data = message.get('content', {})
         parts = content_data.get('parts', [])
         
         # Use first part if available
-        if not parts or not isinstance(parts, list):
-            continue
+        content = None
+        if parts and isinstance(parts, list) and isinstance(parts[0], str):
+            content = parts[0]
+        elif attachments:
+            # Message has attachments but no text content (e.g., reasoning traces)
+            # Use a placeholder so the attachments can be displayed
+            content_type = content_data.get('content_type', '')
+            if content_type == 'thoughts':
+                content = '[Reasoning process]'
+            elif content_type == 'reasoning_recap':
+                content = '[Reasoning summary]'
+            else:
+                content = '[Attachment]'
         
-        content = parts[0] if parts else ""
-        
-        # Skip empty or whitespace-only messages
+        # Skip if no content and no attachments
         if not content or not content.strip():
             continue
         
@@ -77,6 +90,10 @@ def extract_messages(conversation_data: Dict, **kwargs) -> List[Dict]:
         created_at = message.get('create_time') or node.get('create_time')
         if created_at is not None:
             msg_dict['created_at'] = created_at
+        
+        # Include attachments if present
+        if attachments:
+            msg_dict['attachments'] = attachments
         
         messages.append(msg_dict)
     
