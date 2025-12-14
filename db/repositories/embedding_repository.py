@@ -254,10 +254,10 @@ class EmbeddingRepository(BaseRepository[MessageEmbedding]):
         
         if result:
             return {
-                'total_messages': result.total_messages,
-                'embedded_messages': result.embedded_messages,
-                'coverage_percent': float(result.coverage_percent),
-                'stale_embeddings': result.stale_embeddings
+                'total_messages': result.total_messages or 0,
+                'embedded_messages': result.embedded_messages or 0,
+                'coverage_percent': float(result.coverage_percent) if result.coverage_percent is not None else 0.0,
+                'stale_embeddings': result.stale_embeddings or 0
             }
         else:
             return {

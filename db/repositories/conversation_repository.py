@@ -166,22 +166,135 @@ class ConversationRepository(BaseRepository[Conversation]):
     def get_stats(self) -> dict:
         """Get conversation statistics."""
         total_conversations = self.count()
-        
+
         # Get message count across all conversations
         total_messages = self.session.query(func.count(Message.id)).scalar() or 0
-        
+
         # Get recent activity (last 30 days)
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         recent_conversations = self.session.query(func.count(Conversation.id))\
             .filter(Conversation.updated_at >= thirty_days_ago)\
             .scalar() or 0
-        
+
         return {
             'total_conversations': total_conversations,
             'total_messages': total_messages,
             'recent_conversations': recent_conversations,
             'avg_messages_per_conversation': round(total_messages / total_conversations, 2) if total_conversations > 0 else 0
         }
+
+    def get_timeline_histogram(self, bucket_count: int = 10) -> List[dict]:
+        """Get conversation creation timeline as histogram buckets with source breakdown.
+
+        Args:
+            bucket_count: Number of time buckets to create
+
+        Returns:
+            List of dicts with 'date' and source counts
+        """
+        # Get earliest and latest conversation dates
+        date_range = self.session.query(
+            func.min(Conversation.created_at).label('earliest'),
+            func.max(Conversation.created_at).label('latest')
+        ).first()
+
+        if not date_range.earliest or not date_range.latest:
+            return []
+
+        earliest = date_range.earliest
+        latest = date_range.latest
+
+        # Calculate time span and bucket size
+        time_span = (latest - earliest).total_seconds()
+
+        # Determine appropriate bucket size based on time span
+        days_span = time_span / 86400
+
+        if days_span <= 30:
+            # Daily buckets for <= 30 days
+            trunc_format = 'day'
+        elif days_span <= 180:
+            # Weekly buckets for <= 6 months
+            trunc_format = 'week'
+        elif days_span <= 730:
+            # Monthly buckets for <= 2 years
+            trunc_format = 'month'
+        else:
+            # Quarterly buckets for > 2 years
+            trunc_format = 'month'  # PostgreSQL doesn't have quarter trunc, we'll group by month
+
+        # Query conversations grouped by date buckets AND source
+        # We need to join with messages to get the source from message metadata
+        query = text(f"""
+            WITH first_messages AS (
+                SELECT
+                    conversation_id,
+                    metadata->>'source' as source,
+                    ROW_NUMBER() OVER (PARTITION BY conversation_id ORDER BY created_at ASC) as rn
+                FROM messages
+            ),
+            conversation_sources AS (
+                SELECT
+                    c.id,
+                    c.created_at,
+                    COALESCE(LOWER(fm.source), 'unknown') as source
+                FROM conversations c
+                LEFT JOIN first_messages fm ON c.id = fm.conversation_id AND fm.rn = 1
+                WHERE c.created_at IS NOT NULL
+            )
+            SELECT
+                DATE_TRUNC('{trunc_format}', created_at) as bucket_date,
+                source,
+                COUNT(*) as count
+            FROM conversation_sources
+            GROUP BY bucket_date, source
+            ORDER BY bucket_date, source
+        """)
+
+        try:
+            result = self.session.execute(query)
+
+            # Organize data by date bucket
+            buckets_map = {}
+            for row in result:
+                date_key = row.bucket_date.date().isoformat()
+                if date_key not in buckets_map:
+                    buckets_map[date_key] = {'date': date_key}
+
+                # Normalize source names
+                source = row.source if row.source else 'unknown'
+                if source and isinstance(source, str):
+                    source_lower = source.lower()
+                    if 'claude' in source_lower:
+                        source = 'claude'
+                    elif 'chatgpt' in source_lower or 'gpt' in source_lower:
+                        source = 'chatgpt'
+                    elif 'openwebui' in source_lower or 'open-webui' in source_lower:
+                        source = 'openwebui'
+                    elif 'json' in source_lower:
+                        source = 'json'
+                    elif 'docx' in source_lower:
+                        source = 'docx'
+                    else:
+                        source = 'unknown'
+                else:
+                    source = 'unknown'
+
+                # Add to bucket, summing if same source appears multiple times
+                if source in buckets_map[date_key]:
+                    buckets_map[date_key][source] += int(row.count)
+                else:
+                    buckets_map[date_key][source] = int(row.count)
+
+            # Convert to list and sort by date
+            buckets = sorted(buckets_map.values(), key=lambda x: x['date'])
+
+            return buckets
+        except Exception as e:
+            # Log error and return empty list
+            import logging
+            logging.error(f"Error getting timeline histogram: {e}")
+            return []
     
     def delete_conversation_with_cascade(self, conversation_id: UUID) -> bool:
         """Delete a conversation and all its associated data (messages and embeddings).

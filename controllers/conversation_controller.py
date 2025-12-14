@@ -176,29 +176,39 @@ class ConversationController:
     
     def stats_with_postgres_adapter(self, postgres_controller):
         """Display statistics using PostgreSQL backend
-        
+
         Args:
             postgres_controller: PostgreSQL controller instance
-        
+
         Returns:
             Flask Response (rendered template)
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         try:
             # Get statistics from PostgreSQL backend
             stats_data = postgres_controller.get_stats()
-            
+            logger.info(f"Stats data from postgres: {stats_data}")
+
             # Get source breakdown
             all_conversations = postgres_controller.get_conversations()
             source_counts = self.format_service.calculate_source_breakdown(all_conversations)
-            
+
             # Format stats for template
-            document_count = int(stats_data.get('document_count', 0))
-            
+            total_conversations = int(stats_data.get('total_conversations', 0))
+            total_messages = int(stats_data.get('total_messages', 0))
+            total_embeddings = int(stats_data.get('total_embeddings', 0))
+            embedding_coverage = float(stats_data.get('embedding_coverage_percent') or 0)
+
             formatted_stats = {
-                'total': document_count,
-                'full': document_count,  # PostgreSQL stores full documents
-                'chunked': 0,  # Not chunked in PostgreSQL mode
+                'total': total_conversations,
+                'total_conversations': total_conversations,
+                'total_messages': total_messages,
+                'total_embeddings': total_embeddings,
+                'embedding_coverage_percent': embedding_coverage,
                 'sources': source_counts,
+                'timeline': stats_data.get('timeline', []),
                 'date_range': {
                     'earliest': stats_data.get('earliest_ts', ''),
                     'latest': stats_data.get('latest_ts', '')
@@ -211,18 +221,21 @@ class ConversationController:
                 'embedding_model': stats_data.get('embedding_model', 'all-MiniLM-L6-v2'),
                 'status': stats_data.get('status', 'healthy')
             }
-            
+
+            logger.info(f"Formatted stats: total_conversations={total_conversations}, total_messages={total_messages}")
             return render_template("stats.html", stats=formatted_stats)
-        
+
         except Exception as e:
             # Return empty stats rather than error
-            import logging
-            logging.error(f"Error getting PostgreSQL stats: {e}")
+            logger.error(f"Error getting PostgreSQL stats: {e}", exc_info=True)
             return render_template("stats.html", stats={
                 'total': 0,
-                'full': 0,
-                'chunked': 0,
+                'total_conversations': 0,
+                'total_messages': 0,
+                'total_embeddings': 0,
+                'embedding_coverage_percent': 0,
                 'sources': {},
+                'timeline': [],
                 'collection_name': 'chat_history',
                 'embedding_model': 'all-MiniLM-L6-v2'
             })

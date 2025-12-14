@@ -39,9 +39,10 @@
   --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.06);
   --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08);
   
-  /* Badge colors */
-  --claude-badge: 204 35% 60%;
-  --chatgpt-badge: 142 20% 60%;
+  /* Badge colors - softer tones */
+  --claude-badge: 261 45% 58%;      /* Softer purple */
+  --chatgpt-badge: 214 70% 58%;     /* Softer blue */
+  --openwebui-badge: 17 75% 65%;    /* Softer coral-orange */
   
   /* Transitions */
   --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -82,8 +83,10 @@
   --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.20);
   --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.15);
   
-  --claude-badge: 204 100% 50%;
-  --chatgpt-badge: 142 71% 55%;
+  /* Badge colors - softer, brighter for dark mode */
+  --claude-badge: 261 45% 65%;      /* Softer lighter purple for dark mode */
+  --chatgpt-badge: 214 65% 65%;     /* Softer lighter blue for dark mode */
+  --openwebui-badge: 17 70% 68%;    /* Softer lighter coral-orange for dark mode */
 }
 
 /* Base Styles */
@@ -409,7 +412,7 @@ body {
 
 .badge-openwebui {
   color: white;
-  background-color: hsl(199 89% 48%);  /* Sky blue matching OpenWebUI brand */
+  background-color: hsl(var(--openwebui-badge));
   border: none;
   font-weight: 500;
 }

@@ -451,13 +451,39 @@ class APIFormatAdapter:
         # Get conversation count (not message count)
         conversation_count = self.get_count()
 
-        # Map to legacy format
+        with get_unit_of_work() as uow:
+            # Get detailed conversation stats
+            conv_stats = uow.conversations.get_stats()
+
+            # Get embedding stats
+            embedding_stats = uow.embeddings.get_coverage_stats()
+
+            # Get timeline histogram
+            timeline = uow.conversations.get_timeline_histogram()
+
+            # Get date range
+            date_range = uow.session.execute(text("""
+                SELECT
+                    MIN(created_at) as earliest,
+                    MAX(created_at) as latest
+                FROM conversations
+                WHERE created_at IS NOT NULL
+            """)).first()
+
+        # Map to legacy format with enhanced data
         return {
             "status": "healthy",
             "collection_name": "chat_history",  # Legacy collection name
             "document_count": conversation_count,
             "embedding_model": "all-MiniLM-L6-v2",
-            "version": VERSION
+            "version": VERSION,
+            "total_conversations": conv_stats.get('total_conversations', 0),
+            "total_messages": conv_stats.get('total_messages', 0),
+            "total_embeddings": embedding_stats.get('embedded_messages') or 0,
+            "embedding_coverage_percent": embedding_stats.get('coverage_percent') or 0.0,
+            "timeline": timeline,
+            "earliest_ts": date_range.earliest.isoformat() if date_range and date_range.earliest else None,
+            "latest_ts": date_range.latest.isoformat() if date_range and date_range.latest else None
         }
     
     def get_health(self) -> Dict[str, Any]:
