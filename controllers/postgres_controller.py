@@ -764,6 +764,7 @@ class PostgresController:
 
                 # Get job stats
                 stats = uow.jobs.get_embedding_job_stats()
+                status_counts = stats.get('embedding_jobs_by_status', {})
 
                 # Get current model
                 model = uow.settings.get_value('embedding_model') or EMBEDDING_MODEL
@@ -774,10 +775,10 @@ class PostgresController:
                         "last_heartbeat": heartbeat_str
                     },
                     "queue": {
-                        "pending": stats.get('pending', 0),
-                        "running": stats.get('running', 0),
-                        "completed": stats.get('completed', 0),
-                        "failed": stats.get('failed', 0)
+                        "pending": status_counts.get('pending', 0),
+                        "running": status_counts.get('running', 0),
+                        "completed": status_counts.get('completed', 0),
+                        "failed": status_counts.get('failed', 0)
                     },
                     "model": {
                         "current": model,

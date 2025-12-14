@@ -2,6 +2,8 @@
 Utility modules for DovOS.
 """
 
-from .docx_parser import parse_docx_file, extract_timestamp, clean_text_content
+# Note: docx_parser is excluded from production builds
+# Import it directly where needed: from utils.docx_parser import parse_docx_file
+# This keeps the utils module importable even when docx_parser.py is missing
 
-__all__ = ['parse_docx_file', 'extract_timestamp', 'clean_text_content']
+__all__ = []
