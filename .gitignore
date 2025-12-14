@@ -103,3 +103,9 @@ tests/fixtures/golden_responses/*.json
 tests/golden_responses/*.json
 !tests/fixtures/golden_responses/.gitkeep
 !tests/golden_responses/.gitkeep
+
+# Documentation (keep local, don't publish)
+docs/
+
+# Temporary summary files
+BRANCH_SUMMARY.md

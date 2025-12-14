@@ -1,5 +1,8 @@
 # Dovos
 
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://ghcr.io/mbrichman/dovos)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A chat conversation archive and search application with PostgreSQL full-text search, RAG (Retrieval-Augmented Generation) integration, and OpenWebUI compatibility.
 
 ## Description
@@ -28,6 +31,18 @@ Dovos is a Flask-based web application designed to import, archive, and search t
 
 ### Quick Start with Docker (Recommended)
 
+**Pull from GitHub Container Registry:**
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/mbrichman/dovos:main
+
+# Or pull a specific version
+docker pull ghcr.io/mbrichman/dovos:v1.0.0
+```
+
+**Run with Docker Compose:**
+
 ```bash
 # 1. Configure environment
 cp .env.example .env
@@ -42,8 +57,6 @@ docker compose exec dovos-rag alembic upgrade head
 # 4. Access the application
 open http://localhost:5001
 ```
-
-See `DOCKER_DEPLOYMENT.md` for detailed Docker deployment instructions.
 
 ### Alternative: Local Python Environment Setup
 
@@ -250,4 +263,4 @@ Additional documentation is available in the `docs/` directory:
 
 ## License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

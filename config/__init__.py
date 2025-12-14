@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # === CONFIG ===
-SECRET_KEY = "your-secret-key-change-this-in-production"
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
 
 # PostgreSQL Configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://user:pass@localhost:5432/dovos_dev")
@@ -18,8 +18,8 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "384"))
 
 # OpenWebUI Configuration
-OPENWEBUI_URL = "http://100.116.198.80:3000"
-OPENWEBUI_API_KEY = "sk-44016316021243d0b0a00ba36aa0c22e"
+OPENWEBUI_URL = os.getenv("OPENWEBUI_URL", "")
+OPENWEBUI_API_KEY = os.getenv("OPENWEBUI_API_KEY", "")
 
 # RAG Context Configuration
 RAG_DEFAULT_WINDOW_SIZE = int(os.getenv("RAG_WINDOW_SIZE", "3"))
