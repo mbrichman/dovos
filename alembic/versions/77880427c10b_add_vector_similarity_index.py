@@ -72,24 +72,22 @@ def upgrade() -> None:
         lists = 500
 
     logger.info(f"🔨 Creating IVFFLAT index with {lists} lists...")
-    logger.info("This may take a few minutes. Index will be built CONCURRENTLY.")
+    logger.info("This may take a few minutes and will briefly lock the table.")
 
     # Run ANALYZE first to gather statistics
     logger.info("Running ANALYZE...")
     conn.execute(text("ANALYZE message_embeddings"))
 
-    # Note: CREATE INDEX CONCURRENTLY cannot run inside a transaction block
-    # So we need to use op.execute with special handling
-    # The index will be created outside the transaction
+    # Create index (regular CREATE INDEX works fine in migration)
+    logger.info("Creating index...")
+
     try:
-        # Create index concurrently
-        # Using vector_cosine_ops for cosine similarity (most common for embeddings)
-        conn.execute(text(f"""
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_embeddings_vector_ivfflat
+        op.execute(f"""
+            CREATE INDEX IF NOT EXISTS idx_embeddings_vector_ivfflat
             ON message_embeddings
             USING ivfflat (embedding vector_cosine_ops)
             WITH (lists = {lists})
-        """))
+        """)
 
         logger.info("✅ Vector similarity index created successfully!")
         logger.info("Vector searches will now be 10-100x faster.")
@@ -97,7 +95,7 @@ def upgrade() -> None:
     except Exception as e:
         logger.error(f"❌ Failed to create index: {e}")
         logger.error("You can manually create it later with:")
-        logger.error(f"  CREATE INDEX CONCURRENTLY idx_embeddings_vector_ivfflat")
+        logger.error(f"  CREATE INDEX idx_embeddings_vector_ivfflat")
         logger.error(f"  ON message_embeddings USING ivfflat (embedding vector_cosine_ops)")
         logger.error(f"  WITH (lists = {lists});")
         raise
@@ -108,9 +106,9 @@ def downgrade() -> None:
 
     logger.info("🗑️  Dropping vector similarity index...")
 
-    # Drop index concurrently to avoid blocking queries
+    # Drop index
     op.execute("""
-        DROP INDEX CONCURRENTLY IF EXISTS idx_embeddings_vector_ivfflat
+        DROP INDEX IF EXISTS idx_embeddings_vector_ivfflat
     """)
 
     logger.info("✅ Vector index removed")

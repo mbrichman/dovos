@@ -64,7 +64,7 @@ def create_ivfflat_index(lists: int = 100):
     """
     logger.info(f"Creating IVFFLAT index with {lists} lists...")
 
-    with engine.begin() as conn:
+    with engine.connect() as conn:
         # Run ANALYZE first to gather statistics
         logger.info("Running ANALYZE on message_embeddings...")
         conn.execute(text("ANALYZE message_embeddings"))
@@ -72,14 +72,16 @@ def create_ivfflat_index(lists: int = 100):
         # Create the index
         logger.info("Creating index (this may take a few minutes)...")
         conn.execute(text(f"""
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_embeddings_vector_ivfflat
+            CREATE INDEX IF NOT EXISTS idx_embeddings_vector_ivfflat
             ON message_embeddings
             USING ivfflat (embedding vector_cosine_ops)
             WITH (lists = {lists})
         """))
 
-    logger.info("✅ IVFFLAT index created successfully!")
-    logger.info("Vector similarity searches will now be much faster.")
+        conn.commit()
+
+        logger.info("✅ IVFFLAT index created successfully!")
+        logger.info("Vector similarity searches will now be much faster.")
 
 
 def create_hnsw_index(m: int = 16, ef_construction: int = 64):
@@ -96,7 +98,7 @@ def create_hnsw_index(m: int = 16, ef_construction: int = 64):
     """
     logger.info(f"Creating HNSW index (m={m}, ef_construction={ef_construction})...")
 
-    with engine.begin() as conn:
+    with engine.connect() as conn:
         # Run ANALYZE first
         logger.info("Running ANALYZE on message_embeddings...")
         conn.execute(text("ANALYZE message_embeddings"))
@@ -104,14 +106,16 @@ def create_hnsw_index(m: int = 16, ef_construction: int = 64):
         # Create the index
         logger.info("Creating index (this may take several minutes)...")
         conn.execute(text(f"""
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_embeddings_vector_hnsw
+            CREATE INDEX IF NOT EXISTS idx_embeddings_vector_hnsw
             ON message_embeddings
             USING hnsw (embedding vector_cosine_ops)
             WITH (m = {m}, ef_construction = {ef_construction})
         """))
 
-    logger.info("✅ HNSW index created successfully!")
-    logger.info("Vector similarity searches will now be much faster with better recall.")
+        conn.commit()
+
+        logger.info("✅ HNSW index created successfully!")
+        logger.info("Vector similarity searches will now be much faster with better recall.")
 
 
 def recommend_index_params(count: int, index_type: str):
