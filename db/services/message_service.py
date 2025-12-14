@@ -14,6 +14,13 @@ from db.repositories.unit_of_work import UnitOfWork, get_unit_of_work
 logger = logging.getLogger(__name__)
 
 
+def get_current_embedding_model(uow: UnitOfWork) -> str:
+    """Get embedding model with fallback to config."""
+    from config import EMBEDDING_MODEL
+    model = uow.settings.get_value('embedding_model')
+    return model or EMBEDDING_MODEL
+
+
 class MessageService:
     """
     Service for message operations using the outbox pattern.
@@ -49,7 +56,7 @@ class MessageService:
                 'message_id': str(message.id),
                 'conversation_id': str(conversation_id),
                 'content': content,
-                'model': 'all-MiniLM-L6-v2'  # Default model
+                'model': get_current_embedding_model(uow)
             }
             
             uow.jobs.enqueue(
@@ -97,7 +104,7 @@ class MessageService:
                         'message_id': str(message_id),
                         'conversation_id': str(message.conversation_id),
                         'content': content,
-                        'model': 'all-MiniLM-L6-v2'
+                        'model': get_current_embedding_model(uow)
                     }
                     
                     uow.jobs.enqueue(
@@ -141,7 +148,7 @@ class MessageService:
                 'message_id': str(message.id),
                 'conversation_id': str(conversation.id),
                 'content': initial_content,
-                'model': 'all-MiniLM-L6-v2'
+                'model': get_current_embedding_model(uow)
             }
             
             uow.jobs.enqueue(
@@ -185,7 +192,7 @@ class MessageService:
                     'message_id': str(message.id),
                     'conversation_id': str(msg_data['conversation_id']),
                     'content': msg_data['content'],
-                    'model': 'all-MiniLM-L6-v2'
+                    'model': get_current_embedding_model(uow)
                 }
                 
                 uow.jobs.enqueue(
@@ -210,7 +217,7 @@ class MessageService:
                 'message_id': str(message_id),
                 'conversation_id': str(message.conversation_id),
                 'content': message.content,
-                'model': 'all-MiniLM-L6-v2',
+                'model': get_current_embedding_model(uow),
                 'reprocess': True
             }
             

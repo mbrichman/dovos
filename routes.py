@@ -53,7 +53,11 @@ def init_routes(app):
     @app.route("/api/settings", methods=["GET", "POST"])
     def api_settings():
         return jsonify(postgres_controller.handle_settings(request))
-    
+
+    @app.route("/api/embedding/status")
+    def embedding_status():
+        return jsonify(postgres_controller.get_embedding_status())
+
     @app.route("/stats")
     def stats():
         return conversation_controller.stats_with_postgres_adapter(postgres_controller)

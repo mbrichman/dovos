@@ -15,6 +15,9 @@ from db.services.message_service import MessageService
 from db.services.import_service import ConversationImportService
 from db.importers import detect_format
 from db.importers.registry import FORMAT_REGISTRY
+from db.repositories.unit_of_work import get_unit_of_work
+from db.models.models import Message
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -666,12 +669,56 @@ class PostgresController:
             
             if flask_request.method == 'POST':
                 data = request_obj.get_json() or {}
-                
-                # Save settings
+                new_model = data.get('embedding_model')
+                confirm = data.get('confirm_regeneration', False)
+
+                # Handle embedding model change with confirmation flow
+                if new_model:
+                    current_model = self.adapter.get_setting('embedding_model')
+                    from config import EMBEDDING_MODEL
+                    current_model = current_model or EMBEDDING_MODEL
+
+                    # Model is changing
+                    if new_model != current_model:
+                        if not confirm:
+                            # Validate model first
+                            validation = self.validate_embedding_model(new_model)
+                            if not validation.get('valid'):
+                                return {
+                                    "success": False,
+                                    "error": f"Invalid model: {validation.get('error')}"
+                                }
+
+                            # Count messages for confirmation
+                            with get_unit_of_work() as uow:
+                                msg_count = uow.session.query(func.count(Message.id)).scalar()
+
+                            # Return confirmation requirement
+                            return {
+                                "requires_confirmation": True,
+                                "message": f"Regenerate embeddings for {msg_count:,} messages?",
+                                "current_model": current_model,
+                                "new_model": new_model,
+                                "message_count": msg_count
+                            }
+
+                        # Confirmed - proceed with regeneration
+                        if confirm:
+                            job_count = self.regenerate_embeddings(new_model)
+                            self.adapter.set_setting('embedding_model_previous', current_model)
+                            self.adapter.set_setting('embedding_model', new_model)
+                            return {
+                                "success": True,
+                                "regeneration_started": True,
+                                "jobs_enqueued": job_count,
+                                "message": "Embedding regeneration started"
+                            }
+
+                # Save other settings (non-embedding or same model)
                 for key, value in data.items():
-                    if value:  # Only save non-empty values
+                    if value and key not in ['confirm_regeneration']:
                         self.adapter.set_setting(key, value)
-                
+
                 return {
                     "success": True,
                     "message": "Settings saved successfully"
@@ -690,7 +737,135 @@ class PostgresController:
                 "success": False,
                 "error": str(e)
             }
-    
+
+    def get_embedding_status(self) -> Dict[str, Any]:
+        """
+        GET /api/embedding/status
+
+        Returns worker status and queue statistics.
+        """
+        from datetime import datetime, timezone
+        from config import EMBEDDING_MODEL
+
+        try:
+            with get_unit_of_work() as uow:
+                # Check heartbeat
+                heartbeat_str = uow.settings.get_value('embedding_worker_heartbeat')
+                worker_running = False
+
+                if heartbeat_str:
+                    try:
+                        heartbeat = datetime.fromisoformat(heartbeat_str)
+                        # Worker is running if heartbeat is less than 60 seconds old
+                        elapsed = (datetime.now(timezone.utc) - heartbeat).total_seconds()
+                        worker_running = elapsed < 60
+                    except ValueError:
+                        logger.warning(f"Invalid heartbeat timestamp: {heartbeat_str}")
+
+                # Get job stats
+                stats = uow.jobs.get_embedding_job_stats()
+
+                # Get current model
+                model = uow.settings.get_value('embedding_model') or EMBEDDING_MODEL
+
+                return {
+                    "worker": {
+                        "status": "running" if worker_running else "stopped",
+                        "last_heartbeat": heartbeat_str
+                    },
+                    "queue": {
+                        "pending": stats.get('pending', 0),
+                        "running": stats.get('running', 0),
+                        "completed": stats.get('completed', 0),
+                        "failed": stats.get('failed', 0)
+                    },
+                    "model": {
+                        "current": model,
+                        "dimension": 384
+                    }
+                }
+
+        except Exception as e:
+            logger.error(f"Failed to get embedding status: {e}")
+            return {
+                "worker": {"status": "unknown", "last_heartbeat": None},
+                "queue": {"pending": 0, "running": 0, "completed": 0, "failed": 0},
+                "model": {"current": EMBEDDING_MODEL, "dimension": 384},
+                "error": str(e)
+            }
+
+    def validate_embedding_model(self, model_name: str) -> Dict[str, Any]:
+        """
+        Validate that an embedding model can be loaded and has 384 dimensions.
+        """
+        try:
+            from sentence_transformers import SentenceTransformer
+            import torch
+
+            logger.info(f"Validating embedding model: {model_name}")
+
+            # Load model on CPU
+            model = SentenceTransformer(model_name, device='cpu')
+
+            # Generate test embedding
+            test_embedding = model.encode(["test"])
+            dimension = len(test_embedding[0])
+
+            logger.info(f"Model {model_name} loaded successfully with dimension {dimension}")
+
+            # Check dimension matches required 384
+            if dimension != 384:
+                return {
+                    "valid": False,
+                    "error": f"Model dimension {dimension} does not match required dimension 384"
+                }
+
+            return {
+                "valid": True,
+                "dimension": dimension,
+                "model_name": model_name
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to validate model {model_name}: {e}")
+            return {
+                "valid": False,
+                "error": str(e)
+            }
+
+    def regenerate_embeddings(self, new_model: str) -> int:
+        """
+        Enqueue jobs to regenerate all embeddings with a new model.
+        Keeps old embeddings until new ones are complete.
+        """
+        try:
+            with get_unit_of_work() as uow:
+                # Get all message IDs
+                message_ids = uow.messages.get_all_ids_for_embedding()
+
+                logger.info(f"Enqueueing {len(message_ids)} embedding jobs for model {new_model}")
+
+                # Enqueue jobs with new model
+                for msg_id in message_ids:
+                    msg = uow.messages.get_by_id(msg_id)
+                    if msg and msg.content:
+                        uow.jobs.enqueue(
+                            kind='generate_embedding',
+                            payload={
+                                'message_id': str(msg_id),
+                                'content': msg.content,
+                                'model': new_model,
+                                'reprocess': True  # Flag to replace existing embedding
+                            }
+                        )
+
+                logger.info(f"Successfully enqueued {len(message_ids)} embedding jobs")
+                return len(message_ids)
+
+        except Exception as e:
+            logger.error(f"Failed to regenerate embeddings: {e}")
+            raise
+
     # ===== UTILITY METHODS =====
     
     def _parse_date_range(self, start_str: Optional[str], end_str: Optional[str]) -> Optional[Tuple[datetime, datetime]]:

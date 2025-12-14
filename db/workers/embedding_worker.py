@@ -99,7 +99,11 @@ class EmbeddingWorker:
             'start_time': None,
             'last_job_time': None
         }
-        
+
+        # Heartbeat tracking
+        self.last_heartbeat_time = None
+        self.heartbeat_interval = 30  # seconds
+
         # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -108,21 +112,48 @@ class EmbeddingWorker:
         """Handle shutdown signals gracefully."""
         logger.info(f"Received signal {signum}, shutting down gracefully...")
         self.stop()
-        
+
+    def _update_heartbeat(self):
+        """Update heartbeat timestamp in settings table."""
+        try:
+            with get_unit_of_work() as uow:
+                uow.settings.create_or_update(
+                    'embedding_worker_heartbeat',
+                    datetime.now(timezone.utc).isoformat()
+                )
+            self.last_heartbeat_time = datetime.now(timezone.utc)
+            logger.debug("Heartbeat updated")
+        except Exception as e:
+            logger.error(f"Failed to update heartbeat: {e}")
+
+    def _should_update_heartbeat(self) -> bool:
+        """Check if heartbeat should be updated (every 30 seconds)."""
+        if self.last_heartbeat_time is None:
+            return True
+        elapsed = (datetime.now(timezone.utc) - self.last_heartbeat_time).total_seconds()
+        return elapsed >= self.heartbeat_interval
+
     def start(self):
         """Start the worker loop."""
         self.running = True
         self.stats['start_time'] = datetime.now(timezone.utc)
-        
+
         logger.info(f"🚀 Starting embedding worker {self.worker_id}")
         logger.info(f"   Max jobs per batch: {self.max_jobs_per_batch}")
         logger.info(f"   Poll interval: {self.poll_interval_seconds}s")
         logger.info(f"   Max retries: {self.max_retries}")
-        
+
+        # Initial heartbeat
+        self._update_heartbeat()
+
         try:
             while self.running:
+                # Update heartbeat if needed
+                if self._should_update_heartbeat():
+                    self._update_heartbeat()
+
                 jobs_processed = self._process_batch()
-                
+
                 if jobs_processed == 0:
                     # No jobs found, wait before polling again
                     time.sleep(self.poll_interval_seconds)

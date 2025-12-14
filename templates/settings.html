@@ -161,12 +161,71 @@
             </div>
         </form>
     </div>
-    
+
+    <div class="settings-card">
+        <h3>🧠 Embedding Configuration</h3>
+
+        <!-- Worker Status Section -->
+        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Worker Status:</strong>
+                    <span id="workerStatus" style="margin-left: 8px;">
+                        <span class="status-indicator">⚪</span> Checking...
+                    </span>
+                </div>
+                <button type="button" class="btn btn-secondary" style="padding: 5px 10px;" onclick="refreshEmbeddingStatus()">
+                    🔄 Refresh
+                </button>
+            </div>
+            <div id="queueStats" style="margin-top: 10px; font-size: 14px; color: #666;">
+                Loading queue statistics...
+            </div>
+        </div>
+
+        <!-- Model Selection -->
+        <form id="embeddingForm">
+            <div class="form-group">
+                <label for="embedding_model">Embedding Model</label>
+                <select id="embedding_model" name="embedding_model" class="form-control">
+                    <option value="sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2 (default - balanced, fast)</option>
+                    <option value="sentence-transformers/paraphrase-MiniLM-L6-v2">paraphrase-MiniLM-L6-v2 (paraphrase detection)</option>
+                    <option value="sentence-transformers/multi-qa-MiniLM-L6-v2">multi-qa-MiniLM-L6-v2 (question answering)</option>
+                    <option value="sentence-transformers/all-MiniLM-L12-v2">all-MiniLM-L12-v2 (higher quality, slower)</option>
+                </select>
+                <div class="form-help">
+                    Select the sentence transformer model for generating embeddings. Changing this will require regenerating all embeddings.
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Save Model</button>
+            </div>
+        </form>
+    </div>
+
     <div class="settings-card">
         <h3>ℹ️ Backend Information</h3>
         <p><strong>Database Backend:</strong> PostgreSQL with pgvector</p>
         <p><strong>Search Mode:</strong> Hybrid (Full-Text + Vector Search)</p>
-        <p><strong>Embedding Model:</strong> all-MiniLM-L6-v2</p>
+        <p id="currentModelInfo"><strong>Embedding Model:</strong> Loading...</p>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <h3 style="margin-top: 0; color: #d9534f;">⚠️ Regenerate All Embeddings?</h3>
+        <p id="confirmMessage" style="margin: 20px 0;">Loading...</p>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <p style="margin: 5px 0;"><strong>Current Model:</strong> <span id="confirmCurrentModel"></span></p>
+            <p style="margin: 5px 0;"><strong>New Model:</strong> <span id="confirmNewModel"></span></p>
+            <p style="margin: 5px 0;"><strong>Messages:</strong> <span id="confirmMessageCount"></span></p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="confirmCancelBtn" class="btn btn-secondary" style="flex: 1;" onclick="closeConfirmModal()">Cancel</button>
+            <button id="confirmProceedBtn" class="btn btn-primary" style="flex: 1;" onclick="confirmRegeneration()">Confirm Regeneration</button>
+        </div>
     </div>
 </div>
 
@@ -239,5 +298,151 @@
             }
         }, 5000);
     }
+
+    // ==== EMBEDDING CONFIGURATION FUNCTIONS ====
+
+    let pendingEmbeddingChange = null;
+
+    async function refreshEmbeddingStatus() {
+        try {
+            const response = await fetch('/api/embedding/status');
+            const data = await response.json();
+
+            // Update worker status
+            const statusEl = document.getElementById('workerStatus');
+            if (data.worker.status === 'running') {
+                statusEl.innerHTML = '<span style="color: #28a745;">🟢 Running</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color: #dc3545;">🔴 Stopped</span>';
+            }
+
+            // Update queue stats
+            const queueEl = document.getElementById('queueStats');
+            queueEl.innerHTML = `
+                <strong>Queue:</strong>
+                Pending: ${data.queue.pending} |
+                Running: ${data.queue.running} |
+                Completed: ${data.queue.completed} |
+                Failed: ${data.queue.failed}
+            `;
+
+            // Update current model in backend info
+            const modelInfo = document.getElementById('currentModelInfo');
+            modelInfo.innerHTML = `<strong>Embedding Model:</strong> ${data.model.current}`;
+
+            // Pre-select current model in dropdown
+            const modelSelect = document.getElementById('embedding_model');
+            if (modelSelect && data.model.current) {
+                modelSelect.value = data.model.current;
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch embedding status:', error);
+            document.getElementById('workerStatus').innerHTML = '<span style="color: #999;">⚪ Unknown</span>';
+            document.getElementById('queueStats').textContent = 'Failed to load queue statistics';
+        }
+    }
+
+    // Handle embedding form submission
+    document.getElementById('embeddingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const newModel = formData.get('embedding_model');
+
+        try {
+            const response = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    embedding_model: newModel
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.requires_confirmation) {
+                // Show confirmation modal
+                pendingEmbeddingChange = {
+                    new_model: data.new_model,
+                    current_model: data.current_model
+                };
+                showConfirmModal(data);
+            } else if (data.success) {
+                showMessage(data.message || 'Model saved successfully', 'success');
+                if (data.regeneration_started) {
+                    showMessage(`Regeneration started: ${data.jobs_enqueued} jobs enqueued`, 'success');
+                    // Refresh status to show updated queue
+                    setTimeout(refreshEmbeddingStatus, 1000);
+                }
+            } else {
+                showMessage('Error: ' + (data.error || 'Failed to save model'), 'error');
+            }
+        } catch (error) {
+            showMessage('Error: ' + error.message, 'error');
+        }
+    });
+
+    function showConfirmModal(data) {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmMessage').textContent = data.message;
+        document.getElementById('confirmCurrentModel').textContent = data.current_model;
+        document.getElementById('confirmNewModel').textContent = data.new_model;
+        document.getElementById('confirmMessageCount').textContent = data.message_count.toLocaleString();
+
+        modal.style.display = 'flex';
+
+        // Focus cancel button (default action)
+        setTimeout(() => {
+            document.getElementById('confirmCancelBtn').focus();
+        }, 100);
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+        pendingEmbeddingChange = null;
+    }
+
+    async function confirmRegeneration() {
+        if (!pendingEmbeddingChange) {
+            closeConfirmModal();
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    embedding_model: pendingEmbeddingChange.new_model,
+                    confirm_regeneration: true
+                })
+            });
+
+            const data = await response.json();
+
+            closeConfirmModal();
+
+            if (data.success && data.regeneration_started) {
+                showMessage(`Regeneration started! ${data.jobs_enqueued} jobs enqueued.`, 'success');
+                // Refresh status to show updated queue
+                setTimeout(refreshEmbeddingStatus, 1000);
+            } else {
+                showMessage('Error: ' + (data.error || 'Failed to start regeneration'), 'error');
+            }
+        } catch (error) {
+            closeConfirmModal();
+            showMessage('Error: ' + error.message, 'error');
+        }
+    }
+
+    // Load embedding status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        refreshEmbeddingStatus();
+    });
 </script>
 {% endblock %}

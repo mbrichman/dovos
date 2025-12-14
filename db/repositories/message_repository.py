@@ -240,7 +240,11 @@ class MessageRepository(BaseRepository[Message]):
         return self.session.query(Message)\
             .filter(Message.id.in_(message_ids))\
             .all()
-    
+
+    def get_all_ids_for_embedding(self) -> List[UUID]:
+        """Get all message IDs for bulk embedding job creation."""
+        return [row[0] for row in self.session.query(Message.id).all()]
+
     def get_by_role(self, role: str, limit: int = 100) -> List[Message]:
         """Get messages by role (user, assistant, system)."""
         return self.session.query(Message)\
