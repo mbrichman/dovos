@@ -9,11 +9,11 @@ import json
 import logging
 from pathlib import Path
 
-# Add parent directory to path to import config
+# Add parent directory to path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import requests
-import config
+from db.repositories.unit_of_work import get_unit_of_work
 
 # Set up logging
 logging.basicConfig(
@@ -23,15 +23,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def get_openwebui_settings():
+    """Get OpenWebUI settings from database"""
+    with get_unit_of_work() as uow:
+        url = uow.settings.get_value("openwebui_url")
+        api_key = uow.settings.get_value("openwebui_api_key")
+        return url, api_key
+
+
 def test_connection():
     """Test basic connection to OpenWebUI"""
     print("\n" + "="*60)
     print("1. Testing Basic Connection")
     print("="*60)
-    
-    url = f"{config.OPENWEBUI_URL}/api/v1/chats"
-    headers = {"Authorization": f"Bearer {config.OPENWEBUI_API_KEY}"}
-    
+
+    openwebui_url, openwebui_api_key = get_openwebui_settings()
+
+    if not openwebui_url or not openwebui_api_key:
+        print("✗ OpenWebUI settings not configured in database")
+        print("  Please configure OpenWebUI URL and API key in the settings page")
+        return False
+
+    url = f"{openwebui_url}/api/v1/chats"
+    headers = {"Authorization": f"Bearer {openwebui_api_key}"}
+
     logger.info(f"Testing GET {url}")
     logger.debug(f"Headers: {headers}")
     
@@ -60,9 +75,15 @@ def test_available_endpoints():
     print("\n" + "="*60)
     print("2. Testing Available Endpoints")
     print("="*60)
-    
-    headers = {"Authorization": f"Bearer {config.OPENWEBUI_API_KEY}"}
-    
+
+    openwebui_url, openwebui_api_key = get_openwebui_settings()
+
+    if not openwebui_url or not openwebui_api_key:
+        print("✗ OpenWebUI settings not configured")
+        return {}
+
+    headers = {"Authorization": f"Bearer {openwebui_api_key}"}
+
     # Endpoints to test
     endpoints = [
         ("GET", "/api/v1/chats"),
@@ -73,10 +94,10 @@ def test_available_endpoints():
         ("POST", "/api/chats/new"),
         ("POST", "/api/chats/import"),
     ]
-    
+
     results = {}
     for method, endpoint in endpoints:
-        url = f"{config.OPENWEBUI_URL}{endpoint}"
+        url = f"{openwebui_url}{endpoint}"
         try:
             if method == "GET":
                 response = requests.get(url, headers=headers, timeout=5)
@@ -102,7 +123,13 @@ def test_export_format():
     print("\n" + "="*60)
     print("3. Testing Export Format")
     print("="*60)
-    
+
+    openwebui_url, openwebui_api_key = get_openwebui_settings()
+
+    if not openwebui_url or not openwebui_api_key:
+        print("✗ OpenWebUI settings not configured")
+        return None, False
+
     # Create a minimal test conversation in OpenWebUI format
     test_conversation = {
         "id": "test-conv-123",
@@ -147,24 +174,24 @@ def test_export_format():
         "created_at": 1704067200,
         "updated_at": 1704067210
     }
-    
+
     print(f"\nTest conversation format:")
     print(json.dumps(test_conversation, indent=2)[:500] + "...")
-    
+
     # Test endpoints
     endpoints_to_try = [
         "/api/v1/chats/new",
         "/api/v1/chats/import",
         "/api/v1/chats",
     ]
-    
+
     headers = {
-        "Authorization": f"Bearer {config.OPENWEBUI_API_KEY}",
+        "Authorization": f"Bearer {openwebui_api_key}",
         "Content-Type": "application/json"
     }
-    
+
     for endpoint in endpoints_to_try:
-        url = f"{config.OPENWEBUI_URL}{endpoint}"
+        url = f"{openwebui_url}{endpoint}"
         print(f"\nTrying POST {endpoint}...")
         logger.info(f"Testing POST {url}")
         logger.debug(f"Headers: {headers}")
@@ -211,18 +238,24 @@ def check_api_key_permissions():
     print("\n" + "="*60)
     print("4. Checking API Key Permissions")
     print("="*60)
-    
-    headers = {"Authorization": f"Bearer {config.OPENWEBUI_API_KEY}"}
-    
+
+    openwebui_url, openwebui_api_key = get_openwebui_settings()
+
+    if not openwebui_url or not openwebui_api_key:
+        print("✗ OpenWebUI settings not configured")
+        return
+
+    headers = {"Authorization": f"Bearer {openwebui_api_key}"}
+
     # Try to get user info or other metadata
     test_endpoints = [
         "/api/v1/users/user",
         "/api/v1/auths/signin",
         "/api/v1/models",
     ]
-    
+
     for endpoint in test_endpoints:
-        url = f"{config.OPENWEBUI_URL}{endpoint}"
+        url = f"{openwebui_url}{endpoint}"
         try:
             response = requests.get(url, headers=headers, timeout=5)
             if response.status_code < 400:
@@ -239,11 +272,20 @@ def main():
     print("\n" + "="*70)
     print("OpenWebUI Export Diagnostic Tool")
     print("="*70)
+
+    openwebui_url, openwebui_api_key = get_openwebui_settings()
+
+    if not openwebui_url or not openwebui_api_key:
+        print("\n✗ OpenWebUI settings not configured in database")
+        print("  Please configure OpenWebUI URL and API key in the settings page")
+        print("="*70)
+        return
+
     print(f"\nConfiguration:")
-    print(f"  URL: {config.OPENWEBUI_URL}")
-    print(f"  API Key: {config.OPENWEBUI_API_KEY[:20]}...{config.OPENWEBUI_API_KEY[-10:]}")
+    print(f"  URL: {openwebui_url}")
+    print(f"  API Key: {openwebui_api_key[:20]}...{openwebui_api_key[-10:]}")
     print("="*70)
-    
+
     # Run tests
     connection_ok = test_connection()
     

@@ -600,9 +600,8 @@ class APIFormatAdapter:
     def export_to_openwebui(self, doc_id: str) -> Dict[str, Any]:
         """Export conversation to OpenWebUI format."""
         import requests
-        import config
         from uuid import UUID
-        
+
         # Import the converter functions
         from utils.openwebui_converter import convert_conversation
         
@@ -676,20 +675,35 @@ class APIFormatAdapter:
                     "success": False,
                     "error": f"Conversion failed: {str(e)}"
                 }
-            
-            # Send to OpenWebUI server using config values
+
+            # Get OpenWebUI settings from database
+            openwebui_url = self.get_setting("openwebui_url")
+            openwebui_api_key = self.get_setting("openwebui_api_key")
+
+            if not openwebui_url or not openwebui_api_key:
+                return {
+                    "success": False,
+                    "error": "OpenWebUI settings not configured. Please set OpenWebUI URL and API key in settings."
+                }
+
+            # Send to OpenWebUI server using database settings
             headers = {
-                "Authorization": f"Bearer {config.OPENWEBUI_API_KEY}",
+                "Authorization": f"Bearer {openwebui_api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             try:
                 # OpenWebUI's chat creation endpoint
+                # Disable SSL verification and warnings (TODO: Fix SSL certificate)
+                import urllib3
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
                 response = requests.post(
-                    f"{config.OPENWEBUI_URL}/api/v1/chats/new",
+                    f"{openwebui_url}/api/v1/chats/new",
                     headers=headers,
                     json=openwebui_conv,
-                    timeout=30
+                    timeout=30,
+                    verify=False
                 )
                 
                 if response.status_code == 200:

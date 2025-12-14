@@ -17,10 +17,6 @@ PGAPPNAME = os.getenv("PGAPPNAME", "dovos-api")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "384"))
 
-# OpenWebUI Configuration
-OPENWEBUI_URL = os.getenv("OPENWEBUI_URL", "")
-OPENWEBUI_API_KEY = os.getenv("OPENWEBUI_API_KEY", "")
-
 # RAG Context Configuration
 RAG_DEFAULT_WINDOW_SIZE = int(os.getenv("RAG_WINDOW_SIZE", "3"))
 RAG_MAX_WINDOW_SIZE = int(os.getenv("RAG_MAX_WINDOW_SIZE", "10"))
@@ -52,8 +48,6 @@ __all__ = [
     'PGAPPNAME',
     'EMBEDDING_MODEL',
     'EMBEDDING_DIM',
-    'OPENWEBUI_URL',
-    'OPENWEBUI_API_KEY',
     'VERSION',
     'get_version',
     'SEARCH_SYNONYMS',

@@ -124,7 +124,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Export
+                        Export to OpenWebUI
                     </button>
                     <button class="conversation-menu-item conversation-menu-item-danger" onclick="deleteConversation(event, '{{ conversation.id }}')">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,7 +268,7 @@ async function exportConversation(event, conversationId) {
     const originalHTML = button.innerHTML;
     
     button.disabled = true;
-    button.innerHTML = '<span>Exporting...</span>';
+    button.innerHTML = '<span>Exporting to OpenWebUI...</span>';
     
     try {
         const response = await fetch(`/export_to_openwebui/${conversationId}`, {
@@ -280,7 +280,7 @@ async function exportConversation(event, conversationId) {
         
         if (response.ok && data.success) {
             showNotification('Successfully exported to OpenWebUI!', 'success');
-            button.innerHTML = '<span>✓ Exported</span>';
+            button.innerHTML = '<span>✓ Exported to OpenWebUI</span>';
             setTimeout(() => {
                 button.disabled = false;
                 button.innerHTML = originalHTML;
@@ -290,8 +290,8 @@ async function exportConversation(event, conversationId) {
         }
     } catch (error) {
         console.error('Export error:', error);
-        showNotification(error.message || 'Export failed', 'error');
-        button.innerHTML = '<span>✗ Failed</span>';
+        showNotification(error.message || 'Export to OpenWebUI failed', 'error');
+        button.innerHTML = '<span>✗ Export Failed</span>';
         setTimeout(() => {
             button.disabled = false;
             button.innerHTML = originalHTML;

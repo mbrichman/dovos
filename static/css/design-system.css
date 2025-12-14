@@ -841,7 +841,7 @@ body {
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  min-width: 160px;
+  min-width: 210px;
   z-index: 1000;
   display: none;
 }
