@@ -543,7 +543,16 @@ class PostgresController:
                     # Delegate to import service
                     import_result = self.import_service.import_json_data(conversations_data)
                     
-                    return import_result.to_dict(), 200
+                    # Return user-friendly success message
+                    if import_result.imported_count > 0:
+                        msg = f"✅ Successfully imported {import_result.imported_count} conversations from {import_result.format_detected} format"
+                        if import_result.skipped_duplicates > 0:
+                            msg += f" (skipped {import_result.skipped_duplicates} duplicates)"
+                        return msg, 200
+                    elif import_result.skipped_duplicates > 0:
+                        return f"ℹ️ All {import_result.skipped_duplicates} conversations were already imported", 200
+                    else:
+                        return "⚠️ No conversations were imported", 400
                 
                 except json.JSONDecodeError as e:
                     return f"Error: Invalid JSON format - {str(e)}", 400
@@ -565,7 +574,12 @@ class PostgresController:
                     try:
                         # Delegate to import service
                         import_result = self.import_service.import_docx_file(temp_path, file.filename)
-                        return import_result.to_dict(), 200
+                        
+                        # Return user-friendly success message
+                        if import_result.imported_count > 0:
+                            return f"✅ Successfully imported Word document with {import_result.imported_count} conversation(s)", 200
+                        else:
+                            return "⚠️ No conversations were imported from Word document", 400
                     finally:
                         # Clean up temp file
                         if os.path.exists(temp_path):
