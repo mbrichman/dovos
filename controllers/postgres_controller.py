@@ -745,7 +745,7 @@ class PostgresController:
         Returns worker status and queue statistics.
         """
         from datetime import datetime, timezone
-        from config import EMBEDDING_MODEL
+        from config import EMBEDDING_MODEL, VERSION
 
         try:
             with get_unit_of_work() as uow:
@@ -782,7 +782,8 @@ class PostgresController:
                     "model": {
                         "current": model,
                         "dimension": 384
-                    }
+                    },
+                    "version": VERSION
                 }
 
         except Exception as e:
@@ -791,6 +792,7 @@ class PostgresController:
                 "worker": {"status": "unknown", "last_heartbeat": None},
                 "queue": {"pending": 0, "running": 0, "completed": 0, "failed": 0},
                 "model": {"current": EMBEDDING_MODEL, "dimension": 384},
+                "version": VERSION,
                 "error": str(e)
             }
 

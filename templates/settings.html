@@ -206,6 +206,7 @@
 
     <div class="settings-card">
         <h3>ℹ️ Backend Information</h3>
+        <p><strong>Version:</strong> <span id="versionInfo">Loading...</span></p>
         <p><strong>Database Backend:</strong> PostgreSQL with pgvector</p>
         <p><strong>Search Mode:</strong> Hybrid (Full-Text + Vector Search)</p>
         <p id="currentModelInfo"><strong>Embedding Model:</strong> Loading...</p>
@@ -329,6 +330,12 @@
             // Update current model in backend info
             const modelInfo = document.getElementById('currentModelInfo');
             modelInfo.innerHTML = `<strong>Embedding Model:</strong> ${data.model.current}`;
+
+            // Update version in backend info
+            if (data.version) {
+                const versionInfo = document.getElementById('versionInfo');
+                versionInfo.textContent = data.version;
+            }
 
             // Pre-select current model in dropdown
             const modelSelect = document.getElementById('embedding_model');

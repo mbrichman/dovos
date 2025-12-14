@@ -446,15 +446,18 @@ class APIFormatAdapter:
     
     def get_stats(self) -> Dict[str, Any]:
         """Get database statistics in legacy format."""
+        from config import VERSION
+
         # Get conversation count (not message count)
         conversation_count = self.get_count()
-        
+
         # Map to legacy format
         return {
             "status": "healthy",
             "collection_name": "chat_history",  # Legacy collection name
             "document_count": conversation_count,
-            "embedding_model": "all-MiniLM-L6-v2"
+            "embedding_model": "all-MiniLM-L6-v2",
+            "version": VERSION
         }
     
     def get_health(self) -> Dict[str, Any]:

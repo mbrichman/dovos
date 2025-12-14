@@ -31,6 +31,18 @@ RAG_DEFAULT_MAX_TOKENS = int(os.getenv("RAG_DEFAULT_MAX_TOKENS", "0"))  # 0 = no
 RAG_PROXIMITY_DECAY_LAMBDA = float(os.getenv("RAG_PROXIMITY_DECAY_LAMBDA", "0.3"))
 RAG_APPLY_RECENCY_BONUS = os.getenv("RAG_APPLY_RECENCY_BONUS", "false").lower() == "true"
 
+# Version
+def get_version():
+    """Read version from VERSION file."""
+    try:
+        version_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "VERSION")
+        with open(version_file, 'r') as f:
+            return f.read().strip()
+    except Exception:
+        return "unknown"
+
+VERSION = get_version()
+
 # Import synonym functionality
 from .synonyms import SEARCH_SYNONYMS, get_synonyms, add_synonym_mapping
 
@@ -42,6 +54,8 @@ __all__ = [
     'EMBEDDING_DIM',
     'OPENWEBUI_URL',
     'OPENWEBUI_API_KEY',
+    'VERSION',
+    'get_version',
     'SEARCH_SYNONYMS',
     'get_synonyms',
     'add_synonym_mapping',
