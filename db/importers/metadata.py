@@ -46,9 +46,36 @@ class ExtractorMetadata:
 
 # Default metadata for built-in extractors
 DEFAULT_METADATA: Dict[str, ExtractorMetadata] = {
-    # ChatGPT and DOCX importers are premium features
-    # Available with Dovos Pro or Enterprise license
-    # Contact us for licensing information
+    'chatgpt': ExtractorMetadata(
+        name='ChatGPT',
+        version='1.0.0',
+        description='ChatGPT format message extractor. Extracts messages from ChatGPT\'s node-based mapping structure.',
+        author='DovOS Contributors',
+        supported_extensions=['.json'],
+        capabilities={'auto_detect': True, 'streaming': False, 'requires_license': True},
+        format_spec={
+            'description': 'ChatGPT JSON export format',
+            'input_type': 'dict',
+            'structure': 'Conversation dict with "mapping" key containing node_id -> node_data',
+            'required_fields': ['mapping'],
+            'example_field': 'mapping is a dict where each node contains "message" with "author" and "content"',
+        },
+        breaking_changes=[],
+    ),
+    'docx': ExtractorMetadata(
+        name='DOCX',
+        version='1.0.0',
+        description='DOCX format message extractor. Extracts messages from Word documents.',
+        author='DovOS Contributors',
+        supported_extensions=['.docx'],
+        capabilities={'auto_detect': False, 'streaming': False, 'requires_license': True},
+        format_spec={
+            'description': 'Microsoft Word DOCX format',
+            'input_type': 'file',
+            'structure': 'Word document with message exchanges',
+        },
+        breaking_changes=[],
+    ),
     'claude': ExtractorMetadata(
         name='Claude',
         version='1.0.0',
