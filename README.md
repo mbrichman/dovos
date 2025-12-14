@@ -36,30 +36,48 @@ See [PREMIUM_FEATURES.md](PREMIUM_FEATURES.md) for details.
 
 ### Quick Start with Docker (Recommended)
 
-**Pull from GitHub Container Registry:**
+**Option A: Using Pre-built Image from GitHub Container Registry**
 
 ```bash
-# Pull the latest image
-docker pull ghcr.io/mbrichman/dovos:main
+# 1. Download the docker-compose file for GHCR
+wget https://raw.githubusercontent.com/mbrichman/dovos/main/docker-compose.ghcr.yml
 
-# Or pull a specific version
-docker pull ghcr.io/mbrichman/dovos:v1.0.0
+# 2. Create .env file (optional - uses defaults if not provided)
+cat > .env << EOF
+POSTGRES_USER=dovos
+POSTGRES_PASSWORD=dovos_password
+POSTGRES_DB=dovos
+SECRET_KEY=change-this-secret-key-in-production
+EOF
+
+# 3. Start the stack (PostgreSQL + Dovos)
+docker compose -f docker-compose.ghcr.yml up -d
+
+# 4. Run database migrations
+docker compose -f docker-compose.ghcr.yml exec dovos-rag alembic upgrade head
+
+# 5. Access the application
+open http://localhost:5001
 ```
 
-**Run with Docker Compose:**
+**Option B: Building from Source**
 
 ```bash
-# 1. Configure environment
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials and OpenWebUI settings
+# 1. Clone the repository
+git clone https://github.com/mbrichman/dovos.git
+cd dovos
 
-# 2. Start the entire stack
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# 3. Start the entire stack
 docker compose up -d
 
-# 3. Run database migrations
+# 4. Run database migrations
 docker compose exec dovos-rag alembic upgrade head
 
-# 4. Access the application
+# 5. Access the application
 open http://localhost:5001
 ```
 
