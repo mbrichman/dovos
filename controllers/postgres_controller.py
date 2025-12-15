@@ -681,7 +681,17 @@ class PostgresController:
                     # Model is changing
                     if new_model != current_model:
                         if not confirm:
-                            # Validate model first
+                            # Return confirmation requirement without validation
+                            # (validation will happen when user confirms)
+                            return {
+                                "requires_confirmation": True,
+                                "message": "Changing the embedding model will regenerate all embeddings. This may take a long time depending on the number of messages you have.",
+                                "current_model": current_model,
+                                "new_model": new_model
+                            }
+
+                        # Confirmed - validate model before regeneration
+                        if confirm:
                             validation = self.validate_embedding_model(new_model)
                             if not validation.get('valid'):
                                 return {
@@ -689,21 +699,7 @@ class PostgresController:
                                     "error": f"Invalid model: {validation.get('error')}"
                                 }
 
-                            # Count messages for confirmation
-                            with get_unit_of_work() as uow:
-                                msg_count = uow.session.query(func.count(Message.id)).scalar()
-
-                            # Return confirmation requirement
-                            return {
-                                "requires_confirmation": True,
-                                "message": f"Regenerate embeddings for {msg_count:,} messages?",
-                                "current_model": current_model,
-                                "new_model": new_model,
-                                "message_count": msg_count
-                            }
-
-                        # Confirmed - proceed with regeneration
-                        if confirm:
+                            # Proceed with regeneration
                             job_count = self.regenerate_embeddings(new_model)
                             self.adapter.set_setting('embedding_model_previous', current_model)
                             self.adapter.set_setting('embedding_model', new_model)

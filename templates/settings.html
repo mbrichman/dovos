@@ -272,7 +272,6 @@
         <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
             <p style="margin: 5px 0;"><strong>Current Model:</strong> <span id="confirmCurrentModel"></span></p>
             <p style="margin: 5px 0;"><strong>New Model:</strong> <span id="confirmNewModel"></span></p>
-            <p style="margin: 5px 0;"><strong>Messages:</strong> <span id="confirmMessageCount"></span></p>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button id="confirmCancelBtn" class="btn btn-secondary" style="flex: 1;" onclick="closeConfirmModal()">Cancel</button>
@@ -487,7 +486,6 @@
         document.getElementById('confirmMessage').textContent = data.message;
         document.getElementById('confirmCurrentModel').textContent = data.current_model;
         document.getElementById('confirmNewModel').textContent = data.new_model;
-        document.getElementById('confirmMessageCount').textContent = data.message_count.toLocaleString();
 
         modal.style.display = 'flex';
 
@@ -499,6 +497,15 @@
 
     function closeConfirmModal() {
         document.getElementById('confirmModal').style.display = 'none';
+
+        // Reset dropdown to current model when canceling
+        if (pendingEmbeddingChange && pendingEmbeddingChange.current_model) {
+            const modelSelect = document.getElementById('embedding_model');
+            if (modelSelect) {
+                modelSelect.value = pendingEmbeddingChange.current_model;
+            }
+        }
+
         pendingEmbeddingChange = null;
     }
 
