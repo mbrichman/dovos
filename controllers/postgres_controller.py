@@ -716,8 +716,13 @@ class PostgresController:
 
                 # Save other settings (non-embedding or same model)
                 for key, value in data.items():
-                    if value and key not in ['confirm_regeneration']:
-                        self.adapter.set_setting(key, value)
+                    if key not in ['confirm_regeneration']:
+                        if value:
+                            # Set non-empty values
+                            self.adapter.set_setting(key, value)
+                        else:
+                            # Delete empty values to clear the setting
+                            self.adapter.delete_setting(key)
 
                 return {
                     "success": True,

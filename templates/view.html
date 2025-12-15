@@ -314,7 +314,15 @@ View Conversation
         width: 18px;
         height: 18px;
     }
-    
+    .tools-dropdown-item-danger {
+        color: hsl(var(--destructive));
+    }
+    .tools-dropdown-item-danger:hover,
+    .tools-dropdown-item-danger:active {
+        background-color: hsl(var(--destructive) / 0.1);
+        color: hsl(var(--destructive));
+    }
+
     /* Responsive improvements */
     @media (max-width: 768px) {
         .conversation-header {
@@ -630,12 +638,20 @@ View Conversation
                     </svg>
                     <span>Export as Markdown</span>
                 </a>
+                {% if openwebui_configured %}
                 <button id="exportToOpenWebUIBtn" class="tools-dropdown-item" onclick="exportToOpenWebUI('{{ doc_id }}'); return false;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <span class="button-text">Export to OpenWebUI</span>
                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+                {% endif %}
+                <button class="tools-dropdown-item tools-dropdown-item-danger" onclick="deleteConversation('{{ doc_id }}'); return false;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Delete</span>
                 </button>
                 {% endif %}
             </div>
@@ -1163,7 +1179,40 @@ View Conversation
             }, 3000);
         }
     };
-    
+
+    // Delete conversation function
+    async function deleteConversation(conversationId) {
+        // Close the dropdown menu
+        closeToolsMenu();
+
+        // Confirm deletion
+        if (!confirm('Are you sure you want to delete this conversation? This will also delete all messages and embeddings. This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/conversation/${conversationId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                showNotification('Conversation deleted successfully!', 'success');
+                // Redirect to conversations list after a short delay
+                setTimeout(() => {
+                    window.location.href = '/conversations';
+                }, 1000);
+            } else {
+                showNotification(data.error || 'Failed to delete conversation', 'error');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showNotification('Network error: Could not connect to server', 'error');
+        }
+    }
+
     // Helper function to show notifications
     function showNotification(message, type = 'success') {
         const copySuccess = document.getElementById('copySuccess');
@@ -1171,7 +1220,7 @@ View Conversation
             copySuccess.textContent = message;
             copySuccess.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
             copySuccess.style.display = 'block';
-            
+
             setTimeout(() => {
                 copySuccess.style.display = 'none';
                 copySuccess.style.backgroundColor = '#28a745';

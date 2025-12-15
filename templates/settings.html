@@ -91,10 +91,51 @@
     }
     
     .status-message {
-        padding: 12px;
-        border-radius: 4px;
-        margin-bottom: 20px;
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        padding-right: 40px;
+        border-radius: 8px;
         display: none;
+        z-index: 1000;
+        min-width: 300px;
+        max-width: 600px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .status-message-close {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        line-height: 1;
+        color: inherit;
+        opacity: 0.5;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        transition: opacity 0.2s;
+    }
+
+    .status-message-close:hover {
+        opacity: 1;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     }
     
     .status-success {
@@ -117,11 +158,21 @@
         border: 1px solid #bee5eb;
         display: block;
     }
+
+    .status-testing {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        display: block;
+    }
 {% endblock %}
 
 {% block content %}
 <div class="settings-container">
-    <div id="statusMessage" class="status-message"></div>
+    <div id="statusMessage" class="status-message">
+        <span id="statusMessageText"></span>
+        <button id="statusMessageClose" class="status-message-close" onclick="dismissMessage()" aria-label="Close">&times;</button>
+    </div>
     
     <div class="settings-card">
         <h3>🌐 OpenWebUI Integration</h3>
@@ -264,40 +315,79 @@
     async function testConnection() {
         const url = document.getElementById('openwebui_url').value;
         const apiKey = document.getElementById('openwebui_api_key').value;
-        
+
         if (!url || !apiKey) {
             showMessage('Please fill in both OpenWebUI URL and API Key', 'info');
             return;
         }
-        
-        showMessage('Testing connection...', 'info');
-        
+
+        showMessage('Testing connection...', 'testing'); // Use 'testing' type to prevent auto-hide
+
         try {
+            // Create abort controller for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
             const response = await fetch(url + '/api/v1/health', {
                 headers: {
                     'Authorization': 'Bearer ' + apiKey
-                }
+                },
+                signal: controller.signal
             });
-            
+
+            clearTimeout(timeoutId);
+
             if (response.ok) {
                 showMessage('✅ Connection successful!', 'success');
             } else {
                 showMessage('❌ Connection failed: ' + response.status + ' ' + response.statusText, 'error');
             }
         } catch (error) {
-            showMessage('❌ Connection failed: ' + error.message, 'error');
+            console.error('Test connection error:', error);
+            if (error.name === 'AbortError') {
+                showMessage('❌ Connection timeout: Server did not respond within 10 seconds', 'error');
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                showMessage('❌ Connection failed: Cannot reach server. Check the URL or try using the backend test.', 'error');
+            } else {
+                showMessage('❌ Connection failed: ' + error.message, 'error');
+            }
         }
     }
     
+    let messageTimeout = null;
+
     function showMessage(message, type) {
         const messageEl = document.getElementById('statusMessage');
-        messageEl.textContent = message;
+        const messageTextEl = document.getElementById('statusMessageText');
+
+        // Clear any existing timeout
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+            messageTimeout = null;
+        }
+
+        messageTextEl.textContent = message;
         messageEl.className = 'status-message status-' + type;
-        setTimeout(() => {
-            if (type !== 'error') {
+        messageEl.style.display = 'block'; // Explicitly show the message
+
+        // Auto-hide info/success messages after 5 seconds (but not error or testing)
+        if (type !== 'error' && type !== 'testing') {
+            messageTimeout = setTimeout(() => {
                 messageEl.style.display = 'none';
-            }
-        }, 5000);
+                messageTimeout = null;
+            }, 5000);
+        }
+    }
+
+    function dismissMessage() {
+        const messageEl = document.getElementById('statusMessage');
+        messageEl.style.display = 'none';
+
+        // Clear any pending timeout
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+            messageTimeout = null;
+        }
     }
 
     // ==== EMBEDDING CONFIGURATION FUNCTIONS ====

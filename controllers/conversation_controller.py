@@ -85,6 +85,9 @@ class ConversationController:
                 sort_order
             )
         
+        # Check if OpenWebUI is configured
+        openwebui_configured = postgres_controller.adapter.is_openwebui_configured()
+
         # Render template (no server-side pagination - client handles lazy loading)
         return render_template(
             "conversations.html",
@@ -95,6 +98,7 @@ class ConversationController:
             search_form=search_form,
             search_triggered=search_triggered,
             query=query,
+            openwebui_configured=openwebui_configured,
         )
     
     def view_conversation_with_postgres_adapter(self, doc_id, postgres_controller):
@@ -150,14 +154,18 @@ class ConversationController:
                 }
                 
                 conversation_obj = {'meta': conversation_meta}
-                
+
+                # Check if OpenWebUI is configured
+                openwebui_configured = postgres_controller.adapter.is_openwebui_configured()
+
                 # Use appropriate template based on source
                 if source.lower() == 'docx':
                     return render_template(
                         "view_document.html",
                         conversation=conversation_obj,
                         messages=messages,
-                        doc_id=doc_id
+                        doc_id=doc_id,
+                        openwebui_configured=openwebui_configured
                     )
                 else:
                     return render_template(
@@ -165,7 +173,8 @@ class ConversationController:
                         conversation=conversation_obj,
                         messages=messages,
                         assistant_name=assistant_name,
-                        doc_id=doc_id
+                        doc_id=doc_id,
+                        openwebui_configured=openwebui_configured
                     )
         
         except Exception as e:

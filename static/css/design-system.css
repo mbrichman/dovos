@@ -862,6 +862,7 @@ body {
   cursor: pointer;
   width: 100%;
   text-align: left;
+  text-decoration: none;
   transition: var(--transition-base);
 }
 

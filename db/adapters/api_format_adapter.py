@@ -808,6 +808,26 @@ class APIFormatAdapter:
             logger.error(f"Failed to set setting {key}: {e}")
             return False
 
+    def delete_setting(self, key: str) -> bool:
+        """Delete a setting by key."""
+        try:
+            with get_unit_of_work() as uow:
+                uow.settings.delete(key)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete setting {key}: {e}")
+            return False
+
+    def is_openwebui_configured(self) -> bool:
+        """Check if OpenWebUI is properly configured with URL and API key."""
+        try:
+            openwebui_url = self.get_setting("openwebui_url")
+            openwebui_api_key = self.get_setting("openwebui_api_key")
+            return bool(openwebui_url and openwebui_api_key)
+        except Exception as e:
+            logger.error(f"Failed to check OpenWebUI configuration: {e}")
+            return False
+
 
 # Global adapter instance
 _adapter = None
