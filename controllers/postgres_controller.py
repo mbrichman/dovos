@@ -875,17 +875,17 @@ class PostgresController:
     def _parse_date_range(self, start_str: Optional[str], end_str: Optional[str]) -> Optional[Tuple[datetime, datetime]]:
         """
         Parse date range strings into datetime objects.
-        
+
         Args:
             start_str: Start date string (ISO format)
             end_str: End date string (ISO format)
-            
+
         Returns:
             Tuple of (start_date, end_date) or None if parsing fails
         """
         if not start_str or not end_str:
             return None
-        
+
         try:
             start_date = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
             end_date = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
@@ -893,6 +893,54 @@ class PostgresController:
         except Exception as e:
             logger.warning(f"Failed to parse date range {start_str} - {end_str}: {e}")
             return None
+
+    # ===== LICENSE ENDPOINTS =====
+
+    def get_license_status(self) -> Dict[str, Any]:
+        """
+        GET /api/license/status
+
+        Returns the current license status and tier information.
+
+        Returns:
+            Dict with license status information
+        """
+        from utils.license import get_license_validator
+
+        try:
+            validator = get_license_validator()
+            status = validator.get_status()
+
+            # Add feature availability information
+            from db.importers.registry import EXTRACTOR_METADATA
+
+            premium_features = []
+            free_features = []
+
+            for format_name, metadata in EXTRACTOR_METADATA.items():
+                capabilities = metadata.get('capabilities', {})
+                requires_license = capabilities.get('requires_license', False)
+                display_name = metadata.get('name', format_name.capitalize())
+
+                if requires_license:
+                    premium_features.append(display_name)
+                else:
+                    free_features.append(display_name)
+
+            status['premium_features'] = premium_features
+            status['free_features'] = free_features
+
+            return status
+
+        except Exception as e:
+            logger.error(f"Failed to get license status: {e}")
+            return {
+                'error': str(e),
+                'tier': 'unknown',
+                'has_pro': False,
+                'has_enterprise': False,
+                'is_licensed': False
+            }
 
 
 # ===== ATTACHMENT EXTRACTION UTILITIES =====

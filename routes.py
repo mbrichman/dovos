@@ -54,6 +54,10 @@ def init_routes(app):
     def api_settings():
         return jsonify(postgres_controller.handle_settings(request))
 
+    @app.route("/api/license/status", methods=["GET"])
+    def api_license_status():
+        return jsonify(postgres_controller.get_license_status())
+
     @app.route("/api/embedding/status")
     def embedding_status():
         return jsonify(postgres_controller.get_embedding_status())

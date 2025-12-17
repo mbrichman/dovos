@@ -90,6 +90,7 @@ backups/
 *.sql.gz
 *.backup
 dovos_backups/
+scripts/sync_prod_to_dev.sh
 
 # Large data files
 Source Files/

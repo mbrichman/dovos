@@ -22,13 +22,14 @@ from datetime import datetime, timezone
 
 from db.models.import_result import ImportResult
 from db.repositories.unit_of_work import get_unit_of_work
-from db.importers.registry import detect_format, FORMAT_REGISTRY
+from db.importers.registry import detect_format, FORMAT_REGISTRY, EXTRACTOR_METADATA
 from db.importers.errors import (
     FormatDetectionError,
     ImporterNotAvailableError,
     ExtractionError,
     get_user_friendly_error_message
 )
+from utils.license import check_feature_license
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,16 @@ class ConversationImportService:
                 )
                 user_msg = get_user_friendly_error_message(error, available_formats)
                 raise ValueError(user_msg)
-            
+
+            # Check license requirements for this format
+            metadata = EXTRACTOR_METADATA.get(format_key, {})
+            capabilities = metadata.get('capabilities', {})
+            requires_license = capabilities.get('requires_license', False)
+
+            has_access, license_error = check_feature_license(format_type, requires_license)
+            if not has_access:
+                raise ValueError(license_error)
+
             result.messages.append(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
             result.messages.append(f"📥 Importing {len(conversations)} conversations from {format_type} format")
             logger.info(f"🔍 Detected {format_type} format with {len(conversations)} conversations")
@@ -150,7 +160,16 @@ class ConversationImportService:
             # Extract messages using registry extractor
             if 'docx' not in FORMAT_REGISTRY:
                 raise ValueError("DOCX import not available")
-            
+
+            # Check license requirements for DOCX format
+            metadata = EXTRACTOR_METADATA.get('docx', {})
+            capabilities = metadata.get('capabilities', {})
+            requires_license = capabilities.get('requires_license', False)
+
+            has_access, license_error = check_feature_license('DOCX', requires_license)
+            if not has_access:
+                raise ValueError(license_error)
+
             messages, title, timestamps = FORMAT_REGISTRY['docx'](file_path, filename)
             
             if not messages:
