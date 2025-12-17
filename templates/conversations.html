@@ -124,7 +124,17 @@
                         Export as Markdown
                     </a>
                     {% if openwebui_configured %}
-                    <button class="conversation-menu-item" onclick="exportConversation(event, '{{ conversation.id }}')">
+                    <!-- TODO: Add "Open in OpenWebUI" menu option here
+                         IMPLEMENTATION APPROACH for list view:
+                         1. Add data attributes to conversation items: data-source="{{ conversation.meta.source }}" data-conv-id="{{ conversation.id }}"
+                         2. On page load (DOMContentLoaded), find all OpenWebUI conversations
+                         3. Make parallel API calls to /api/check_openwebui_conversation/<id> for all OpenWebUI convos
+                         4. Update menus with results:
+                            - Add "Open in OpenWebUI" button if exists
+                            - Change "Export" to "Clone" if exists
+                         5. This is BETTER than JIT check because users see correct options immediately
+                         6. See /templates/view.html lines 642-664, 1182-1228 for reference code -->
+                    <button id="export-{{ conversation.id }}" class="conversation-menu-item" onclick="exportConversation(event, '{{ conversation.id }}')">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>

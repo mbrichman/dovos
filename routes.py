@@ -108,6 +108,12 @@ def init_routes(app):
         """API endpoint for exporting conversation to OpenWebUI"""
         return jsonify(postgres_controller.export_to_openwebui(doc_id))
 
+    @app.route("/api/check_openwebui_conversation/<conversation_id>", methods=["GET"])
+    def check_openwebui_conversation(conversation_id):
+        """Check if conversation exists in OpenWebUI"""
+        result = postgres_controller.check_conversation_exists_in_openwebui(conversation_id)
+        return jsonify(result)
+
     @app.route("/api/rag/query", methods=["POST"])
     def api_rag_query():
         """RAG query endpoint with contextual window expansion for OpenWebUI integration."""

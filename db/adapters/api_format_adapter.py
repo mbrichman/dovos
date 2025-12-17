@@ -659,14 +659,27 @@ class APIFormatAdapter:
                 }
                 chat_messages.append(chat_msg)
             
+            # Check if this is a clone (conversation already exists in OpenWebUI)
+            is_clone = False
+            try:
+                check_result = self.check_conversation_exists_in_openwebui(doc_id)
+                is_clone = check_result.get('exists', False) and check_result.get('is_openwebui_conversation', False)
+            except Exception:
+                # If check fails, proceed as new export
+                pass
+
             # Build conversation object
+            title = metadata.get("title", "Untitled Conversation")
+            if is_clone:
+                title = f"{title} (Clone)"
+
             claude_conv = {
-                "name": metadata.get("title", "Untitled Conversation"),
+                "name": title,
                 "created_at": metadata.get("earliest_ts", ""),
                 "updated_at": metadata.get("latest_ts") or metadata.get("earliest_ts", ""),
                 "chat_messages": chat_messages
             }
-            
+
             # Convert to OpenWebUI format
             try:
                 openwebui_conv = convert_conversation(claude_conv)
@@ -739,7 +752,122 @@ class APIFormatAdapter:
                 "success": False,
                 "error": str(e)
             }
-    
+
+    def check_conversation_exists_in_openwebui(self, conversation_id: str) -> Dict[str, Any]:
+        """
+        Check if a conversation exists in OpenWebUI.
+
+        Args:
+            conversation_id: UUID of the conversation to check
+
+        Returns:
+            Dictionary with:
+                - exists (bool): True if conversation exists in OpenWebUI
+                - is_openwebui_conversation (bool): True if conversation originated from OpenWebUI
+                - openwebui_uuid (str|None): The OpenWebUI conversation UUID
+                - url (str|None): URL to open the conversation in OpenWebUI
+                - success (bool): False if there was an error
+                - error (str): Error message if success is False
+        """
+        import requests
+        from uuid import UUID
+
+        try:
+            # Get conversation from database
+            try:
+                conv_uuid = UUID(conversation_id)
+            except (ValueError, TypeError):
+                return {
+                    "success": False,
+                    "error": "Invalid conversation ID format"
+                }
+
+            with get_unit_of_work() as uow:
+                conversation = uow.conversations.get_by_id(conv_uuid)
+                if not conversation:
+                    return {
+                        "success": False,
+                        "error": "Conversation not found"
+                    }
+
+                # Get first message to check metadata
+                messages = uow.messages.get_by_conversation(conv_uuid)
+                if not messages:
+                    return {
+                        "exists": False,
+                        "is_openwebui_conversation": False,
+                        "openwebui_uuid": None,
+                        "url": None
+                    }
+
+                # Check if conversation is from OpenWebUI
+                first_message = messages[0]
+                metadata = first_message.message_metadata or {}
+
+                source = metadata.get('source')
+                openwebui_uuid = metadata.get('original_conversation_id')
+
+                if source != 'openwebui' or not openwebui_uuid:
+                    return {
+                        "exists": False,
+                        "is_openwebui_conversation": False,
+                        "openwebui_uuid": None,
+                        "url": None
+                    }
+
+                # Get OpenWebUI settings
+                openwebui_url = self.get_setting("openwebui_url")
+                openwebui_api_key = self.get_setting("openwebui_api_key")
+
+                if not openwebui_url or not openwebui_api_key:
+                    return {
+                        "success": False,
+                        "error": "OpenWebUI settings not configured. Please set OpenWebUI URL and API key in settings."
+                    }
+
+                # Check if conversation exists in OpenWebUI
+                headers = {
+                    "Authorization": f"Bearer {openwebui_api_key}",
+                    "Content-Type": "application/json"
+                }
+
+                try:
+                    # Disable SSL verification (TODO: Fix SSL certificate)
+                    import urllib3
+                    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+                    response = requests.get(
+                        f"{openwebui_url}/api/v1/chats/{openwebui_uuid}",
+                        headers=headers,
+                        timeout=10,
+                        verify=False
+                    )
+
+                    # 200 = exists, 401 or 404 = doesn't exist
+                    exists = response.status_code == 200
+
+                    return {
+                        "exists": exists,
+                        "is_openwebui_conversation": True,
+                        "openwebui_uuid": openwebui_uuid,
+                        "url": f"{openwebui_url}/c/{openwebui_uuid}"
+                    }
+
+                except requests.exceptions.RequestException as e:
+                    logger.error(f"Failed to check OpenWebUI conversation existence: {e}")
+                    return {
+                        "success": False,
+                        "error": f"Failed to connect to OpenWebUI: {str(e)}",
+                        "is_openwebui_conversation": True
+                    }
+
+        except Exception as e:
+            logger.error(f"Error checking conversation existence: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
     def _parse_conversation_messages(self, document: str, metadata: Dict) -> List[Dict]:
         """Parse conversation document into messages."""
         messages = []

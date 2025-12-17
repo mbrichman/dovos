@@ -301,6 +301,26 @@ View Conversation
     .tools-dropdown-item:not(:last-child) {
         border-bottom: 1px solid hsl(var(--border));
     }
+    /* OpenWebUI menu group styling */
+    .openwebui-menu-group > .tools-dropdown-item {
+        border-bottom: none !important;
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    /* First visible item in group gets normal top padding */
+    .openwebui-menu-group > .tools-dropdown-item:first-child,
+    .openwebui-menu-group > a.tools-dropdown-item:not([style*="display: none"]):first-of-type {
+        padding-top: 0.75rem !important;
+    }
+    /* Last visible item in group gets normal bottom padding */
+    .openwebui-menu-group > .tools-dropdown-item:last-child,
+    .openwebui-menu-group > button.tools-dropdown-item:last-of-type {
+        padding-bottom: 0.75rem !important;
+    }
+    /* Add border after the group */
+    .openwebui-menu-group {
+        border-bottom: 1px solid hsl(var(--border));
+    }
     .tools-dropdown-item:hover,
     .tools-dropdown-item:active {
         background-color: hsl(var(--secondary));
@@ -639,13 +659,30 @@ View Conversation
                     <span>Export as Markdown</span>
                 </a>
                 {% if openwebui_configured %}
-                <button id="exportToOpenWebUIBtn" class="tools-dropdown-item" onclick="exportToOpenWebUI('{{ doc_id }}'); return false;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <span class="button-text">Export to OpenWebUI</span>
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                </button>
+                <div class="openwebui-menu-group">
+                    <!-- Loading state while checking OpenWebUI -->
+                    <div id="openwebuiLoading" class="tools-dropdown-item openwebui-group-item" style="display: none; opacity: 0.6; cursor: default;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Checking OpenWebUI...</span>
+                    </div>
+                    <!-- Open in OpenWebUI button (shown only if conversation exists in OpenWebUI) -->
+                    <a id="openInOpenWebUIBtn" class="tools-dropdown-item openwebui-group-item" href="#" target="_blank" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        <span>Open in OpenWebUI</span>
+                    </a>
+                    <!-- Export/Clone button -->
+                    <button id="exportToOpenWebUIBtn" class="tools-dropdown-item openwebui-group-item" onclick="exportToOpenWebUI('{{ doc_id }}'); return false;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span class="button-text">Export to OpenWebUI</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
                 {% endif %}
                 <button class="tools-dropdown-item tools-dropdown-item-danger" onclick="deleteConversation('{{ doc_id }}'); return false;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -779,15 +816,23 @@ View Conversation
 
 {% block page_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         // Format dates
         formatDates();
-        
+
+        // Check OpenWebUI status on page load (if configured)
+        {% if openwebui_configured %}
+        const conversationId = '{{ doc_id }}';
+        const checkResult = await checkConversationExistsInOpenWebUI(conversationId);
+        updateOpenWebUIMenu(checkResult);
+        openwebuiCheckCompleted = true;
+        {% endif %}
+
         // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             const toolsMenu = document.getElementById('toolsDropdown');
             const toolsButton = document.querySelector('.tools-menu-button');
-            
+
             if (toolsMenu && !toolsMenu.contains(e.target) && !toolsButton.contains(e.target)) {
                 toolsMenu.classList.remove('show');
             }
@@ -1175,6 +1220,57 @@ View Conversation
             }, 3000);
         }
     };
+
+    // Track if we've already checked OpenWebUI existence for this page load
+    let openwebuiCheckCompleted = false;
+
+    // Check if conversation exists in OpenWebUI
+    async function checkConversationExistsInOpenWebUI(conversationId) {
+        try {
+            const response = await fetch(`/api/check_openwebui_conversation/${conversationId}`);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error checking OpenWebUI conversation:', error);
+            return { exists: false, is_openwebui_conversation: false };
+        }
+    }
+
+    // Update menu based on OpenWebUI status
+    function updateOpenWebUIMenu(checkResult) {
+        const openInBtn = document.getElementById('openInOpenWebUIBtn');
+        const exportBtn = document.getElementById('exportToOpenWebUIBtn');
+        const exportBtnText = exportBtn ? exportBtn.querySelector('.button-text') : null;
+        const loading = document.getElementById('openwebuiLoading');
+
+        // Hide loading
+        if (loading) {
+            loading.style.display = 'none';
+        }
+
+        if (checkResult.is_openwebui_conversation && checkResult.exists && checkResult.url) {
+            // Show "Open in OpenWebUI" button
+            if (openInBtn) {
+                openInBtn.href = checkResult.url;
+                openInBtn.style.display = 'flex';
+            }
+
+            // Change "Export" to "Clone"
+            if (exportBtnText) {
+                exportBtnText.textContent = 'Clone to OpenWebUI';
+            }
+        } else {
+            // Hide "Open in OpenWebUI" button
+            if (openInBtn) {
+                openInBtn.style.display = 'none';
+            }
+
+            // Keep as "Export to OpenWebUI"
+            if (exportBtnText) {
+                exportBtnText.textContent = 'Export to OpenWebUI';
+            }
+        }
+    }
 
     // Delete conversation function
     async function deleteConversation(conversationId) {

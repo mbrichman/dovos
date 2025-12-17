@@ -499,19 +499,35 @@ class PostgresController:
     def export_to_openwebui(self, doc_id: str) -> Dict[str, Any]:
         """
         POST /api/export/openwebui/<doc_id>
-        
+
         Export conversation to OpenWebUI format.
         """
         try:
             return self.adapter.export_to_openwebui(doc_id)
-        
+
         except Exception as e:
             logger.error(f"Export failed: {e}")
             return {
                 "success": False,
                 "message": f"Export failed: {str(e)}"
             }
-    
+
+    def check_conversation_exists_in_openwebui(self, conversation_id: str) -> Dict[str, Any]:
+        """
+        GET /api/check_openwebui_conversation/<conversation_id>
+
+        Check if a conversation still exists in OpenWebUI.
+        """
+        try:
+            return self.adapter.check_conversation_exists_in_openwebui(conversation_id)
+
+        except Exception as e:
+            logger.error(f"Check conversation existence failed: {e}")
+            return {
+                "success": False,
+                "error": f"Check failed: {str(e)}"
+            }
+
     # ===== UPLOAD ENDPOINTS =====
     
     def upload(self) -> Any:
