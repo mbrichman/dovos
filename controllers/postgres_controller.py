@@ -148,9 +148,10 @@ class PostgresController:
                 return {"error": "No query provided"}
             
             n_results = int(request.args.get("n", 5))
-            
+
             # Get search type from parameters (new way) or keyword flag (legacy way)
-            search_type = request.args.get("search_type", "auto")
+            # Support both 'search_type' and 'type' as parameter names
+            search_type = request.args.get("search_type") or request.args.get("type", "auto")
             keyword = request.args.get("keyword", "false").lower() == "true"
             
             # Use SearchService based on search type
@@ -222,7 +223,8 @@ class PostgresController:
             
             n_results = data.get('n_results', 10)
             keyword_search = data.get('keyword_search', False)
-            search_type = data.get('search_type', 'auto')
+            # Support both 'search_type' and 'type' as parameter names
+            search_type = data.get('search_type') or data.get('type', 'auto')
             
             # Handle date range filter if specified
             date_range = None

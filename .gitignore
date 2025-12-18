@@ -105,6 +105,9 @@ tests/golden_responses/*.json
 !tests/fixtures/golden_responses/.gitkeep
 !tests/golden_responses/.gitkeep
 
+# Search optimization test data (generated from corpus, contains UUIDs)
+tests/search_optimization/search_test_queries.json
+
 # Documentation (keep local, don't publish)
 docs/
 
