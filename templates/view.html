@@ -502,6 +502,8 @@ View Conversation
     .attachment-badge.audio { background: #dcfce7; color: #166534; }
     .attachment-badge.citation { background: #fed7aa; color: #9a3412; }
     .attachment-badge.artifact { background: #e9d5ff; color: #6b21a8; }
+    .attachment-badge.thinking { background: #fce7f3; color: #9f1239; }
+    .attachment-badge.voice_note { background: #dcfce7; color: #166534; }
     
     .attachment-name {
         flex: 1;
@@ -734,7 +736,98 @@ View Conversation
         font-size: 0.875rem;
         line-height: 1.6;
     }
-    
+
+    .thinking-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid hsl(var(--border));
+    }
+
+    .thinking-icon {
+        font-size: 1.25rem;
+    }
+
+    .thinking-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #9f1239;
+    }
+
+    .thinking-content {
+        padding: 1rem;
+        background: hsl(var(--secondary) / 0.5);
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        font-family: ui-monospace, monospace;
+        color: hsl(var(--foreground));
+    }
+
+    .thinking-summaries {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: hsl(var(--secondary) / 0.3);
+        border-radius: 0.375rem;
+    }
+
+    .thinking-summaries-toggle {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: hsl(var(--muted-foreground));
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .thinking-summaries-content {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid hsl(var(--border) / 0.3);
+    }
+
+    .thinking-summary-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        background: hsl(var(--background));
+        border-left: 2px solid hsl(var(--muted-foreground) / 0.3);
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    .voice-note-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid hsl(var(--border));
+    }
+
+    .voice-note-icon {
+        font-size: 1.25rem;
+    }
+
+    .voice-note-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #166534;
+    }
+
+    .voice-note-content {
+        padding: 1rem;
+        background: hsl(var(--secondary) / 0.5);
+        border-radius: 0.375rem;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        color: hsl(var(--foreground));
+    }
+
     @media (max-width: 768px) {
         .attachment-header {
             gap: 0.5rem;
@@ -926,6 +1019,32 @@ View Conversation
                                         </ul>
                                     </div>
                                     {% endif %}
+                                {% elif attachment.type == 'thinking' %}
+                                    <div class="thinking-header">
+                                        <span class="thinking-icon">🧠</span>
+                                        <span class="thinking-title">Claude's Extended Reasoning</span>
+                                    </div>
+                                    <div class="thinking-content">
+                                        {{ attachment.extracted_content }}
+                                    </div>
+                                    {% if attachment.metadata and attachment.metadata.get('summaries') %}
+                                    <details class="thinking-summaries">
+                                        <summary class="thinking-summaries-toggle">View Summaries</summary>
+                                        <div class="thinking-summaries-content">
+                                            {% for summary in attachment.metadata.summaries %}
+                                            <div class="thinking-summary-item">{{ summary }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </details>
+                                    {% endif %}
+                                {% elif attachment.type == 'voice_note' %}
+                                    <div class="voice-note-header">
+                                        <span class="voice-note-icon">🎤</span>
+                                        <span class="voice-note-title">{{ attachment.metadata.title }}</span>
+                                    </div>
+                                    <div class="voice-note-content">
+                                        {{ attachment.extracted_content }}
+                                    </div>
                                 {% elif attachment.type == 'image' %}
                                     <img src="{{ attachment.extracted_content }}" alt="{{ attachment.file_name }}" style="max-width: 100%; height: auto; border-radius: var(--radius);" />
                                 {% endif %}

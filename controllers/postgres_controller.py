@@ -968,7 +968,10 @@ def extract_claude_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]:
     Claude exports have multiple types of attachments:
     - attachments[]: Files with extracted_content (text files, code, etc.)
     - files[]: File references without content (images, etc.)
-    - content[]: Tool use artifacts (generated documents, code, etc.)
+    - content[]: Multiple content types including:
+        - tool_use.artifacts: Generated documents and code
+        - thinking: Extended reasoning blocks
+        - voice_note: Audio transcriptions
 
     Args:
         message: Claude message dict with 'attachments', 'files', and 'content' fields
@@ -1066,6 +1069,44 @@ def extract_claude_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]:
                     'citations': artifact_input.get('md_citations', [])
                 }
             })
+
+        # Extract thinking blocks (extended reasoning)
+        elif content_type == 'thinking':
+            thinking_content = content_item.get('thinking', '')
+            summaries = content_item.get('summaries', [])
+            cut_off = content_item.get('cut_off', False)
+
+            if thinking_content:
+                attachments.append({
+                    'type': 'thinking',
+                    'file_name': 'Extended Reasoning',
+                    'file_size': len(thinking_content),
+                    'file_type': 'text/plain',
+                    'extracted_content': thinking_content,
+                    'available': True,
+                    'metadata': {
+                        'summaries': summaries,
+                        'cut_off': cut_off
+                    }
+                })
+
+        # Extract voice notes (audio transcriptions)
+        elif content_type == 'voice_note':
+            note_title = content_item.get('title', 'Voice Note')
+            note_text = content_item.get('text', '')
+
+            if note_text:
+                attachments.append({
+                    'type': 'voice_note',
+                    'file_name': note_title,
+                    'file_size': len(note_text),
+                    'file_type': 'audio/transcription',
+                    'extracted_content': note_text,
+                    'available': True,
+                    'metadata': {
+                        'title': note_title
+                    }
+                })
 
     return attachments
 

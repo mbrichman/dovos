@@ -240,6 +240,125 @@ class TestClaudeAttachmentExtraction:
         assert attachments[1]["type"] == "artifact"
         assert attachments[1]["file_name"] == "Report.html"
 
+    def test_extract_thinking_block(self):
+        """Test extraction of thinking block from content array."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-thinking-1",
+            "text": "Let me think about this",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Let me think about this"
+                },
+                {
+                    "type": "thinking",
+                    "thinking": "I need to carefully consider the implications of this approach...",
+                    "summaries": [
+                        "Analyzing the problem",
+                        "Considering alternatives"
+                    ],
+                    "cut_off": False
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["type"] == "thinking"
+        assert attachments[0]["file_name"] == "Extended Reasoning"
+        assert attachments[0]["file_type"] == "text/plain"
+        assert attachments[0]["extracted_content"] == "I need to carefully consider the implications of this approach..."
+        assert attachments[0]["available"] is True
+        assert attachments[0]["metadata"]["summaries"] == ["Analyzing the problem", "Considering alternatives"]
+        assert attachments[0]["metadata"]["cut_off"] is False
+
+    def test_extract_voice_note(self):
+        """Test extraction of voice note from content array."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-voice-1",
+            "text": "Here's what I recorded",
+            "sender": "human",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Here's what I recorded"
+                },
+                {
+                    "type": "voice_note",
+                    "title": "Meeting Notes",
+                    "text": "Discussion about project timeline\nKey deadlines identified\nAction items assigned"
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["type"] == "voice_note"
+        assert attachments[0]["file_name"] == "Meeting Notes"
+        assert attachments[0]["file_type"] == "audio/transcription"
+        assert "Discussion about project timeline" in attachments[0]["extracted_content"]
+        assert attachments[0]["available"] is True
+        assert attachments[0]["metadata"]["title"] == "Meeting Notes"
+
+    def test_extract_multiple_content_types(self):
+        """Test extraction of artifact, thinking block, and voice note together."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-multi",
+            "text": "Here's everything",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "voice_note",
+                    "title": "User Request",
+                    "text": "User wants a summary"
+                },
+                {
+                    "type": "thinking",
+                    "thinking": "Need to analyze the data first",
+                    "summaries": [],
+                    "cut_off": False
+                },
+                {
+                    "type": "tool_use",
+                    "name": "artifacts",
+                    "input": {
+                        "id": "art-1",
+                        "type": "text/markdown",
+                        "title": "Summary",
+                        "content": "# Summary\n\nHere's the data analysis"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 3
+        assert attachments[0]["type"] == "voice_note"
+        assert attachments[1]["type"] == "thinking"
+        assert attachments[2]["type"] == "artifact"
+
 
 class TestChatGPTAttachmentExtraction:
     """Test extraction of attachments from ChatGPT export format."""
