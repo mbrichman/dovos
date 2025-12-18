@@ -62,16 +62,100 @@ export class SearchHandler {
             const searchTerm = searchInput.value.trim();
             if (searchTerm) {
                 const messageContents = document.querySelectorAll('.message-content');
-                
+
                 messageContents.forEach(content => {
-                    // Skip highlighting within tags
-                    const html = content.innerHTML;
-                    const regex = new RegExp(`(${searchTerm})`, 'gi');
-                    
-                    // This is a simple approach - for production, you'd want a more robust HTML-aware solution
-                    content.innerHTML = html.replace(regex, '<mark>$1</mark>');
+                    this.highlightTextNodes(content, searchTerm);
                 });
             }
         }
+    }
+
+    /**
+     * Safely highlights search terms in text nodes only, preserving HTML structure
+     * @param {Element} element - The element to search within
+     * @param {string} searchTerm - The term to highlight
+     */
+    highlightTextNodes(element, searchTerm) {
+        // Escape special regex characters in search term
+        const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedTerm})`, 'gi');
+
+        // Walk through all text nodes
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    // Skip empty text nodes and nodes in script/style tags
+                    if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+                    const parent = node.parentElement;
+                    if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.tagName === 'MARK') {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
+        );
+
+        const nodesToHighlight = [];
+        let currentNode;
+
+        // Collect all text nodes first (can't modify while walking)
+        while (currentNode = walker.nextNode()) {
+            if (regex.test(currentNode.textContent)) {
+                nodesToHighlight.push(currentNode);
+            }
+        }
+
+        // Now highlight each text node
+        nodesToHighlight.forEach(node => {
+            const text = node.textContent;
+            const matches = [];
+            let match;
+
+            // Reset regex for new text
+            regex.lastIndex = 0;
+
+            // Find all matches
+            while ((match = regex.exec(text)) !== null) {
+                matches.push({
+                    index: match.index,
+                    length: match[0].length,
+                    text: match[0]
+                });
+            }
+
+            if (matches.length === 0) return;
+
+            // Create document fragment with highlighted text
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
+
+            matches.forEach(match => {
+                // Add text before match
+                if (match.index > lastIndex) {
+                    fragment.appendChild(
+                        document.createTextNode(text.substring(lastIndex, match.index))
+                    );
+                }
+
+                // Add highlighted match
+                const mark = document.createElement('mark');
+                mark.textContent = match.text;
+                fragment.appendChild(mark);
+
+                lastIndex = match.index + match.length;
+            });
+
+            // Add remaining text
+            if (lastIndex < text.length) {
+                fragment.appendChild(
+                    document.createTextNode(text.substring(lastIndex))
+                );
+            }
+
+            // Replace the text node with the fragment
+            node.parentNode.replaceChild(fragment, node);
+        });
     }
 }

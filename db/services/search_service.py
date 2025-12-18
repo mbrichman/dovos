@@ -25,19 +25,21 @@ class SearchConfig:
     # Ranking weights (must sum to 1.0)
     vector_weight: float = 0.6
     fts_weight: float = 0.4
-    
+
     # Search thresholds
     vector_similarity_threshold: float = 0.2  # Minimum cosine similarity
     fts_rank_threshold: float = 0.01  # Minimum FTS rank
-    
+
     # Result limits
     max_results: int = 50
     max_fts_results: int = 100
     max_vector_results: int = 100
-    
+
     # Query processing
     enable_query_expansion: bool = True
     enable_typo_tolerance: bool = True
+    typo_tolerance_threshold: float = 0.15  # Minimum trigram similarity for fuzzy matches
+    typo_fallback_min_results: int = 3  # If FTS returns fewer results, try fuzzy matching
     
     def __post_init__(self):
         """Validate configuration."""
@@ -293,48 +295,89 @@ class SearchService:
         return self.embedding_generator.generate_embedding(query)
     
     def _fts_search(self, uow, query: str, config: SearchConfig, conversation_id: Optional[UUID]) -> List[Dict[str, Any]]:
-        """Perform full-text search."""
+        """Perform full-text search with typo tolerance fallback."""
         # Expand query if enabled
         if config.enable_query_expansion:
             expanded_query = self._expand_query(query)
         else:
             expanded_query = query
-        
+
         # Search with expanded query
         results = uow.messages.search_full_text(
             query=expanded_query,
             limit=config.max_fts_results,
             conversation_id=conversation_id
         )
-        
+
         # Filter by rank threshold
         filtered_results = [
-            r for r in results 
+            r for r in results
             if r['metadata'].get('rank', 0) >= config.fts_rank_threshold
         ]
-        
-        logger.debug(f"FTS: {len(results)} raw → {len(filtered_results)} after threshold")
+
+        # If typo tolerance is enabled and we have few or no results, try fuzzy matching
+        if (config.enable_typo_tolerance and
+            len(filtered_results) < config.typo_fallback_min_results and
+            len(query.strip()) >= 3):  # Only for queries with 3+ characters
+
+            logger.info(f"🔤 FTS returned {len(filtered_results)} results, trying fuzzy matching for '{query}'")
+
+            # Try fuzzy matching with trigrams
+            fuzzy_results = self._fuzzy_search(uow, query, config, conversation_id)
+
+            # Merge results, avoiding duplicates
+            existing_ids = {r['metadata']['message_id'] for r in filtered_results}
+            for fuzzy_result in fuzzy_results:
+                if fuzzy_result['metadata']['message_id'] not in existing_ids:
+                    # Convert similarity to rank for consistency
+                    fuzzy_result['metadata']['rank'] = fuzzy_result['metadata'].pop('similarity', 0)
+                    fuzzy_result['metadata']['fuzzy_match'] = True
+                    filtered_results.append(fuzzy_result)
+
+            logger.debug(f"FTS+Fuzzy: {len(filtered_results)} total results")
+
+        logger.debug(f"FTS: {len(results)} raw → {len(filtered_results)} after threshold/fuzzy")
         return filtered_results
     
     def _vector_search(self, uow, query_embedding: List[float], config: SearchConfig, conversation_id: Optional[UUID]) -> List[Dict[str, Any]]:
         """Perform vector similarity search."""
         distance_threshold = 1.0 - config.vector_similarity_threshold
-        
+
         results = uow.embeddings.search_similar(
             query_embedding=query_embedding,
             limit=config.max_vector_results,
             distance_threshold=distance_threshold,
             conversation_id=conversation_id
         )
-        
+
         # Filter by similarity threshold
         filtered_results = [
-            r for r in results 
+            r for r in results
             if r['metadata'].get('similarity', 0) >= config.vector_similarity_threshold
         ]
-        
+
         logger.debug(f"Vector: {len(results)} raw → {len(filtered_results)} after threshold")
         return filtered_results
+
+    def _fuzzy_search(self, uow, query: str, config: SearchConfig, conversation_id: Optional[UUID]) -> List[Dict[str, Any]]:
+        """
+        Perform fuzzy text search using trigram similarity.
+        This helps catch typos and misspellings.
+        """
+        try:
+            results = uow.messages.search_trigram(
+                query=query,
+                limit=config.max_fts_results,
+                similarity_threshold=config.typo_tolerance_threshold
+            )
+
+            logger.debug(f"Fuzzy search: found {len(results)} results with similarity >= {config.typo_tolerance_threshold}")
+            return results
+
+        except Exception as e:
+            # If trigram extension is not available, log and return empty
+            logger.warning(f"Fuzzy search failed (pg_trgm may not be installed): {e}")
+            return []
     
     def _combine_and_rank_results(self, 
                                  fts_results: List[Dict[str, Any]], 
@@ -478,19 +521,57 @@ class SearchService:
         
         return '\n'.join(content_lines)
     
+    def get_query_suggestions(self, query: str, limit: int = 5) -> List[str]:
+        """
+        Get query suggestions for potentially misspelled queries.
+        Returns a list of suggested corrections based on content similarity.
+        """
+        if len(query.strip()) < 3:
+            return []
+
+        try:
+            with get_unit_of_work() as uow:
+                # Use trigram similarity to find similar terms in the content
+                # This is a simplified version - in production, you might want to:
+                # 1. Build a dictionary of common terms from your corpus
+                # 2. Use that dictionary for faster suggestion lookups
+                sql_query = text("""
+                    WITH words AS (
+                        SELECT DISTINCT unnest(string_to_array(lower(content), ' ')) as word
+                        FROM messages
+                        WHERE length(unnest(string_to_array(lower(content), ' '))) >= 3
+                        LIMIT 10000
+                    )
+                    SELECT word, similarity(word, :query) as sim
+                    FROM words
+                    WHERE similarity(word, :query) > 0.3
+                    ORDER BY sim DESC
+                    LIMIT :limit
+                """)
+
+                result = uow.session.execute(sql_query, {'query': query.lower(), 'limit': limit})
+                suggestions = [row.word for row in result if row.word != query.lower()]
+
+                logger.debug(f"Query suggestions for '{query}': {suggestions}")
+                return suggestions
+
+        except Exception as e:
+            logger.warning(f"Failed to generate query suggestions: {e}")
+            return []
+
     def get_search_stats(self) -> Dict[str, Any]:
         """Get search-related statistics."""
         with get_unit_of_work() as uow:
             # Get message and embedding counts
             message_stats = uow.messages.get_message_stats()
-            
+
             # Get embedding coverage
             total_messages = message_stats['total_messages']
             embedded_messages = message_stats['embedded_messages']
-            
+
             # Get job queue stats for embedding jobs
             embedding_job_stats = uow.jobs.get_embedding_job_stats()
-            
+
             return {
                 'total_messages': total_messages,
                 'embedded_messages': embedded_messages,
