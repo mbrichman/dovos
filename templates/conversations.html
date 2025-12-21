@@ -636,14 +636,45 @@ function formatDateElement(element) {
         try {
             const date = new Date(dateStr);
             if (!isNaN(date.getTime())) {
-                const options = {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                };
-                element.textContent = date.toLocaleDateString(undefined, options);
+                const now = new Date();
+                const isMobile = window.innerWidth <= 768;
+
+                if (isMobile) {
+                    // Mobile: use compact, localized formats
+                    const isToday = date.toDateString() === now.toDateString();
+                    const isThisYear = date.getFullYear() === now.getFullYear();
+
+                    if (isToday) {
+                        // Today: just show time
+                        element.textContent = date.toLocaleTimeString(undefined, {
+                            hour: 'numeric',
+                            minute: '2-digit'
+                        });
+                    } else if (isThisYear) {
+                        // This year: short date without year
+                        element.textContent = date.toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    } else {
+                        // Older: short numeric date
+                        element.textContent = date.toLocaleDateString(undefined, {
+                            year: '2-digit',
+                            month: 'numeric',
+                            day: 'numeric'
+                        });
+                    }
+                } else {
+                    // Desktop: full format
+                    const options = {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    };
+                    element.textContent = date.toLocaleDateString(undefined, options);
+                }
             }
         } catch (e) {
             console.warn('Date parsing failed:', dateStr, e);
