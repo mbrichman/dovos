@@ -32,14 +32,31 @@
                        value="{{ query or '' }}"
                        class="search-input">
                 <div class="search-mode-select">
-                    <select name="search_type" id="searchType" class="search-mode-dropdown">
-                        <option value="auto" {% if search_form.search_type.data == 'auto' or not search_form.search_type.data %}selected{% endif %}>Smart</option>
-                        <option value="semantic" {% if search_form.search_type.data == 'semantic' %}selected{% endif %}>Semantic</option>
-                        <option value="fts" {% if search_form.search_type.data == 'fts' %}selected{% endif %}>Keyword</option>
-                    </select>
-                    <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <input type="hidden" name="search_type" id="searchType" value="{{ search_form.search_type.data or 'auto' }}">
+                    <button type="button" class="search-mode-trigger" id="searchModeTrigger" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="search-mode-label">
+                            {% if search_form.search_type.data == 'semantic' %}Semantic
+                            {% elif search_form.search_type.data == 'fts' %}Keyword
+                            {% else %}Smart{% endif %}
+                        </span>
+                        <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="search-mode-menu" id="searchModeMenu" role="listbox">
+                        <button type="button" class="search-mode-option {% if search_form.search_type.data == 'auto' or not search_form.search_type.data %}active{% endif %}" data-value="auto" role="option">
+                            <span class="option-label">Smart</span>
+                            <span class="option-desc">Auto-select best method</span>
+                        </button>
+                        <button type="button" class="search-mode-option {% if search_form.search_type.data == 'semantic' %}active{% endif %}" data-value="semantic" role="option">
+                            <span class="option-label">Semantic</span>
+                            <span class="option-desc">Search by meaning</span>
+                        </button>
+                        <button type="button" class="search-mode-option {% if search_form.search_type.data == 'fts' %}active{% endif %}" data-value="fts" role="option">
+                            <span class="option-label">Keyword</span>
+                            <span class="option-desc">Exact text matching</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -250,6 +267,65 @@ searchForm.addEventListener('submit', function(e) {
     searchButton.disabled = true;
     searchButtonText.style.display = 'none';
     searchButtonSpinner.style.display = 'inline-block';
+});
+
+// Search mode dropdown
+const searchModeTrigger = document.getElementById('searchModeTrigger');
+const searchModeMenu = document.getElementById('searchModeMenu');
+const searchTypeInput = document.getElementById('searchType');
+const searchModeLabel = searchModeTrigger.querySelector('.search-mode-label');
+
+function toggleSearchModeMenu() {
+    const isOpen = searchModeMenu.classList.contains('show');
+    if (isOpen) {
+        closeSearchModeMenu();
+    } else {
+        searchModeMenu.classList.add('show');
+        searchModeTrigger.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function closeSearchModeMenu() {
+    searchModeMenu.classList.remove('show');
+    searchModeTrigger.setAttribute('aria-expanded', 'false');
+}
+
+function selectSearchMode(value, label) {
+    searchTypeInput.value = value;
+    searchModeLabel.textContent = label;
+
+    // Update active state
+    document.querySelectorAll('.search-mode-option').forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.dataset.value === value) {
+            opt.classList.add('active');
+        }
+    });
+
+    closeSearchModeMenu();
+}
+
+searchModeTrigger.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSearchModeMenu();
+});
+
+document.querySelectorAll('.search-mode-option').forEach(option => {
+    option.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const value = this.dataset.value;
+        const label = this.querySelector('.option-label').textContent;
+        selectSearchMode(value, label);
+    });
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+    if (!searchModeMenu.contains(e.target) && !searchModeTrigger.contains(e.target)) {
+        closeSearchModeMenu();
+    }
 });
 
 // Toggle filters
