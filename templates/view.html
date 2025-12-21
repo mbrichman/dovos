@@ -944,11 +944,15 @@ View Conversation
         <div>
             <strong>Source:</strong>
             {% if conversation.meta.source|lower == 'claude' %}
-                <span class="badge badge-claude">Claude</span>
+                <span class="conversation-meta-pill violet">Claude</span>
             {% elif conversation.meta.source|lower == 'chatgpt' %}
-                <span class="badge badge-chatgpt">ChatGPT</span>
+                <span class="conversation-meta-pill green">ChatGPT</span>
+            {% elif conversation.meta.source|lower == 'openwebui' %}
+                <span class="conversation-meta-pill blue">OpenWebUI</span>
+            {% elif conversation.meta.source|lower == 'word' %}
+                <span class="conversation-meta-pill amber">Word</span>
             {% else %}
-                <span class="badge">{{ conversation.meta.source|capitalize }}</span>
+                <span class="conversation-meta-pill teal">{{ conversation.meta.source|capitalize }}</span>
             {% endif %}
         </div>
         {% if conversation.meta.earliest_ts %}

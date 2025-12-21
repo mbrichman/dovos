@@ -481,22 +481,6 @@ h1, h2, h3 {
   box-shadow: var(--shadow-xs);
 }
 
-.badge-claude {
-  background: linear-gradient(135deg, hsl(var(--claude-badge)), hsl(280 55% 52%));
-}
-
-.badge-chatgpt {
-  background: linear-gradient(135deg, hsl(var(--chatgpt-badge)), hsl(168 60% 38%));
-}
-
-.badge-openwebui {
-  background: linear-gradient(135deg, hsl(var(--openwebui-badge)), hsl(14 85% 52%));
-}
-
-.badge-word {
-  background: linear-gradient(135deg, hsl(211 100% 50%), hsl(220 90% 55%));
-}
-
 /* Tables */
 .table {
   color: hsl(var(--foreground));
