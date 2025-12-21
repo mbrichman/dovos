@@ -165,3 +165,13 @@ def init_routes(app):
     def api_rag_health():
         """Health check endpoint for RAG service"""
         return jsonify(postgres_controller.rag_health())
+
+    @app.route("/api/sync/openwebui", methods=["POST"])
+    def api_sync_openwebui():
+        """Trigger OpenWebUI sync"""
+        return jsonify(postgres_controller.trigger_openwebui_sync())
+
+    @app.route("/api/sync/status", methods=["GET"])
+    def api_sync_status():
+        """Get sync status and statistics"""
+        return jsonify(postgres_controller.get_sync_status())

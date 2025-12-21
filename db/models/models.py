@@ -15,22 +15,27 @@ Base = declarative_base()
 
 class Conversation(Base):
     __tablename__ = 'conversations'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    
+
+    # Source tracking for sync (OpenWebUI, Claude, ChatGPT)
+    source_id = Column(String(255), nullable=True)  # Original ID from source system
+    source_type = Column(String(50), nullable=True)  # 'openwebui', 'claude', 'chatgpt'
+    source_updated_at = Column(DateTime(timezone=True), nullable=True)  # Last known update time at source
+
     # Relationship to messages
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
-    
+
     def __repr__(self):
         return f"<Conversation(id='{self.id}', title='{self.title[:50]}...')>"
 
 
 class Message(Base):
     __tablename__ = 'messages'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     conversation_id = Column(UUID(as_uuid=True), ForeignKey('conversations.id', ondelete='CASCADE'), nullable=False)
     role = Column(String, nullable=False)
@@ -40,7 +45,10 @@ class Message(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     version = Column(Integer, nullable=False, default=1)
     message_search = Column(TSVECTOR, Computed("to_tsvector('english', coalesce(content, ''))"))  # Generated column
-    
+
+    # Source tracking for sync
+    source_message_id = Column(String(255), nullable=True)  # Original message ID from source system
+
     # Constraints
     __table_args__ = (
         CheckConstraint("role IN ('user', 'assistant', 'system')", name='messages_role_check'),

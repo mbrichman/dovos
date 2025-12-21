@@ -298,15 +298,92 @@ class ConversationRepository(BaseRepository[Conversation]):
     
     def delete_conversation_with_cascade(self, conversation_id: UUID) -> bool:
         """Delete a conversation and all its associated data (messages and embeddings).
-        
+
         Returns True if deleted, False if not found.
         """
         conversation = self.get_by_id(conversation_id)
         if not conversation:
             return False
-        
+
         # PostgreSQL will handle cascade deletion of messages and embeddings
         # due to foreign key constraints defined in the schema
         self.session.delete(conversation)
+        self.session.flush()
+        return True
+
+    def get_by_source(self, source_type: str, source_id: str) -> Optional[Conversation]:
+        """
+        Find a conversation by its source type and source ID.
+
+        Args:
+            source_type: The source system (e.g., 'openwebui', 'claude', 'chatgpt')
+            source_id: The original ID from the source system
+
+        Returns:
+            The conversation if found, None otherwise
+        """
+        return self.session.query(Conversation)\
+            .filter(Conversation.source_type == source_type)\
+            .filter(Conversation.source_id == source_id)\
+            .first()
+
+    def get_all_by_source_type(self, source_type: str) -> List[Conversation]:
+        """
+        Get all conversations from a specific source type.
+
+        Args:
+            source_type: The source system (e.g., 'openwebui', 'claude', 'chatgpt')
+
+        Returns:
+            List of conversations from that source
+        """
+        return self.session.query(Conversation)\
+            .filter(Conversation.source_type == source_type)\
+            .filter(Conversation.source_id.isnot(None))\
+            .order_by(desc(Conversation.updated_at))\
+            .all()
+
+    def get_source_tracking_map(self, source_type: str) -> dict:
+        """
+        Build a map of source_id -> (conversation_id, source_updated_at) for sync.
+
+        This is efficient for comparing many conversations during sync.
+
+        Args:
+            source_type: The source system to get map for
+
+        Returns:
+            Dict mapping source_id to (conversation_id, source_updated_at)
+        """
+        conversations = self.session.query(
+            Conversation.source_id,
+            Conversation.id,
+            Conversation.source_updated_at
+        ).filter(
+            Conversation.source_type == source_type,
+            Conversation.source_id.isnot(None)
+        ).all()
+
+        return {
+            row.source_id: (row.id, row.source_updated_at)
+            for row in conversations
+        }
+
+    def update_source_tracking(self, conversation_id: UUID, source_updated_at: datetime) -> bool:
+        """
+        Update the source_updated_at timestamp for a conversation.
+
+        Args:
+            conversation_id: The conversation ID to update
+            source_updated_at: The new source timestamp
+
+        Returns:
+            True if updated, False if not found
+        """
+        conversation = self.get_by_id(conversation_id)
+        if not conversation:
+            return False
+
+        conversation.source_updated_at = source_updated_at
         self.session.flush()
         return True

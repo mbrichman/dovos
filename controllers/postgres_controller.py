@@ -969,6 +969,90 @@ class PostgresController:
                 'is_licensed': False
             }
 
+    # ===== SYNC ENDPOINTS =====
+
+    def trigger_openwebui_sync(self) -> Dict[str, Any]:
+        """
+        POST /api/sync/openwebui
+
+        Trigger OpenWebUI synchronization in background.
+
+        Returns:
+            Dict with sync status (started, already_running, or error)
+        """
+        from db.services.sync_service import ConversationSyncService
+
+        try:
+            sync_service = ConversationSyncService()
+            result = sync_service.start_background_sync()
+
+            if result['status'] == 'started':
+                return {
+                    "success": True,
+                    "message": "Sync started in background",
+                    "started_at": result['started_at']
+                }
+            elif result['status'] == 'already_running':
+                return {
+                    "success": True,
+                    "message": "Sync already in progress",
+                    "started_at": result['started_at'],
+                    "progress": result['progress']
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get('error', 'Unknown error'),
+                    "errors": [result.get('error', 'Unknown error')]
+                }
+
+        except Exception as e:
+            logger.error(f"OpenWebUI sync failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "errors": [str(e)]
+            }
+
+    def get_sync_status(self) -> Dict[str, Any]:
+        """
+        GET /api/sync/status
+
+        Get current sync status and statistics.
+
+        Returns:
+            Dict with sync status information
+        """
+        from db.services.sync_service import ConversationSyncService
+
+        try:
+            sync_service = ConversationSyncService()
+            status = sync_service.get_sync_status()
+
+            # Add running sync info
+            sync_progress = sync_service.get_sync_progress()
+            status['sync_running'] = sync_progress['running']
+            # Always include progress (shows completion message after sync finishes)
+            if sync_progress['progress']:
+                status['sync_progress'] = sync_progress['progress']
+            if sync_progress['started_at']:
+                status['sync_started_at'] = sync_progress['started_at']
+            if sync_progress['error']:
+                status['sync_error'] = sync_progress['error']
+
+            return status
+
+        except Exception as e:
+            logger.error(f"Failed to get sync status: {e}")
+            return {
+                "error": str(e),
+                "last_openwebui_sync": None,
+                "conversations_by_source": {},
+                "total_conversations": 0,
+                "openwebui_configured": False,
+                "sync_running": False
+            }
+
 
 # ===== ATTACHMENT EXTRACTION UTILITIES =====
 

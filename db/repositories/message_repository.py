@@ -288,3 +288,63 @@ class MessageRepository(BaseRepository[Message]):
             'embedding_coverage_percent': round((embedded_count / total_messages) * 100, 2) if total_messages > 0 else 0,
             'recent_messages_24h': recent_messages
         }
+
+    def get_by_source_message_id(self, conversation_id: UUID, source_message_id: str) -> Optional[Message]:
+        """
+        Find a message by its source message ID within a conversation.
+
+        Args:
+            conversation_id: The conversation ID to search in
+            source_message_id: The original message ID from the source system
+
+        Returns:
+            The message if found, None otherwise
+        """
+        return self.session.query(Message)\
+            .filter(Message.conversation_id == conversation_id)\
+            .filter(Message.source_message_id == source_message_id)\
+            .first()
+
+    def get_max_sequence(self, conversation_id: UUID) -> int:
+        """
+        Get the highest sequence number for a conversation.
+
+        Used when appending new messages to determine the next sequence number.
+
+        Args:
+            conversation_id: The conversation ID
+
+        Returns:
+            The maximum sequence number, or 0 if no messages exist
+        """
+        from sqlalchemy import cast, Integer
+
+        result = self.session.query(
+            func.max(
+                func.coalesce(
+                    cast(text("metadata->>'sequence'"), Integer),
+                    0
+                )
+            )
+        ).filter(Message.conversation_id == conversation_id).scalar()
+
+        return result or 0
+
+    def get_source_message_ids(self, conversation_id: UUID) -> set:
+        """
+        Get all source_message_ids for a conversation.
+
+        Useful for efficiently checking which messages already exist.
+
+        Args:
+            conversation_id: The conversation ID
+
+        Returns:
+            Set of source_message_ids (excluding None values)
+        """
+        result = self.session.query(Message.source_message_id)\
+            .filter(Message.conversation_id == conversation_id)\
+            .filter(Message.source_message_id.isnot(None))\
+            .all()
+
+        return {row.source_message_id for row in result}

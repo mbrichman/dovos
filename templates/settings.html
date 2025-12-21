@@ -214,6 +214,28 @@
     </div>
 
     <div class="settings-card">
+        <h3>🔄 Sync with OpenWebUI</h3>
+
+        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Last Sync:</strong>
+                    <span id="lastSyncTime" style="margin-left: 8px;">Never</span>
+                </div>
+                <button type="button" id="syncNowBtn" class="btn btn-primary" onclick="triggerSync()">
+                    🔄 Sync Now
+                </button>
+            </div>
+            <div id="syncStats" style="margin-top: 10px; font-size: 14px; color: #666;">
+                Loading sync status...
+            </div>
+        </div>
+
+        <div id="syncResult" style="display: none; padding: 15px; border-radius: 4px; margin-top: 15px;">
+        </div>
+    </div>
+
+    <div class="settings-card">
         <h3>🧠 Embedding Configuration</h3>
 
         <!-- Worker Status Section -->
@@ -547,6 +569,136 @@
     // Load embedding status on page load
     document.addEventListener('DOMContentLoaded', function() {
         refreshEmbeddingStatus();
+        refreshSyncStatus();
     });
+
+    // ==== SYNC FUNCTIONS ====
+
+    async function refreshSyncStatus() {
+        try {
+            const response = await fetch('/api/sync/status');
+            const data = await response.json();
+
+            // Update last sync time
+            const lastSyncEl = document.getElementById('lastSyncTime');
+            if (data.last_openwebui_sync) {
+                const syncDate = new Date(data.last_openwebui_sync);
+                lastSyncEl.textContent = syncDate.toLocaleString();
+            } else {
+                lastSyncEl.textContent = 'Never';
+            }
+
+            // Update sync stats
+            const statsEl = document.getElementById('syncStats');
+            const sources = data.conversations_by_source || {};
+            const openwebuiCount = sources.openwebui || 0;
+            const syncBtn = document.getElementById('syncNowBtn');
+
+            if (data.openwebui_configured) {
+                let statsHtml = `
+                    <strong>OpenWebUI Conversations:</strong> ${openwebuiCount} |
+                    <strong>Total:</strong> ${data.total_conversations || 0}
+                `;
+
+                // Show sync progress or completion status
+                if (data.sync_running) {
+                    statsHtml += `<br><span style="color: #28a745;"><strong>Sync in progress:</strong> ${data.sync_progress || 'Starting...'}</span>`;
+                    // Disable sync button while running
+                    if (syncBtn) {
+                        syncBtn.disabled = true;
+                        syncBtn.textContent = '⏳ Syncing...';
+                    }
+                    // Auto-refresh while running
+                    setTimeout(refreshSyncStatus, 3000);
+                } else {
+                    // Re-enable sync button
+                    if (syncBtn) {
+                        syncBtn.disabled = false;
+                        syncBtn.textContent = '🔄 Sync Now';
+                    }
+                    // Show last sync result if available
+                    if (data.sync_progress && data.sync_progress !== 'Failed') {
+                        statsHtml += `<br><span style="color: #666;"><strong>Last result:</strong> ${data.sync_progress}</span>`;
+                    }
+                }
+
+                // Show last error if any
+                if (data.sync_error) {
+                    statsHtml += `<br><span style="color: #dc3545;"><strong>Last error:</strong> ${data.sync_error}</span>`;
+                }
+
+                statsEl.innerHTML = statsHtml;
+            } else {
+                statsEl.innerHTML = '<span style="color: #dc3545;">OpenWebUI not configured. Please save URL and API key above.</span>';
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch sync status:', error);
+            document.getElementById('syncStats').textContent = 'Failed to load sync status';
+        }
+    }
+
+    async function triggerSync() {
+        const syncBtn = document.getElementById('syncNowBtn');
+        const resultDiv = document.getElementById('syncResult');
+
+        // Disable button and show loading state
+        syncBtn.disabled = true;
+        syncBtn.textContent = '⏳ Starting...';
+        resultDiv.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/sync/openwebui', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            // Show result
+            resultDiv.style.display = 'block';
+
+            if (data.success) {
+                resultDiv.style.background = '#d4edda';
+                resultDiv.style.border = '1px solid #c3e6cb';
+                resultDiv.innerHTML = `
+                    <strong style="color: #155724;">${data.message}</strong><br>
+                    <span style="color: #155724;">
+                        Progress will update automatically. You can close this page.
+                    </span>
+                `;
+
+                // Start polling for status updates
+                syncBtn.textContent = '⏳ Syncing...';
+                setTimeout(refreshSyncStatus, 2000);
+            } else {
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.border = '1px solid #f5c6cb';
+                const errorMsg = data.errors && data.errors.length > 0 ? data.errors[0] : (data.error || 'Unknown error');
+                resultDiv.innerHTML = `
+                    <strong style="color: #721c24;">Sync Failed</strong><br>
+                    <span style="color: #721c24;">${errorMsg}</span>
+                `;
+                // Re-enable button on error
+                syncBtn.disabled = false;
+                syncBtn.textContent = '🔄 Sync Now';
+            }
+
+        } catch (error) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#f8d7da';
+            resultDiv.style.border = '1px solid #f5c6cb';
+            resultDiv.innerHTML = `
+                <strong style="color: #721c24;">Sync Failed</strong><br>
+                <span style="color: #721c24;">${error.message}</span>
+            `;
+            // Re-enable button on error
+            syncBtn.disabled = false;
+            syncBtn.textContent = '🔄 Sync Now';
+        }
+        // Note: button stays disabled until sync completes (handled by refreshSyncStatus)
+    }
 </script>
 {% endblock %}

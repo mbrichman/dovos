@@ -240,15 +240,15 @@ class ConversationImportService:
         """
         return detect_format(data)
     
-    def _build_existing_conversations_map(self) -> Dict[str, Tuple[str, str]]:
+    def _build_existing_conversations_map(self) -> Dict[str, Tuple[str, str, datetime]]:
         """
-        Build a map of existing conversations for duplicate detection.
-        
+        Build a map of existing conversations for duplicate/update detection.
+
         Returns:
-            Dict mapping conversation_id -> (content_hash, db_id)
+            Dict mapping source_id -> (content_hash, db_id, source_updated_at)
         """
         existing_conv_map = {}
-        
+
         with get_unit_of_work() as uow:
             existing_conversations = uow.conversations.get_all()
             for conv in existing_conversations:
@@ -256,20 +256,23 @@ class ConversationImportService:
                 # Concatenate all message content for duplicate detection
                 full_content = "\n\n".join(msg.content for msg in messages if msg.content)
                 content_hash = hashlib.sha256(full_content.encode()).hexdigest()
-                
-                # Store by original conversation ID if available in metadata
-                if messages and messages[0].message_metadata:
+
+                # Use source_id from conversation if available (new approach)
+                if conv.source_id:
+                    existing_conv_map[conv.source_id] = (content_hash, conv.id, conv.source_updated_at)
+                # Fall back to original_conversation_id from message metadata (legacy approach)
+                elif messages and messages[0].message_metadata:
                     original_id = messages[0].message_metadata.get('original_conversation_id')
                     if original_id:
-                        existing_conv_map[original_id] = (content_hash, conv.id)
-        
+                        existing_conv_map[original_id] = (content_hash, conv.id, None)
+
         return existing_conv_map
     
     def _import_single_conversation(
         self,
         conv_data: Dict[str, Any],
         format_type: str,
-        existing_conv_map: Dict[str, Tuple[str, str]],
+        existing_conv_map: Dict[str, Tuple[str, str, datetime]],
         result: ImportResult
     ) -> None:
         """
@@ -313,23 +316,35 @@ class ConversationImportService:
         if not messages:
             return
         
-        # Check for duplicates using conversation ID
+        # Check for duplicates/updates using conversation ID
         conv_id = conv_data.get('id') or conv_data.get('uuid')
         full_content = "\n\n".join(msg['content'] for msg in messages if msg['content'].strip())
         content_hash = hashlib.sha256(full_content.encode()).hexdigest()
-        
+
         if conv_id and conv_id in existing_conv_map:
-            existing_hash, existing_db_id = existing_conv_map[conv_id]
+            existing_hash, existing_db_id, existing_source_updated_at = existing_conv_map[conv_id]
             if content_hash == existing_hash:
                 # Content is identical, skip this duplicate
                 result.skipped_duplicates += 1
                 logger.info(f"Skipping duplicate conversation: {title}")
                 return
             else:
-                # Content changed - for now we skip (update logic would go here)
-                result.skipped_duplicates += 1
-                logger.info(f"Conversation exists with different content: {title} - skipping")
-                return
+                # Content changed - check if we should update
+                source_updated_at = self._extract_source_updated_at(conv_data, format_type)
+
+                if self._should_update(existing_source_updated_at, source_updated_at):
+                    # Update the existing conversation with new messages
+                    messages_added = self._update_existing_conversation(
+                        existing_db_id, conv_data, format_type, messages, source_updated_at
+                    )
+                    result.updated_count += 1
+                    result.messages_added += messages_added
+                    logger.info(f"Updated conversation '{title}' with {messages_added} new messages")
+                    return
+                else:
+                    result.skipped_duplicates += 1
+                    logger.info(f"Conversation exists with different content: {title} - skipping (no newer timestamp)")
+                    return
         
         # Calculate earliest and latest timestamps from messages
         timestamps = [msg.get('created_at') for msg in messages if msg.get('created_at')]
@@ -355,8 +370,16 @@ class ConversationImportService:
         
         # Import in a single transaction
         with get_unit_of_work() as uow:
-            # Create conversation with original timestamps if available
+            # Create conversation with original timestamps and source tracking
             conv_kwargs = {'title': title}
+
+            # Add source tracking fields
+            if conv_id:
+                conv_kwargs['source_id'] = conv_id
+                conv_kwargs['source_type'] = format_type.lower()
+                source_updated_at = self._extract_source_updated_at(conv_data, format_type)
+                if source_updated_at:
+                    conv_kwargs['source_updated_at'] = source_updated_at
             
             # Set original timestamps if available
             # ChatGPT/OpenWebUI use Unix epoch (numeric), Claude uses ISO format (string)
@@ -464,6 +487,166 @@ class ConversationImportService:
             # Transaction commits here automatically
         
         result.imported_count += 1
-        
+
         if result.imported_count % 50 == 0:
-            logger.info(f"📊 Imported {result.imported_count} conversations...")
+            logger.info(f"Imported {result.imported_count} conversations...")
+
+    def _extract_source_updated_at(self, conv_data: Dict[str, Any], format_type: str) -> datetime:
+        """
+        Extract the source updated_at timestamp from conversation data.
+
+        Args:
+            conv_data: Conversation data
+            format_type: Detected format type
+
+        Returns:
+            datetime object or None if not available
+        """
+        ts = None
+
+        if format_type.lower() == 'chatgpt':
+            ts = conv_data.get('update_time') or conv_data.get('create_time')
+        elif format_type.lower() == 'claude':
+            ts = conv_data.get('updated_at') or conv_data.get('created_at')
+        elif format_type.lower() == 'openwebui':
+            ts = conv_data.get('updated_at') or conv_data.get('created_at')
+
+        if ts is None:
+            return None
+
+        try:
+            if isinstance(ts, datetime):
+                return ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
+            elif isinstance(ts, (int, float)):
+                # Detect nanoseconds (> 10^12)
+                if ts > 10**12:
+                    ts = ts / 10**9
+                # Detect milliseconds (> 10^11)
+                elif ts > 10**11:
+                    ts = ts / 1000.0
+                return datetime.fromtimestamp(ts, tz=timezone.utc)
+            elif isinstance(ts, str):
+                return datetime.fromisoformat(ts.replace('Z', '+00:00'))
+        except (ValueError, TypeError, OSError):
+            pass
+
+        return None
+
+    def _should_update(self, existing_updated_at: datetime, new_updated_at: datetime) -> bool:
+        """
+        Determine if an existing conversation should be updated.
+
+        Args:
+            existing_updated_at: The existing source_updated_at timestamp (may be None)
+            new_updated_at: The new source updated_at timestamp (may be None)
+
+        Returns:
+            True if the conversation should be updated
+        """
+        # If we don't have the new timestamp, don't update
+        if new_updated_at is None:
+            return False
+
+        # If we don't have an existing timestamp, update (assume it's newer)
+        if existing_updated_at is None:
+            return True
+
+        # Update if the new timestamp is newer
+        return new_updated_at > existing_updated_at
+
+    def _update_existing_conversation(
+        self,
+        conversation_id,
+        conv_data: Dict[str, Any],
+        format_type: str,
+        messages: List[Dict],
+        source_updated_at: datetime
+    ) -> int:
+        """
+        Update an existing conversation with new messages.
+
+        Args:
+            conversation_id: The existing conversation's UUID
+            conv_data: Conversation data
+            format_type: Detected format type
+            messages: Extracted messages
+            source_updated_at: The source's updated_at timestamp
+
+        Returns:
+            Number of messages added
+        """
+        messages_added = 0
+
+        with get_unit_of_work() as uow:
+            # Get existing messages for comparison
+            existing_messages = uow.messages.get_by_conversation(conversation_id)
+            existing_content_hashes = {
+                hashlib.sha256(f"{m.role}:{m.content}".encode()).hexdigest()[:16]
+                for m in existing_messages
+            }
+
+            # Get max sequence for appending
+            max_sequence = uow.messages.get_max_sequence(conversation_id)
+
+            # Process new messages
+            for idx, msg in enumerate(messages):
+                content = msg.get('content', '').strip()
+                if not content:
+                    continue
+
+                # Check if message already exists by content hash
+                content_hash = hashlib.sha256(f"{msg['role']}:{content}".encode()).hexdigest()[:16]
+                if content_hash in existing_content_hashes:
+                    continue
+
+                # New message, add it
+                max_sequence += 1
+                message_metadata = {
+                    'source': format_type.lower(),
+                    'sequence': max_sequence
+                }
+
+                # Determine message timestamp
+                msg_ts = msg.get('created_at')
+                msg_kwargs = {
+                    'conversation_id': conversation_id,
+                    'role': msg['role'],
+                    'content': content,
+                    'message_metadata': message_metadata
+                }
+
+                if msg_ts:
+                    try:
+                        if isinstance(msg_ts, datetime):
+                            msg_kwargs['created_at'] = msg_ts
+                        elif isinstance(msg_ts, (int, float)):
+                            msg_kwargs['created_at'] = datetime.fromtimestamp(msg_ts, tz=timezone.utc)
+                        elif isinstance(msg_ts, str):
+                            msg_kwargs['created_at'] = datetime.fromisoformat(msg_ts.replace('Z', '+00:00'))
+                    except (ValueError, TypeError, OSError):
+                        pass
+
+                message = uow.messages.create(**msg_kwargs)
+                uow.session.flush()
+
+                # Enqueue embedding job
+                uow.jobs.enqueue(
+                    kind='generate_embedding',
+                    payload={
+                        'message_id': str(message.id),
+                        'conversation_id': str(conversation_id),
+                        'content': content,
+                        'model': 'all-MiniLM-L6-v2'
+                    }
+                )
+
+                messages_added += 1
+                existing_content_hashes.add(content_hash)
+
+            # Update source tracking timestamp
+            if source_updated_at:
+                uow.conversations.update_source_tracking(conversation_id, source_updated_at)
+
+            uow.commit()
+
+        return messages_added
