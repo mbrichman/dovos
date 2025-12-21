@@ -484,6 +484,7 @@ h1, h2, h3 {
 .main-content {
   flex: 1;
   min-width: 0;
+  padding: 2rem;
   background-color: hsl(var(--background));
   position: relative;
 }
@@ -1502,7 +1503,7 @@ h1, h2, h3 {
   }
 
   .main-content {
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
   }
 
   .page-header {
