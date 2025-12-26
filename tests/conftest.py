@@ -188,7 +188,7 @@ def test_db_engine(test_db_url):
     
     # Create all tables
     Base.metadata.create_all(engine)
-    
+
     # Verify extensions are loaded
     with engine.connect() as conn:
         result = conn.execute(text(
@@ -197,7 +197,42 @@ def test_db_engine(test_db_url):
         extensions = [row[0] for row in result]
         assert 'vector' in extensions, "pgvector extension not loaded"
         assert 'pg_trgm' in extensions, "pg_trgm extension not loaded"
-    
+
+    # Create helper views that are defined in alembic migrations
+    with engine.connect() as conn:
+        conn.execute(text("DROP VIEW IF EXISTS conversation_summaries CASCADE"))
+        conn.execute(text("""
+            CREATE VIEW conversation_summaries AS
+            SELECT
+                c.id,
+                c.title,
+                c.created_at,
+                c.updated_at,
+                COUNT(m.id) as message_count,
+                MIN(m.created_at) as earliest_message_at,
+                MAX(m.created_at) as latest_message_at,
+                LEFT(COALESCE(
+                    (SELECT content FROM messages WHERE conversation_id = c.id ORDER BY created_at LIMIT 1),
+                    ''
+                ), 200) as preview
+            FROM conversations c
+            LEFT JOIN messages m ON c.id = m.conversation_id
+            GROUP BY c.id, c.title, c.created_at, c.updated_at
+        """))
+
+        conn.execute(text("DROP VIEW IF EXISTS embedding_coverage CASCADE"))
+        conn.execute(text("""
+            CREATE VIEW embedding_coverage AS
+            SELECT
+                COUNT(m.id) as total_messages,
+                COUNT(e.message_id) as embedded_messages,
+                ROUND(COUNT(e.message_id)::numeric / NULLIF(COUNT(m.id), 0) * 100, 2) as coverage_percent,
+                COUNT(CASE WHEN e.updated_at < m.updated_at THEN 1 END) as stale_embeddings
+            FROM messages m
+            LEFT JOIN message_embeddings e ON m.id = e.message_id
+        """))
+        conn.commit()
+
     yield engine
     
     # Cleanup: drop all tables after test session
