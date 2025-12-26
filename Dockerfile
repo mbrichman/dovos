@@ -15,6 +15,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Cache bust arg - forces rebuild when code changes
+ARG CACHEBUST=1
+
 # Copy application code
 COPY . .
 
