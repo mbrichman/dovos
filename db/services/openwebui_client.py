@@ -143,16 +143,68 @@ class OpenWebUIClient:
             logger.error(f"Failed to get chat {chat_id} from OpenWebUI: {e}")
             raise OpenWebUIClientError(f"Failed to get chat: {e}") from e
 
+    def list_all_chats_from_db(self) -> List[OpenWebUIChat]:
+        """
+        Get ALL conversations including those in folders.
+
+        Uses the /api/v1/chats/all/db endpoint which returns all chats
+        regardless of folder membership.
+
+        Returns:
+            List of all OpenWebUIChat objects (without messages)
+        """
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/v1/chats/all/db",
+                verify=self.verify_ssl,
+                timeout=self.timeout * 2  # Longer timeout for full fetch
+            )
+
+            if response.status_code == 401:
+                raise OpenWebUIAuthError("Authentication failed. Check your API key.")
+            elif response.status_code == 403:
+                raise OpenWebUIAuthError("Access forbidden. Check your permissions.")
+
+            response.raise_for_status()
+
+            chats = []
+            for chat_data in response.json():
+                chats.append(self._parse_chat_summary(chat_data))
+
+            logger.info(f"Fetched {len(chats)} chats from OpenWebUI (including folders)")
+            return chats
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to list all chats from OpenWebUI: {e}")
+            raise OpenWebUIClientError(f"Failed to list all chats: {e}") from e
+
     def iter_all_chats(self) -> Iterator[OpenWebUIChat]:
         """
-        Iterate through all conversations (paginated).
+        Iterate through all conversations including those in folders.
+
+        Uses the /api/v1/chats/all/db endpoint to ensure ALL conversations
+        are included, not just those outside of folders.
 
         Yields:
             OpenWebUIChat objects (without messages)
+        """
+        try:
+            # Try the all/db endpoint first (includes folders)
+            all_chats = self.list_all_chats_from_db()
+            yield from all_chats
+        except OpenWebUIClientError as e:
+            # Fall back to paginated list if all/db fails
+            logger.warning(f"all/db endpoint failed, falling back to pagination: {e}")
+            yield from self._iter_chats_paginated()
 
-        Note:
-            OpenWebUI API returns ~60 chats per page (server-controlled).
-            Stops when a page returns fewer chats or is empty.
+    def _iter_chats_paginated(self) -> Iterator[OpenWebUIChat]:
+        """
+        Iterate through conversations using pagination (legacy fallback).
+
+        Note: This may miss conversations in folders.
+
+        Yields:
+            OpenWebUIChat objects (without messages)
         """
         page = 1
         prev_count = None
