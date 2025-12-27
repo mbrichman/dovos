@@ -52,7 +52,7 @@ DEFAULT_METADATA: Dict[str, ExtractorMetadata] = {
         description='ChatGPT format message extractor. Extracts messages from ChatGPT\'s node-based mapping structure.',
         author='DovOS Contributors',
         supported_extensions=['.json'],
-        capabilities={'auto_detect': True, 'streaming': False, 'requires_license': True},
+        capabilities={'auto_detect': True, 'streaming': False},
         format_spec={
             'description': 'ChatGPT JSON export format',
             'input_type': 'dict',
@@ -68,7 +68,7 @@ DEFAULT_METADATA: Dict[str, ExtractorMetadata] = {
         description='DOCX format message extractor. Extracts messages from Word documents.',
         author='DovOS Contributors',
         supported_extensions=['.docx'],
-        capabilities={'auto_detect': False, 'streaming': False, 'requires_license': True},
+        capabilities={'auto_detect': False, 'streaming': False},
         format_spec={
             'description': 'Microsoft Word DOCX format',
             'input_type': 'file',

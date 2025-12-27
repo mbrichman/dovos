@@ -38,12 +38,6 @@ docs/
 !README.md
 !PREMIUM_FEATURES.md
 
-# Premium importers (not included in public Docker image)
-# These files should not exist in public-release branch
-db/importers/chatgpt.py
-db/importers/docx.py
-utils/docx_parser.py
-
 # Data files (if large)
 data/
 *.db
