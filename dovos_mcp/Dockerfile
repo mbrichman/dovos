@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Install MCP-specific dependencies
+RUN pip install --no-cache-dir -r dovos_mcp/requirements.txt
+
 # Create logs directory
 RUN mkdir -p logs
 

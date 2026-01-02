@@ -26,7 +26,7 @@ from mcp.types import (
     EmbeddedResource,
 )
 from starlette.applications import Starlette
-from starlette.routing import Route
+from starlette.routing import Route, Mount
 from starlette.requests import Request
 from starlette.responses import Response
 import uvicorn
@@ -146,12 +146,13 @@ async def handle_search(arguments: dict) -> Sequence[TextContent]:
         logger.info(f"Searching conversations: query='{query}', mode={search_mode}, limit={limit}")
 
         # Configure search based on mode
+        # All search methods return Tuple[List[SearchResult], Dict[str, Any]]
         if search_mode == "vector":
-            results = search_service.search_vector_only(query, limit=limit)
+            results, _ = search_service.search_vector_only(query, limit=limit)
         elif search_mode == "fulltext":
-            results = search_service.search_fts_only(query, limit=limit)
+            results, _ = search_service.search_fts_only(query, limit=limit)
         else:  # hybrid
-            results = search_service.search(query, limit=limit)
+            results, _ = search_service.search(query, limit=limit)
 
         if not results:
             return [TextContent(
@@ -166,15 +167,13 @@ async def handle_search(arguments: dict) -> Sequence[TextContent]:
 
         for i, result in enumerate(results, 1):
             conversation_id = result.conversation_id
-            title = result.title or "Untitled"
-            score = result.score
-            snippet = result.snippet or "No preview available"
-            message_count = result.message_count or 0
+            title = result.conversation_title or "Untitled"
+            score = result.combined_score
+            snippet = result.content or "No preview available"
 
             output_lines.append(f"{i}. **{title}**")
             output_lines.append(f"   - ID: `{conversation_id}`")
             output_lines.append(f"   - Score: {score:.3f}")
-            output_lines.append(f"   - Messages: {message_count}")
             output_lines.append(f"   - Preview: {snippet[:200]}{'...' if len(snippet) > 200 else ''}")
             output_lines.append("")
 
@@ -243,9 +242,9 @@ async def handle_fetch(arguments: dict) -> Sequence[TextContent]:
             for msg in conversation.messages:
                 role = msg.role.upper() if msg.role else "UNKNOWN"
                 content = msg.content or ""
-                timestamp = msg.timestamp.strftime("%Y-%m-%d %H:%M:%S") if msg.timestamp else ""
+                msg_time = msg.created_at.strftime("%Y-%m-%d %H:%M:%S") if msg.created_at else ""
 
-                output_lines.append(f"**{role}** ({timestamp})")
+                output_lines.append(f"**{role}** ({msg_time})")
                 output_lines.append(content)
                 output_lines.append("")
 
@@ -262,21 +261,23 @@ async def handle_fetch(arguments: dict) -> Sequence[TextContent]:
         )]
 
 
-# Starlette app for HTTP/SSE transport
+# SSE transport instance
+sse_transport = SseServerTransport("/messages/")
+
+
 async def handle_sse(request: Request) -> Response:
     """Handle SSE connection for MCP communication."""
-    async with SseServerTransport("/messages") as (read_stream, write_stream):
+    async with sse_transport.connect_sse(
+        request.scope,
+        request.receive,
+        request._send,
+    ) as (read_stream, write_stream):
         await mcp_server.run(
             read_stream,
             write_stream,
             mcp_server.create_initialization_options()
         )
-
-
-async def handle_messages(request: Request) -> Response:
-    """Handle MCP messages over SSE."""
-    sse = SseServerTransport("/messages")
-    return await sse.handle_sse(request, mcp_server)
+    return Response()
 
 
 async def health_check(request: Request) -> Response:
@@ -291,8 +292,9 @@ async def health_check(request: Request) -> Response:
 app = Starlette(
     debug=False,
     routes=[
-        Route("/sse", endpoint=handle_messages),
+        Route("/sse", endpoint=handle_sse),
         Route("/health", endpoint=health_check),
+        Mount("/messages", app=sse_transport.handle_post_message),
     ],
     on_startup=[initialize_services]
 )
