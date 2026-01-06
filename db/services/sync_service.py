@@ -279,11 +279,19 @@ class ConversationSyncService:
 
             result.updated_count += 1
             result.messages_added += messages_added
+
+            # Sync topics for updated conversation
+            self._sync_topics(client, source_id, existing_id)
+
             logger.info(f"Updated conversation '{chat_summary.title}' with {messages_added} new messages")
         else:
             # New conversation, fetch full chat and create
             full_chat = client.get_chat(source_id)
-            self._create_conversation(full_chat, SyncSource.OPENWEBUI)
+            new_conv_id = self._create_conversation(full_chat, SyncSource.OPENWEBUI)
+
+            # Sync topics for new conversation
+            self._sync_topics(client, source_id, new_conv_id)
+
             result.imported_count += 1
             logger.info(f"Imported new conversation '{chat_summary.title}'")
 
@@ -466,6 +474,39 @@ class ConversationSyncService:
         """Compute a hash for message deduplication."""
         combined = f"{role}:{content}"
         return hashlib.sha256(combined.encode()).hexdigest()[:16]
+
+    def _sync_topics(
+        self,
+        client: OpenWebUIClient,
+        source_id: str,
+        conversation_id: UUID
+    ) -> int:
+        """
+        Sync topics (tags) from OpenWebUI for a conversation.
+
+        Args:
+            client: The OpenWebUI client
+            source_id: The OpenWebUI chat ID
+            conversation_id: The local conversation UUID
+
+        Returns:
+            Number of topics synced
+        """
+        try:
+            topic_names = client.get_chat_topics(source_id)
+            if not topic_names:
+                return 0
+
+            with get_unit_of_work() as uow:
+                uow.topics.set_conversation_topics(conversation_id, topic_names)
+                uow.commit()
+
+            logger.debug(f"Synced {len(topic_names)} topics for conversation {conversation_id}")
+            return len(topic_names)
+
+        except Exception as e:
+            logger.warning(f"Failed to sync topics for {source_id}: {e}")
+            return 0
 
     def get_sync_status(self) -> Dict[str, Any]:
         """

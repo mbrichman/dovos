@@ -143,6 +143,41 @@ class OpenWebUIClient:
             logger.error(f"Failed to get chat {chat_id} from OpenWebUI: {e}")
             raise OpenWebUIClientError(f"Failed to get chat: {e}") from e
 
+    def get_chat_topics(self, chat_id: str) -> List[str]:
+        """
+        Get topics (tags) for a chat.
+
+        Args:
+            chat_id: The chat ID to fetch topics for
+
+        Returns:
+            List of topic name strings (empty list if none or on error)
+        """
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/v1/chats/{chat_id}/tags",
+                verify=self.verify_ssl,
+                timeout=self.timeout
+            )
+
+            # Gracefully handle errors - return empty list rather than raising
+            if response.status_code in (401, 403, 404):
+                logger.debug(f"No topics available for chat {chat_id}: HTTP {response.status_code}")
+                return []
+
+            response.raise_for_status()
+
+            tags = response.json()
+            if not isinstance(tags, list):
+                return []
+
+            # Extract topic names from the tag objects
+            return [tag.get('name', '') for tag in tags if tag.get('name')]
+
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"Failed to get topics for chat {chat_id}: {e}")
+            return []
+
     def list_all_chats_from_db(self) -> List[OpenWebUIChat]:
         """
         Get ALL conversations including those in folders.

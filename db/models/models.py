@@ -32,6 +32,13 @@ class Conversation(Base):
     # Relationship to messages
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
 
+    # Relationship to topics via junction table
+    topics = relationship(
+        "Topic",
+        secondary="conversation_topics",
+        back_populates="conversations"
+    )
+
     def __repr__(self):
         return f"<Conversation(id='{self.id}', title='{self.title[:50]}...')>"
 
@@ -67,17 +74,56 @@ class Message(Base):
 
 class MessageEmbedding(Base):
     __tablename__ = 'message_embeddings'
-    
+
     message_id = Column(UUID(as_uuid=True), ForeignKey('messages.id', ondelete='CASCADE'), primary_key=True)
     embedding = Column(Vector(384))  # Default dimension for all-MiniLM-L6-v2
     model = Column(String, nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    
+
     # Relationship
     message = relationship("Message", back_populates="embedding")
-    
+
     def __repr__(self):
         return f"<MessageEmbedding(message_id='{self.message_id}', model='{self.model}')>"
+
+
+class Topic(Base):
+    """Topics (tags) for categorizing conversations."""
+    __tablename__ = 'topics'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(Text, nullable=False, unique=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+    # Relationship to conversations via junction table
+    conversations = relationship(
+        "Conversation",
+        secondary="conversation_topics",
+        back_populates="topics"
+    )
+
+    def __repr__(self):
+        return f"<Topic(id='{self.id}', name='{self.name}')>"
+
+
+class ConversationTopic(Base):
+    """Junction table linking conversations to topics."""
+    __tablename__ = 'conversation_topics'
+
+    conversation_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey('conversations.id', ondelete='CASCADE'),
+        primary_key=True
+    )
+    topic_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey('topics.id', ondelete='CASCADE'),
+        primary_key=True
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ConversationTopic(conversation_id='{self.conversation_id}', topic_id='{self.topic_id}')>"
 
 
 class Job(Base):
@@ -126,3 +172,5 @@ Index('idx_embeddings_model', MessageEmbedding.model)
 Index('idx_embeddings_updated_at', MessageEmbedding.updated_at.desc())
 Index('idx_jobs_status_kind', Job.status, Job.kind)
 Index('idx_jobs_created_at', Job.created_at.desc())
+Index('idx_topics_name', Topic.name)
+Index('idx_conversation_topics_topic_id', ConversationTopic.topic_id)
