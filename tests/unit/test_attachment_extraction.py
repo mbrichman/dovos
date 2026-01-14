@@ -359,6 +359,460 @@ class TestClaudeAttachmentExtraction:
         assert attachments[1]["type"] == "thinking"
         assert attachments[2]["type"] == "artifact"
 
+    def test_extract_create_file_markdown(self):
+        """Test extraction of create_file tool call with markdown file."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-1",
+            "text": "I'll create that document for you",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "text",
+                    "text": "I'll create that document for you"
+                },
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/red-octopus-value-prop.md",
+                        "file_text": "# Red Octopus\n\nThis is the value proposition document.",
+                        "description": "Creating the Red Octopus value proposition document"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["type"] == "artifact"
+        assert attachments[0]["file_name"] == "red-octopus-value-prop.md"
+        assert attachments[0]["file_type"] == "text/markdown"
+        assert attachments[0]["extracted_content"] == "# Red Octopus\n\nThis is the value proposition document."
+        assert attachments[0]["available"] is True
+        assert attachments[0]["metadata"]["original_path"] == "/home/claude/red-octopus-value-prop.md"
+        assert attachments[0]["metadata"]["description"] == "Creating the Red Octopus value proposition document"
+        assert attachments[0]["metadata"]["tool_name"] == "create_file"
+
+    def test_extract_create_file_python(self):
+        """Test extraction of create_file tool call with Python file."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-2",
+            "text": "Here's the script",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/scripts/hello.py",
+                        "file_text": "#!/usr/bin/env python3\nprint('Hello, World!')",
+                        "description": "Creating a hello world script"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "hello.py"
+        assert attachments[0]["file_type"] == "text/x-python"
+        assert "Hello, World!" in attachments[0]["extracted_content"]
+
+    def test_extract_create_file_javascript(self):
+        """Test extraction of create_file tool call with JavaScript file."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-3",
+            "text": "Here's the component",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/project/src/component.js",
+                        "file_text": "export const Component = () => <div>Hello</div>;",
+                        "description": "Creating React component"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "component.js"
+        assert attachments[0]["file_type"] == "application/javascript"
+
+    def test_extract_create_file_typescript(self):
+        """Test extraction of create_file tool call with TypeScript file."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-4",
+            "text": "Here's the typed component",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/project/src/types.ts",
+                        "file_text": "interface User { name: string; }",
+                        "description": "Creating TypeScript types"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "types.ts"
+        assert attachments[0]["file_type"] == "application/typescript"
+
+    def test_extract_create_file_html(self):
+        """Test extraction of create_file tool call with HTML file."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-5",
+            "text": "Here's the page",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/index.html",
+                        "file_text": "<!DOCTYPE html><html><body>Hello</body></html>",
+                        "description": "Creating HTML page"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "index.html"
+        assert attachments[0]["file_type"] == "text/html"
+
+    def test_extract_create_file_unknown_extension(self):
+        """Test extraction of create_file with unknown extension defaults to text/plain."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-6",
+            "text": "Here's the file",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/data.xyz",
+                        "file_text": "some data content",
+                        "description": "Creating data file"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "data.xyz"
+        assert attachments[0]["file_type"] == "text/plain"
+
+    def test_extract_create_file_empty_content_skipped(self):
+        """Test that create_file with empty content is skipped."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-empty",
+            "text": "Creating empty file",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/empty.txt",
+                        "file_text": "",
+                        "description": "Creating empty file"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 0
+
+    def test_extract_create_file_no_path_uses_default(self):
+        """Test that create_file without path uses default filename."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-create-file-no-path",
+            "text": "Creating file",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "",
+                        "file_text": "some content",
+                        "description": "Creating file without path"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "created_file.txt"
+
+    def test_extract_str_replace(self):
+        """Test extraction of str_replace tool call."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-str-replace-1",
+            "text": "I'll update that section",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "text",
+                    "text": "I'll update that section"
+                },
+                {
+                    "type": "tool_use",
+                    "name": "str_replace",
+                    "input": {
+                        "path": "/home/claude/red-octopus-value-prop.md",
+                        "old_str": "## The Insight\n\nLegal work generates exhaust.",
+                        "new_str": "## The Insight\n\nLegal work is a galaxy of background radiation.",
+                        "description": "Replacing the exhaust metaphor with galaxy metaphor"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["type"] == "file_modification"
+        assert attachments[0]["file_name"] == "red-octopus-value-prop.md"
+        assert attachments[0]["extracted_content"] == "## The Insight\n\nLegal work is a galaxy of background radiation."
+        assert attachments[0]["available"] is True
+        assert attachments[0]["metadata"]["original_path"] == "/home/claude/red-octopus-value-prop.md"
+        assert attachments[0]["metadata"]["old_str"] == "## The Insight\n\nLegal work generates exhaust."
+        assert attachments[0]["metadata"]["description"] == "Replacing the exhaust metaphor with galaxy metaphor"
+        assert attachments[0]["metadata"]["tool_name"] == "str_replace"
+
+    def test_extract_str_replace_empty_new_str_skipped(self):
+        """Test that str_replace with empty new_str is skipped."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-str-replace-empty",
+            "text": "Removing section",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "str_replace",
+                    "input": {
+                        "path": "/home/claude/file.md",
+                        "old_str": "text to remove",
+                        "new_str": "",
+                        "description": "Removing text"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 0
+
+    def test_extract_str_replace_no_path_uses_default(self):
+        """Test that str_replace without path uses default filename."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-str-replace-no-path",
+            "text": "Modifying file",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "str_replace",
+                    "input": {
+                        "path": "",
+                        "old_str": "old",
+                        "new_str": "new content",
+                        "description": "Modifying"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 1
+        assert attachments[0]["file_name"] == "modified_file.txt"
+
+    def test_extract_combined_create_file_and_str_replace(self):
+        """Test extraction of both create_file and str_replace in same message."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-combined-mcp",
+            "text": "Creating and modifying files",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/new-file.md",
+                        "file_text": "# New Document\n\nContent here.",
+                        "description": "Creating new document"
+                    }
+                },
+                {
+                    "type": "tool_use",
+                    "name": "str_replace",
+                    "input": {
+                        "path": "/home/claude/existing.md",
+                        "old_str": "old section",
+                        "new_str": "new section content",
+                        "description": "Updating existing document"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 2
+        assert attachments[0]["type"] == "artifact"
+        assert attachments[0]["file_name"] == "new-file.md"
+        assert attachments[0]["metadata"]["tool_name"] == "create_file"
+        assert attachments[1]["type"] == "file_modification"
+        assert attachments[1]["file_name"] == "existing.md"
+        assert attachments[1]["metadata"]["tool_name"] == "str_replace"
+
+    def test_extract_create_file_with_artifacts_and_thinking(self):
+        """Test extraction of create_file alongside artifacts and thinking blocks."""
+        # Arrange
+        claude_message = {
+            "uuid": "msg-mixed-content",
+            "text": "Here's everything",
+            "sender": "assistant",
+            "attachments": [],
+            "files": [],
+            "content": [
+                {
+                    "type": "thinking",
+                    "thinking": "Let me create the file",
+                    "summaries": [],
+                    "cut_off": False
+                },
+                {
+                    "type": "tool_use",
+                    "name": "artifacts",
+                    "input": {
+                        "id": "art-preview",
+                        "type": "text/markdown",
+                        "title": "Preview",
+                        "content": "# Preview\n\nThis is preview content"
+                    }
+                },
+                {
+                    "type": "tool_use",
+                    "name": "create_file",
+                    "input": {
+                        "path": "/home/claude/final.md",
+                        "file_text": "# Final Document\n\nThis is the final content.",
+                        "description": "Creating final document"
+                    }
+                }
+            ]
+        }
+
+        # Act
+        from controllers.postgres_controller import extract_claude_attachments
+        attachments = extract_claude_attachments(claude_message)
+
+        # Assert
+        assert len(attachments) == 3
+        assert attachments[0]["type"] == "thinking"
+        assert attachments[1]["type"] == "artifact"
+        assert attachments[1]["metadata"].get("tool_name") is None  # artifacts tool, not create_file
+        assert attachments[2]["type"] == "artifact"
+        assert attachments[2]["metadata"]["tool_name"] == "create_file"
+
 
 class TestChatGPTAttachmentExtraction:
     """Test extraction of attachments from ChatGPT export format."""

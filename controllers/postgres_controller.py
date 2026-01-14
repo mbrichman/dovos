@@ -6,6 +6,7 @@ through the APIFormatAdapter for ChromaDB-compatible response formatting.
 """
 
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional, Tuple
 from flask import request
@@ -1224,6 +1225,8 @@ def extract_claude_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]:
     - files[]: File references without content (images, etc.)
     - content[]: Multiple content types including:
         - tool_use.artifacts: Generated documents and code
+        - tool_use.create_file: Files created via MCP tools
+        - tool_use.str_replace: File modifications via MCP tools
         - thinking: Extended reasoning blocks
         - voice_note: Audio transcriptions
 
@@ -1323,6 +1326,71 @@ def extract_claude_attachments(message: Dict[str, Any]) -> List[Dict[str, Any]]:
                     'citations': artifact_input.get('md_citations', [])
                 }
             })
+
+        # Extract create_file tool calls (Claude creates files via MCP tools)
+        elif content_type == 'tool_use' and content_item.get('name') == 'create_file':
+            file_input = content_item.get('input', {})
+            file_path = file_input.get('path', '')
+            file_content = file_input.get('file_text', '')
+            description = file_input.get('description', '')
+
+            if file_content:
+                # Extract filename from path
+                file_name = os.path.basename(file_path) if file_path else 'created_file.txt'
+
+                # Determine file type from extension
+                _, ext = os.path.splitext(file_name)
+                file_type_map = {
+                    '.md': 'text/markdown',
+                    '.py': 'text/x-python',
+                    '.js': 'application/javascript',
+                    '.ts': 'application/typescript',
+                    '.html': 'text/html',
+                    '.css': 'text/css',
+                    '.json': 'application/json',
+                    '.txt': 'text/plain',
+                }
+                file_type = file_type_map.get(ext.lower(), 'text/plain')
+
+                attachments.append({
+                    'type': 'artifact',
+                    'file_name': file_name,
+                    'file_size': len(file_content),
+                    'file_type': file_type,
+                    'extracted_content': file_content,
+                    'available': True,
+                    'metadata': {
+                        'original_path': file_path,
+                        'description': description,
+                        'tool_name': 'create_file'
+                    }
+                })
+
+        # Extract str_replace tool calls (file modifications)
+        elif content_type == 'tool_use' and content_item.get('name') == 'str_replace':
+            file_input = content_item.get('input', {})
+            file_path = file_input.get('path', '')
+            old_str = file_input.get('old_str', '')
+            new_str = file_input.get('new_str', '')
+            description = file_input.get('description', '')
+
+            if new_str:
+                file_name = os.path.basename(file_path) if file_path else 'modified_file.txt'
+
+                attachments.append({
+                    'type': 'file_modification',
+                    'file_name': file_name,
+                    'file_size': len(new_str),
+                    'file_type': 'text/plain',
+                    'extracted_content': new_str,
+                    'available': True,
+                    'metadata': {
+                        'original_path': file_path,
+                        'old_str': old_str,
+                        'description': description,
+                        'tool_name': 'str_replace'
+                    }
+                })
 
         # Extract thinking blocks (extended reasoning)
         elif content_type == 'thinking':
