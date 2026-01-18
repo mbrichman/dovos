@@ -37,14 +37,19 @@ def create_app(database_url=None):
     app.config["SECURITY_REGISTERABLE"] = True
     app.config["SECURITY_SEND_REGISTER_EMAIL"] = False  # No email verification
 
-    # Password is required (passkeys are additive, not a replacement)
-    app.config["SECURITY_PASSWORD_REQUIRED"] = True
+    # === Passkey-Only Flow ===
+    # Unified signin MUST be enabled before setting PASSWORD_REQUIRED to False
+    app.config["SECURITY_UNIFIED_SIGNIN"] = True
+    app.config["SECURITY_PASSWORD_REQUIRED"] = False  # Allow passkey-only registration
+
+    # Unified signin method configuration
+    app.config["SECURITY_US_SIGNIN_REPLACES_LOGIN"] = True  # Use unified signin as main login
 
     # WebAuthn/Passkey configuration
     app.config["SECURITY_WEBAUTHN"] = True
-    app.config["SECURITY_WAN_ALLOW_AS_FIRST_FACTOR"] = False  # Passkeys as 2FA only for now
-    app.config["SECURITY_WAN_ALLOW_AS_MULTI_FACTOR"] = True   # Passkeys can be 2FA
-    app.config["SECURITY_WAN_ALLOW_AS_VERIFY"] = ["secondary"]
+    app.config["SECURITY_WAN_ALLOW_AS_FIRST_FACTOR"] = True   # Passkeys can be primary auth
+    app.config["SECURITY_WAN_ALLOW_AS_MULTI_FACTOR"] = True   # Passkeys can also be 2FA
+    app.config["SECURITY_WAN_ALLOW_AS_VERIFY"] = ["first", "secondary"]
     app.config["SECURITY_WAN_ALLOW_USER_HINTS"] = True
 
     # WebAuthn Relying Party settings
