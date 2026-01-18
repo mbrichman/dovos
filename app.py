@@ -37,9 +37,10 @@ def create_app(database_url=None):
     app.config["SECURITY_REGISTERABLE"] = True
     app.config["SECURITY_SEND_REGISTER_EMAIL"] = False  # No email verification
 
-    # Enable unified signin for passkey-only auth
+    # Unified signin enables multiple auth methods (password + passkey)
     app.config["SECURITY_UNIFIED_SIGNIN"] = True
-    app.config["SECURITY_PASSWORD_REQUIRED"] = False  # Allow passkey-only registration
+    # Password required at registration; users can add passkeys after
+    app.config["SECURITY_PASSWORD_REQUIRED"] = True
 
     # WebAuthn/Passkey configuration
     app.config["SECURITY_WEBAUTHN"] = True

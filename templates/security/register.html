@@ -81,6 +81,25 @@
             color: var(--accent-color);
         }
 
+        .passkey-notice {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.813rem;
+            color: #22c55e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .passkey-notice svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
         .form-group {
             margin-bottom: 1rem;
         }
@@ -140,46 +159,6 @@
             cursor: not-allowed;
         }
 
-        .btn-secondary {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--text-secondary);
-        }
-
-        .passkey-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .passkey-section h3 {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-        }
-
-        .passkey-icon {
-            width: 20px;
-            height: 20px;
-        }
-
         .alert {
             padding: 0.75rem 1rem;
             border-radius: 8px;
@@ -191,12 +170,6 @@
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.2);
             color: #ef4444;
-        }
-
-        .alert-success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            color: #22c55e;
         }
 
         .login-link {
@@ -215,57 +188,6 @@
         .login-link a:hover {
             text-decoration: underline;
         }
-
-        #passkey-status {
-            display: none;
-        }
-
-        .passkey-success {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #22c55e;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        .auth-method-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .auth-method-tab {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-primary);
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .auth-method-tab:hover {
-            border-color: var(--text-secondary);
-        }
-
-        .auth-method-tab.active {
-            border-color: var(--accent-color);
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-color);
-        }
-
-        .auth-section {
-            display: none;
-        }
-
-        .auth-section.active {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -283,7 +205,13 @@
 
             <div class="first-user-notice" id="first-user-notice" style="display: none;">
                 Welcome! You're setting up the first account for this Scry instance.
-                This will be the admin account.
+            </div>
+
+            <div class="passkey-notice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>After registration, you can add a passkey in Settings for passwordless login.</span>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -294,69 +222,30 @@
                 {% endif %}
             {% endwith %}
 
-            <div id="register-error" class="alert alert-danger" style="display: none;"></div>
-            <div id="register-success" class="alert alert-success" style="display: none;"></div>
+            <form method="POST" action="{{ url_for('security.register') }}" id="register-form">
+                {{ register_user_form.hidden_tag() if register_user_form.hidden_tag }}
 
-            <!-- Auth method tabs -->
-            <div class="auth-method-tabs">
-                <button type="button" class="auth-method-tab active" data-method="passkey">
-                    Passkey (Recommended)
-                </button>
-                <button type="button" class="auth-method-tab" data-method="password">
-                    Password
-                </button>
-            </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="you@example.com" required autofocus>
+                </div>
 
-            <!-- Passkey registration section -->
-            <div id="passkey-section" class="auth-section active">
-                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                    Passkeys are more secure than passwords and work with your device's biometrics,
-                    security key, or PIN.
-                </p>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="Create a password" required>
+                    <div class="form-hint">At least 8 characters recommended</div>
+                </div>
 
-                <form id="passkey-form">
-                    <div class="form-group">
-                        <label class="form-label" for="passkey-email">Email</label>
-                        <input type="email" id="passkey-email" name="email" class="form-control"
-                               placeholder="you@example.com" required>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="password_confirm">Confirm Password</label>
+                    <input type="password" id="password_confirm" name="password_confirm" class="form-control"
+                           placeholder="Confirm your password" required>
+                </div>
 
-                    <button type="submit" id="register-passkey-btn" class="btn-primary">
-                        <svg class="passkey-icon" style="display: inline; vertical-align: middle; margin-right: 0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                        Create Account with Passkey
-                    </button>
-                </form>
-            </div>
-
-            <!-- Password registration section -->
-            <div id="password-section" class="auth-section">
-                <form method="POST" action="{{ url_for('security.register') }}" id="password-form">
-                    {{ register_user_form.hidden_tag() if register_user_form.hidden_tag }}
-
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control"
-                               placeholder="you@example.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-control"
-                               placeholder="Create a password" required>
-                        <div class="form-hint">At least 8 characters recommended</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="password_confirm">Confirm Password</label>
-                        <input type="password" id="password_confirm" name="password_confirm" class="form-control"
-                               placeholder="Confirm your password" required>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Create Account</button>
-                </form>
-            </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
 
             <div class="login-link">
                 Already have an account? <a href="{{ url_for('security.login') }}">Sign in</a>
@@ -364,150 +253,16 @@
         </div>
     </div>
 
-    <!-- Flask-Security WebAuthn JS -->
-    <script src="{{ url_for('security.static', filename='js/webauthn.js') }}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabs = document.querySelectorAll('.auth-method-tab');
-            const passkeySection = document.getElementById('passkey-section');
-            const passwordSection = document.getElementById('password-section');
-            const passkeyForm = document.getElementById('passkey-form');
-            const errorDiv = document.getElementById('register-error');
-            const successDiv = document.getElementById('register-success');
-            const firstUserNotice = document.getElementById('first-user-notice');
-
-            // Check if this is first user setup
-            fetch('/api/setup/status')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.setup_required) {
-                        firstUserNotice.style.display = 'block';
-                    }
-                })
-                .catch(() => {});
-
-            // Tab switching
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-
-                    const method = tab.dataset.method;
-                    if (method === 'passkey') {
-                        passkeySection.classList.add('active');
-                        passwordSection.classList.remove('active');
-                    } else {
-                        passkeySection.classList.remove('active');
-                        passwordSection.classList.add('active');
-                    }
-                });
-            });
-
-            // Check if WebAuthn is supported
-            if (!window.PublicKeyCredential) {
-                tabs[0].style.display = 'none';
-                tabs[1].click();
-            }
-
-            // Passkey registration
-            passkeyForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                errorDiv.style.display = 'none';
-                successDiv.style.display = 'none';
-
-                const email = document.getElementById('passkey-email').value;
-                const btn = document.getElementById('register-passkey-btn');
-                btn.disabled = true;
-                btn.textContent = 'Setting up passkey...';
-
-                try {
-                    // First, register the user with email only
-                    const registerResponse = await fetch('{{ url_for("security.register") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: ''  // Empty password for passkey-only
-                        })
-                    });
-
-                    // Check if we need to handle a redirect or JSON response
-                    const contentType = registerResponse.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        const registerData = await registerResponse.json();
-                        if (registerData.error) {
-                            throw new Error(registerData.error);
-                        }
-                    }
-
-                    // Now start WebAuthn registration
-                    btn.textContent = 'Creating passkey...';
-
-                    const wanRegisterResponse = await fetch('{{ url_for("security.wan_register") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: 'Primary Passkey',
-                            usage: 'first'
-                        })
-                    });
-
-                    const wanData = await wanRegisterResponse.json();
-
-                    if (wanData.credential_options) {
-                        // Parse and create credential
-                        const options = FlaskSecurity.webauthnParseOptions(wanData.credential_options);
-
-                        const credential = await navigator.credentials.create({
-                            publicKey: options
-                        });
-
-                        // Send credential to server
-                        const verifyResponse = await fetch('{{ url_for("security.wan_register") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                credential: FlaskSecurity.webauthnPackCredential(credential),
-                                name: 'Primary Passkey',
-                                usage: 'first'
-                            })
-                        });
-
-                        const verifyData = await verifyResponse.json();
-
-                        if (verifyData.error) {
-                            throw new Error(verifyData.error);
-                        }
-
-                        // Success!
-                        successDiv.textContent = 'Account created successfully! Redirecting...';
-                        successDiv.style.display = 'block';
-                        setTimeout(() => {
-                            window.location.href = '{{ url_for("conversations") }}';
-                        }, 1000);
-                    } else if (wanData.error) {
-                        throw new Error(wanData.error);
-                    }
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    errorDiv.textContent = error.message || 'Registration failed. Please try again.';
-                    errorDiv.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = `
-                        <svg class="passkey-icon" style="display: inline; vertical-align: middle; margin-right: 0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                        Create Account with Passkey
-                    `;
+        // Check if this is first user setup
+        fetch('/api/setup/status')
+            .then(r => r.json())
+            .then(data => {
+                if (data.setup_required) {
+                    document.getElementById('first-user-notice').style.display = 'block';
                 }
-            });
-        });
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>
