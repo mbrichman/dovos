@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import Security, SQLAlchemySessionUserDatastore
 
 from config import (
     SECRET_KEY, SECURITY_PASSWORD_SALT, AUTH_ENABLED,
@@ -45,6 +45,13 @@ def create_app(database_url=None):
     # Unified signin method configuration
     app.config["SECURITY_US_SIGNIN_REPLACES_LOGIN"] = True  # Use unified signin as main login
 
+    # TOTP configuration (required when unified signin is enabled)
+    app.config["SECURITY_TOTP_SECRETS"] = {"1": SECRET_KEY}
+    app.config["SECURITY_TOTP_ISSUER"] = WEBAUTHN_RP_NAME
+
+    # Restrict enabled methods to just password and webauthn (disables sms/email)
+    app.config["SECURITY_US_ENABLED_METHODS"] = ["password", "webauthn"]
+
     # WebAuthn/Passkey configuration
     app.config["SECURITY_WEBAUTHN"] = True
     app.config["SECURITY_WAN_ALLOW_AS_FIRST_FACTOR"] = True   # Passkeys can be primary auth
@@ -63,9 +70,10 @@ def create_app(database_url=None):
     app.config["SECURITY_POST_REGISTER_VIEW"] = "/conversations"
     app.config["SECURITY_UNAUTHORIZED_VIEW"] = "/login"
 
-    # Use custom login template
+    # Use custom templates
     app.config["SECURITY_LOGIN_USER_TEMPLATE"] = "security/login.html"
     app.config["SECURITY_REGISTER_USER_TEMPLATE"] = "security/register.html"
+    app.config["SECURITY_US_SIGNIN_TEMPLATE"] = "security/us_signin.html"
 
     # Enable CORS for all routes
     CORS(app)
@@ -81,10 +89,10 @@ def create_app(database_url=None):
     # Initialize Flask-Security (only if auth is enabled)
     if AUTH_ENABLED:
         from db.models.models import User, Role, WebAuthn
-        from db.database import SessionFactory
+        from db.database import db_session
 
         # Create the user datastore
-        user_datastore = SQLAlchemyUserDatastore(SessionFactory, User, Role, webauthn_model=WebAuthn)
+        user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role, webauthn_model=WebAuthn)
 
         # Initialize security extension
         security = Security(app, user_datastore)
@@ -92,6 +100,11 @@ def create_app(database_url=None):
         # Store datastore on app for access in routes
         app.user_datastore = user_datastore
         app.security = security
+
+        # Clean up scoped session after each request
+        @app.teardown_appcontext
+        def shutdown_session(exception=None):
+            db_session.remove()
 
     # Initialize routes
     init_routes(app)

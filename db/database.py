@@ -3,7 +3,7 @@ Database connection and session management for PostgreSQL.
 """
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from sqlalchemy.pool import NullPool
 from contextlib import contextmanager
 import logging
@@ -25,6 +25,9 @@ engine = create_engine(
 
 # Create session factory
 SessionFactory = sessionmaker(bind=engine)
+
+# Create scoped session for Flask-Security
+db_session = scoped_session(SessionFactory)
 
 
 def get_session() -> Session:

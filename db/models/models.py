@@ -62,6 +62,9 @@ class User(Base, UserMixin):
     us_totp_secrets = Column(Text, nullable=True)
     us_phone_number = Column(String(128), nullable=True)
 
+    # WebAuthn user handle (required for passkey support)
+    fs_webauthn_user_handle = Column(String(64), unique=True, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     last_login_at = Column(DateTime(timezone=True), nullable=True)

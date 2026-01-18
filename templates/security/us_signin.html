@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Scry</title>
+    <title>Sign In - Scry</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/scry.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,12 +19,12 @@
             padding: 1rem;
         }
 
-        .login-container {
+        .signin-container {
             width: 100%;
             max-width: 400px;
         }
 
-        .login-card {
+        .signin-card {
             background: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: 16px;
@@ -32,7 +32,7 @@
             box-shadow: var(--shadow-lg);
         }
 
-        .login-logo {
+        .signin-logo {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -40,32 +40,32 @@
             margin-bottom: 2rem;
         }
 
-        .login-logo img {
+        .signin-logo img {
             width: 48px;
             height: 48px;
             border-radius: 12px;
         }
 
-        .login-logo h1 {
+        .signin-logo h1 {
             font-size: 1.75rem;
             font-weight: 600;
             color: hsl(var(--foreground));
             margin: 0;
         }
 
-        .login-title {
+        .signin-title {
             text-align: center;
             margin-bottom: 1.5rem;
         }
 
-        .login-title h2 {
+        .signin-title h2 {
             font-size: 1.25rem;
             font-weight: 500;
             color: hsl(var(--foreground));
             margin: 0;
         }
 
-        .login-title p {
+        .signin-title p {
             color: hsl(var(--muted-foreground));
             margin: 0.5rem 0 0;
             font-size: 0.875rem;
@@ -113,11 +113,21 @@
             cursor: pointer;
             transition: var(--transition-base);
             margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
             box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
@@ -209,58 +219,37 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
+    <div class="signin-container">
+        <div class="signin-card">
+            <div class="signin-logo">
                 <img src="{{ url_for('static', filename='images/scry.png') }}" alt="Scry">
                 <h1>Scry</h1>
             </div>
 
-            <div class="login-title">
+            <div class="signin-title">
                 <h2>Welcome back</h2>
-                <p>Sign in to access your conversations</p>
+                <p>Use your passkey to sign in</p>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ message }}</div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
             <div id="passkey-error" class="alert alert-danger"></div>
 
-            <!-- Passkey login button -->
-            <button type="button" id="passkey-login-btn" class="btn-secondary" style="margin-bottom: 1rem;">
+            <!-- Passkey signin button - primary action -->
+            <button type="button" id="passkey-signin-btn" class="btn-primary" style="margin-bottom: 1.5rem;">
                 <svg class="passkey-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <circle cx="12" cy="16" r="1"></circle>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
                 Sign in with Passkey
             </button>
-
-            <div class="divider">
-                <span>or use email</span>
-            </div>
-
-            <!-- Traditional login form -->
-            <form method="POST" action="{{ url_for('security.login') }}" id="login-form">
-                {{ login_user_form.hidden_tag() if login_user_form.hidden_tag }}
-
-                <div class="form-group">
-                    <label class="form-label" for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-control"
-                           placeholder="you@example.com" required autofocus>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control"
-                           placeholder="Enter your password">
-                </div>
-
-                <button type="submit" class="btn-primary">Sign In</button>
-            </form>
 
             <div class="register-link">
                 Don't have an account? <a href="{{ url_for('security.register') }}">Create one</a>
@@ -268,11 +257,16 @@
         </div>
     </div>
 
-    <!-- Flask-Security WebAuthn JS -->
-    <script src="{{ url_for('security.static', filename='js/webauthn.js') }}"></script>
+    <!-- Hidden form for passkey submission -->
+    <form id="passkey-form" method="POST" action="{{ url_for('security.wan_signin') }}" style="display: none;">
+        <input type="hidden" name="credential" id="credential-input">
+        <input type="hidden" name="wan_state" id="wan-state-input">
+        <input type="hidden" name="remember" value="true">
+    </form>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const passkeyBtn = document.getElementById('passkey-login-btn');
+            const passkeyBtn = document.getElementById('passkey-signin-btn');
             const errorDiv = document.getElementById('passkey-error');
 
             // Check if WebAuthn is supported
@@ -281,66 +275,111 @@
                 return;
             }
 
+            // Base64URL helpers
+            function base64UrlDecode(str) {
+                str = str.replace(/-/g, '+').replace(/_/g, '/');
+                while (str.length % 4) str += '=';
+                const binary = atob(str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes.buffer;
+            }
+
+            function base64UrlEncode(buffer) {
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            }
+
             passkeyBtn.addEventListener('click', async function() {
                 errorDiv.style.display = 'none';
                 passkeyBtn.disabled = true;
                 passkeyBtn.textContent = 'Authenticating...';
 
                 try {
-                    // Start WebAuthn signin flow
-                    const response = await fetch('{{ url_for("security.wan_signin") }}', {
+                    // Step 1: Get credential options from Flask-Security
+                    const startResp = await fetch('{{ url_for("security.wan_signin") }}', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
                         body: JSON.stringify({})
                     });
 
-                    const data = await response.json();
+                    const startData = await startResp.json();
+                    const credentialOptions = startData.response?.credential_options || startData.credential_options;
 
-                    if (data.credential_options) {
-                        // Convert base64 to ArrayBuffer for credential options
-                        const options = FlaskSecurity.webauthnParseOptions(data.credential_options);
-
-                        // Get credential
-                        const credential = await navigator.credentials.get({
-                            publicKey: options
-                        });
-
-                        // Send credential to server
-                        const verifyResponse = await fetch('{{ url_for("security.wan_signin") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                credential: FlaskSecurity.webauthnPackCredential(credential)
-                            })
-                        });
-
-                        const verifyData = await verifyResponse.json();
-
-                        if (verifyData.user && verifyData.user.authentication_token) {
-                            // Success - redirect
-                            window.location.href = '{{ url_for("conversations") }}';
-                        } else if (verifyData.error) {
-                            throw new Error(verifyData.error);
-                        } else {
-                            // Redirect to the next page
-                            window.location.href = verifyData.next || '{{ url_for("conversations") }}';
-                        }
-                    } else if (data.error) {
-                        throw new Error(data.error);
+                    if (!credentialOptions) {
+                        throw new Error(startData.response?.errors?.[0] || 'Failed to start passkey authentication');
                     }
+
+                    // Step 2: Prepare options for browser
+                    const options = { ...credentialOptions };
+                    options.challenge = base64UrlDecode(options.challenge);
+
+                    if (options.allowCredentials) {
+                        options.allowCredentials = options.allowCredentials.map(c => ({
+                            ...c,
+                            id: base64UrlDecode(c.id)
+                        }));
+                    }
+
+                    // Step 3: Get credential from browser
+                    const credential = await navigator.credentials.get({ publicKey: options });
+
+                    // Step 4: Send credential to server
+                    const credentialData = {
+                        id: credential.id,
+                        rawId: base64UrlEncode(credential.rawId),
+                        type: credential.type,
+                        response: {
+                            clientDataJSON: base64UrlEncode(credential.response.clientDataJSON),
+                            authenticatorData: base64UrlEncode(credential.response.authenticatorData),
+                            signature: base64UrlEncode(credential.response.signature)
+                        },
+                        extensions: credential.getClientExtensionResults ? credential.getClientExtensionResults() : {}
+                    };
+
+                    if (credential.response.userHandle) {
+                        credentialData.response.userHandle = base64UrlEncode(credential.response.userHandle);
+                    }
+
+                    // Step 4b: Use custom endpoint that properly logs in the user
+                    const verifyResp = await fetch('/api/auth/webauthn-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ credential: credentialData })
+                    });
+
+                    const verifyData = await verifyResp.json();
+
+                    if (verifyData.error) {
+                        throw new Error(verifyData.error);
+                    }
+
+                    if (verifyData.response?.errors) {
+                        throw new Error(verifyData.response.errors[0]);
+                    }
+
+                    // Success - redirect
+                    window.location.href = verifyData.response?.post_login_url || '/conversations';
+
                 } catch (error) {
                     console.error('Passkey error:', error);
-                    errorDiv.textContent = error.message || 'Passkey authentication failed. Please try again or use email/password.';
+                    errorDiv.textContent = error.message || 'Passkey authentication failed. Please try again.';
                     errorDiv.style.display = 'block';
                 } finally {
                     passkeyBtn.disabled = false;
                     passkeyBtn.innerHTML = `
                         <svg class="passkey-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <circle cx="12" cy="16" r="1"></circle>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
                         Sign in with Passkey
                     `;

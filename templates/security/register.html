@@ -316,12 +316,13 @@
                     });
 
                     const wanStartData = await wanStartResp.json();
-                    if (!wanStartData.credential_options) {
+                    const credentialOptions = wanStartData.response?.credential_options || wanStartData.credential_options;
+                    if (!credentialOptions) {
                         throw new Error(wanStartData.response?.errors?.[0] || wanStartData.error || 'Failed to start passkey registration');
                     }
 
                     // Step 3: Create credential with browser
-                    const options = wanStartData.credential_options;
+                    const options = credentialOptions;
 
                     // Decode base64url fields
                     options.challenge = base64UrlDecode(options.challenge);

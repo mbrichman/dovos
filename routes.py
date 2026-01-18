@@ -93,6 +93,52 @@ def init_routes(app):
         """Health check endpoint for RAG service (public for monitoring)."""
         return jsonify(postgres_controller.rag_health())
 
+    @app.route("/api/auth/webauthn-login", methods=["POST"])
+    def api_webauthn_login():
+        """Login user after WebAuthn credential verification."""
+        if not AUTH_ENABLED:
+            return jsonify({"error": "Auth not enabled"}), 400
+
+        from flask_security import login_user
+        from db.database import db_session
+        from db.models.models import User
+        import base64
+
+        data = request.get_json() or {}
+
+        try:
+            credential_data = data.get('credential', {})
+            user_handle = credential_data.get('response', {}).get('userHandle')
+
+            if not user_handle:
+                return jsonify({"error": "No user handle in credential"}), 401
+
+            # Decode user handle (base64url)
+            user_handle_padded = user_handle + '=' * (4 - len(user_handle) % 4) if len(user_handle) % 4 else user_handle
+            user_handle_decoded = base64.urlsafe_b64decode(user_handle_padded).decode('utf-8')
+
+            # Find user by fs_webauthn_user_handle
+            user = db_session.query(User).filter_by(fs_webauthn_user_handle=user_handle_decoded).first()
+
+            if not user:
+                return jsonify({"error": "User not found for handle: " + user_handle_decoded}), 401
+
+            # Login the user with remember=True for persistent session
+            login_user(user, remember=True)
+
+            return jsonify({
+                "meta": {"code": 200},
+                "response": {
+                    "user": {"email": user.email},
+                    "post_login_url": "/conversations"
+                }
+            })
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
     # =========================================================================
     # Protected routes (require authentication when AUTH_ENABLED)
     # =========================================================================
