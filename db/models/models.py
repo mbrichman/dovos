@@ -58,6 +58,10 @@ class User(Base, UserMixin):
     active = Column(Boolean, default=True, nullable=False)
     fs_uniquifier = Column(String(64), unique=True, nullable=False, default=lambda: uuid.uuid4().hex)
 
+    # Unified signin fields (required for passwordless)
+    us_totp_secrets = Column(Text, nullable=True)
+    us_phone_number = Column(String(128), nullable=True)
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
